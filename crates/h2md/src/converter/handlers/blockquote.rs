@@ -34,7 +34,7 @@ use crate::converter::utility::serialization::serialize_node_to_html;
 pub fn handle_blockquote(
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,

@@ -33,7 +33,7 @@ pub fn dispatch_list_handler(
     tag_name: &str,
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,

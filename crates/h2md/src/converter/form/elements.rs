@@ -31,7 +31,7 @@ use std::borrow::Cow;
 pub fn handle_form(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -151,7 +151,7 @@ pub fn handle_form(
 pub fn handle_fieldset(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -214,7 +214,7 @@ pub fn handle_fieldset(
 pub fn handle_legend(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -275,7 +275,7 @@ pub fn handle_legend(
 pub fn handle_label(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -318,7 +318,7 @@ pub fn handle_label(
 pub fn handle_input(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     _options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -397,7 +397,7 @@ pub fn handle_input(
 pub fn handle_textarea(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -439,7 +439,7 @@ pub fn handle_textarea(
 pub fn handle_select(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -482,7 +482,7 @@ pub fn handle_select(
 pub fn handle_option(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -536,7 +536,7 @@ pub fn handle_option(
 pub fn handle_optgroup(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -590,7 +590,7 @@ pub fn handle_optgroup(
 pub fn handle_button(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -680,7 +680,7 @@ pub fn handle_button(
 pub fn handle_progress(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -722,7 +722,7 @@ pub fn handle_progress(
 pub fn handle_meter(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -764,7 +764,7 @@ pub fn handle_meter(
 pub fn handle_output(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -806,7 +806,7 @@ pub fn handle_output(
 pub fn handle_datalist(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -842,7 +842,7 @@ pub fn handle_datalist(
 pub fn handle(
     tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,

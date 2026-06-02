@@ -26,7 +26,7 @@ use super::walk_node;
 pub fn handle_hgroup(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -56,7 +56,7 @@ pub fn handle_hgroup(
 pub fn handle_dl(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -116,7 +116,7 @@ pub fn handle_dl(
 pub fn handle_dt(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -164,7 +164,7 @@ pub fn handle_dt(
 pub fn handle_dd(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -215,7 +215,7 @@ pub fn handle_dd(
 pub fn handle_menu(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -280,7 +280,7 @@ pub fn handle_menu(
 pub fn handle(
     tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,

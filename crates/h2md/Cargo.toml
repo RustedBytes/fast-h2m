@@ -9,8 +9,8 @@ homepage.workspace = true
 documentation.workspace = true
 readme = "README.md"
 rust-version.workspace = true
-description = "High-performance HTML to Markdown converter using the astral-tl parser. Part of the Kreuzberg ecosystem."
-keywords = ["html", "markdown", "converter", "astral-tl", "doc-processing"]
+description = "High-performance HTML to Markdown converter using the rustedbytes-tl parser. Part of the Kreuzberg ecosystem."
+keywords = ["html", "markdown", "converter", "rustedbytes-tl", "doc-processing"]
 categories = ["parsing", "text-processing", "web-programming"]
 
 [lib]
@@ -23,7 +23,7 @@ inline-images = ["dep:image"]
 metadata = ["dep:serde", "dep:serde_json"]
 visitor = []
 serde = ["dep:serde", "dep:serde_json"]
-simd = ["tl/portable-simd"]
+simd = ["rustedbytes-tl/portable-simd"]
 testkit = []
 
 [dependencies]
@@ -45,7 +45,7 @@ regex.workspace = true
 serde = { version = "1.0", features = ["derive"], optional = true }
 serde_json = { version = "1.0", optional = true }
 thiserror.workspace = true
-tl.workspace = true
+rustedbytes-tl.workspace = true
 
 [dev-dependencies]
 criterion = "0.8.2"

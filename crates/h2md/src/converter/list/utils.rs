@@ -59,7 +59,7 @@ pub const fn calculate_list_continuation_indent(depth: usize) -> usize {
 /// ```
 pub fn is_loose_list(
     node_handle: tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &DomContext,
 ) -> bool {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
@@ -270,7 +270,7 @@ pub const fn calculate_list_nesting_depth(ctx: &Context) -> usize {
 /// Check if a node is a list item element.
 pub fn is_list_item(
     node_handle: tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &DomContext,
 ) -> bool {
     if let Some(info) = dom_ctx.tag_info(node_handle.get_inner(), parser) {
@@ -289,7 +289,7 @@ pub fn is_list_item(
 #[allow(clippy::too_many_arguments)]
 pub fn process_list_children(
     node_handle: tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,

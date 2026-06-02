@@ -18,7 +18,7 @@
 /// * `dom_ctx` - DOM context for tag name resolution
 pub fn handle_caption(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::super::Context,

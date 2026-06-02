@@ -30,7 +30,7 @@ const MAX_TABLE_COLS: usize = 1000;
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn table_total_columns(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &super::super::super::DomContext,
 ) -> usize {
     let mut max_cols = 0usize;
@@ -89,7 +89,7 @@ pub fn table_total_columns(
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn handle_table(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::super::Context,

@@ -8,9 +8,10 @@
 #[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::{ConversionOptions, OutputFormat};
+use crate::tl_types::Parser;
 #[cfg(feature = "visitor")]
 use std::collections::BTreeMap;
-use tl::{NodeHandle, Parser};
+use tl::NodeHandle;
 
 type Context = crate::converter::Context;
 type DomContext = crate::converter::DomContext;

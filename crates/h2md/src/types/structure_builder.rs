@@ -1,4 +1,4 @@
-//! Builds a [`DocumentStructure`] from a parsed `tl::VDom`.
+//! Builds a [`DocumentStructure`] from a parsed `crate::tl_types::Dom`.
 //!
 //! Walk the DOM once, mapping each HTML element to the appropriate [`NodeContent`] variant,
 //! collecting inline [`TextAnnotation`]s, tracking parent/child relationships, and generating
@@ -14,14 +14,14 @@ use super::tables::{GridCell, TableGrid};
 // ── Text extraction ───────────────────────────────────────────────────────────
 
 /// Extract plain text from a tag's descendants, decoding HTML entities.
-fn extract_text(tag: &tl::HTMLTag, parser: &tl::Parser) -> String {
+fn extract_text(tag: &tl::HTMLTag, parser: &crate::tl_types::Parser) -> String {
     let mut buf = String::new();
     collect_text_from_tag(tag, parser, &mut buf);
     buf
 }
 
 /// Recursively accumulate text content from a tag's children.
-fn collect_text_from_tag(tag: &tl::HTMLTag, parser: &tl::Parser, buf: &mut String) {
+fn collect_text_from_tag(tag: &tl::HTMLTag, parser: &crate::tl_types::Parser, buf: &mut String) {
     let children = tag.children();
     for handle in children.top().iter() {
         let Some(node) = handle.get(parser) else {
@@ -54,7 +54,7 @@ fn collect_text_from_tag(tag: &tl::HTMLTag, parser: &tl::Parser, buf: &mut Strin
 /// byte offsets are computed relative to that string.
 fn collect_annotations(
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     text: &str,
     annotations: &mut Vec<TextAnnotation>,
 ) {
@@ -65,7 +65,7 @@ fn collect_annotations(
 /// so far; it is mutated in place as we walk the tree.
 fn collect_annotations_from_tag(
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     full_text: &str,
     offset: &mut usize,
     annotations: &mut Vec<TextAnnotation>,
@@ -137,7 +137,7 @@ fn collect_annotations_from_tag(
 // ── Table extraction ──────────────────────────────────────────────────────────
 
 /// Build a [`TableGrid`] from a `<table>` element.
-fn extract_table_grid(table_tag: &tl::HTMLTag, parser: &tl::Parser) -> TableGrid {
+fn extract_table_grid(table_tag: &tl::HTMLTag, parser: &crate::tl_types::Parser) -> TableGrid {
     // Gather all <tr> handles (recursing through thead/tbody/tfoot).
     let mut row_handles: Vec<tl::NodeHandle> = Vec::new();
     collect_tr_handles(table_tag, parser, &mut row_handles);
@@ -208,7 +208,11 @@ fn extract_table_grid(table_tag: &tl::HTMLTag, parser: &tl::Parser) -> TableGrid
 }
 
 /// Recursively collect all `<tr>` `NodeHandle`s from within a table element.
-fn collect_tr_handles(tag: &tl::HTMLTag, parser: &tl::Parser, result: &mut Vec<tl::NodeHandle>) {
+fn collect_tr_handles(
+    tag: &tl::HTMLTag,
+    parser: &crate::tl_types::Parser,
+    result: &mut Vec<tl::NodeHandle>,
+) {
     let children = tag.children();
     for handle in children.top().iter() {
         if let Some(tl::Node::Tag(child_tag)) = handle.get(parser) {
@@ -246,7 +250,10 @@ fn make_node_id(node_type: &str, text: &str, index: usize) -> String {
 ///
 /// Returns `(term_text, definition_text)` tuples.  Consecutive `<dt>` elements share
 /// the next `<dd>`; orphan `<dd>`s use an empty term.
-fn collect_definition_items(dl_tag: &tl::HTMLTag, parser: &tl::Parser) -> Vec<(String, String)> {
+fn collect_definition_items(
+    dl_tag: &tl::HTMLTag,
+    parser: &crate::tl_types::Parser,
+) -> Vec<(String, String)> {
     let mut items: Vec<(String, String)> = Vec::new();
     let mut pending_terms: Vec<String> = Vec::new();
 
@@ -292,7 +299,7 @@ fn collect_definition_items(dl_tag: &tl::HTMLTag, parser: &tl::Parser) -> Vec<(S
 /// Extract `<meta name=… content=…>` and `<title>` entries from a `<head>` element.
 fn extract_head_metadata_entries(
     head_tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
 ) -> Vec<(String, String)> {
     let mut entries: Vec<(String, String)> = Vec::new();
 
@@ -376,7 +383,7 @@ impl BuilderState {
     }
 }
 
-/// Build a [`DocumentStructure`] from an already-parsed `tl::VDom`.
+/// Build a [`DocumentStructure`] from an already-parsed `crate::tl_types::Dom`.
 ///
 /// Walks the DOM once, mapping HTML elements to semantic [`NodeContent`] variants,
 /// tracking parent/child relationships, extracting inline [`TextAnnotation`]s, and
@@ -402,7 +409,7 @@ impl BuilderState {
 /// assert_eq!(doc.source_format.as_deref(), Some("html"));
 /// assert!(!doc.nodes.is_empty());
 /// ```
-pub fn build_document_structure(dom: &tl::VDom<'_>) -> DocumentStructure {
+pub fn build_document_structure(dom: &crate::tl_types::Dom<'_>) -> DocumentStructure {
     let parser = dom.parser();
     let mut state = BuilderState::new();
 
@@ -422,7 +429,7 @@ pub fn build_document_structure(dom: &tl::VDom<'_>) -> DocumentStructure {
 fn walk(
     state: &mut BuilderState,
     handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     parent_idx: Option<u32>,
 ) {
     let Some(node) = handle.get(parser) else {
@@ -444,7 +451,7 @@ fn process_tag(
     state: &mut BuilderState,
     tag_name: &str,
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     parent_idx: Option<u32>,
 ) {
     match tag_name {

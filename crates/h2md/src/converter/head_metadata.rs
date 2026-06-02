@@ -72,7 +72,10 @@ pub fn extract_frontmatter(
 ///
 /// Produces a `BTreeMap<String, String>` with the same keys/values as
 /// `crate::converter::extract_metadata`.  Byte-equivalence is the contract.
-fn extract_metadata_from_dom(dom: &tl::VDom, parser: &tl::Parser) -> BTreeMap<String, String> {
+fn extract_metadata_from_dom(
+    dom: &crate::tl_types::Dom,
+    parser: &crate::tl_types::Parser,
+) -> BTreeMap<String, String> {
     let mut metadata = BTreeMap::new();
 
     // Find the <head> node by walking the DOM children.
@@ -112,7 +115,10 @@ fn extract_metadata_from_dom(dom: &tl::VDom, parser: &tl::Parser) -> BTreeMap<St
 }
 
 /// Recursively find the first `<head>` tag in the DOM.
-fn find_head_node(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> Option<tl::NodeHandle> {
+fn find_head_node(
+    node_handle: &tl::NodeHandle,
+    parser: &crate::tl_types::Parser,
+) -> Option<tl::NodeHandle> {
     if let Some(node) = node_handle.get(parser) {
         if let tl::Node::Tag(tag) = node {
             if normalize_tag_name(tag.name().as_utf8_str()) == "head" {
@@ -129,7 +135,11 @@ fn find_head_node(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> Option<t
     None
 }
 
-fn extract_title(tag: &tl::HTMLTag, parser: &tl::Parser, metadata: &mut BTreeMap<String, String>) {
+fn extract_title(
+    tag: &tl::HTMLTag,
+    parser: &crate::tl_types::Parser,
+    metadata: &mut BTreeMap<String, String>,
+) {
     let children = tag.children();
     if let Some(first_child) = children.top().iter().next() {
         if let Some(text_node) = first_child.get(parser) {

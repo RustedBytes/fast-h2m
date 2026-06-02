@@ -136,7 +136,7 @@ pub fn attribute_contains_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&str]) 
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn has_semantic_content_ancestor(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &DomContext,
 ) -> bool {
     let mut current_id = node_handle.get_inner();

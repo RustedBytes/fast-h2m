@@ -237,7 +237,7 @@ impl DomContext {
     }
 
     #[inline]
-    pub(crate) fn tag_info(&self, id: u32, parser: &tl::Parser) -> Option<&TagInfo> {
+    pub(crate) fn tag_info(&self, id: u32, parser: &crate::tl_types::Parser) -> Option<&TagInfo> {
         self.tag_info_map.get(id as usize).and_then(|cell| {
             cell.get_or_init(|| self.build_tag_info(id, parser))
                 .as_ref()
@@ -248,7 +248,7 @@ impl DomContext {
     pub(crate) fn tag_name_for<'a>(
         &'a self,
         node_handle: tl::NodeHandle,
-        parser: &'a tl::Parser,
+        parser: &'a crate::tl_types::Parser,
     ) -> Option<std::borrow::Cow<'a, str>> {
         if let Some(info) = self.tag_info(node_handle.get_inner(), parser) {
             return Some(std::borrow::Cow::Borrowed(info.name.as_str()));
@@ -263,7 +263,7 @@ impl DomContext {
     pub(crate) fn next_tag_name<'a>(
         &'a self,
         node_handle: tl::NodeHandle,
-        parser: &'a tl::Parser,
+        parser: &'a crate::tl_types::Parser,
     ) -> Option<&'a str> {
         let next_id = self.next_tag_id(node_handle.get_inner(), parser)?;
         self.tag_info(next_id, parser)
@@ -273,7 +273,7 @@ impl DomContext {
     pub(crate) fn previous_inline_like(
         &self,
         node_handle: tl::NodeHandle,
-        parser: &tl::Parser,
+        parser: &crate::tl_types::Parser,
     ) -> bool {
         let id = node_handle.get_inner();
         self.prev_inline_like_map
@@ -318,7 +318,7 @@ impl DomContext {
     pub(crate) fn next_inline_like(
         &self,
         node_handle: tl::NodeHandle,
-        parser: &tl::Parser,
+        parser: &crate::tl_types::Parser,
     ) -> bool {
         let id = node_handle.get_inner();
         self.next_inline_like_map
@@ -363,7 +363,7 @@ impl DomContext {
     pub(crate) fn next_whitespace_text(
         &self,
         node_handle: tl::NodeHandle,
-        parser: &tl::Parser,
+        parser: &crate::tl_types::Parser,
     ) -> bool {
         let id = node_handle.get_inner();
         self.next_whitespace_map
@@ -403,7 +403,7 @@ impl DomContext {
             })
     }
 
-    pub(crate) fn next_tag_id(&self, id: u32, parser: &tl::Parser) -> Option<u32> {
+    pub(crate) fn next_tag_id(&self, id: u32, parser: &crate::tl_types::Parser) -> Option<u32> {
         self.next_tag_map
             .get(id as usize)
             .and_then(|cell| {
@@ -437,7 +437,11 @@ impl DomContext {
             .copied()
     }
 
-    pub(crate) fn build_tag_info(&self, id: u32, parser: &tl::Parser) -> Option<TagInfo> {
+    pub(crate) fn build_tag_info(
+        &self,
+        id: u32,
+        parser: &crate::tl_types::Parser,
+    ) -> Option<TagInfo> {
         let node_handle = self.node_handle(id)?;
         match node_handle.get(parser) {
             Some(tl::Node::Tag(tag)) => {
@@ -455,7 +459,11 @@ impl DomContext {
         }
     }
 
-    pub(crate) fn text_content(&self, node_handle: tl::NodeHandle, parser: &tl::Parser) -> String {
+    pub(crate) fn text_content(
+        &self,
+        node_handle: tl::NodeHandle,
+        parser: &crate::tl_types::Parser,
+    ) -> String {
         let id = node_handle.get_inner();
         let cached = {
             let mut cache = self.text_cache.borrow_mut();
@@ -473,7 +481,7 @@ impl DomContext {
     pub(crate) fn append_text_content(
         &self,
         node_handle: tl::NodeHandle,
-        parser: &tl::Parser,
+        parser: &crate::tl_types::Parser,
         output: &mut String,
     ) {
         if let Some(value) = {
@@ -496,7 +504,7 @@ impl DomContext {
     pub(crate) fn text_content_uncached(
         &self,
         node_handle: tl::NodeHandle,
-        parser: &tl::Parser,
+        parser: &crate::tl_types::Parser,
     ) -> String {
         let mut text = String::with_capacity(64);
         self.append_text_content_uncached(node_handle, parser, &mut text);
@@ -506,7 +514,7 @@ impl DomContext {
     pub(crate) fn append_text_content_uncached(
         &self,
         node_handle: tl::NodeHandle,
-        parser: &tl::Parser,
+        parser: &crate::tl_types::Parser,
         output: &mut String,
     ) {
         if let Some(node) = node_handle.get(parser) {
@@ -532,7 +540,11 @@ impl DomContext {
     /// Returns the tag name of the parent element if it exists and is a tag,
     /// otherwise returns None.
     #[cfg_attr(not(feature = "visitor"), allow(dead_code))]
-    pub(crate) fn parent_tag_name(&self, node_id: u32, parser: &tl::Parser) -> Option<String> {
+    pub(crate) fn parent_tag_name(
+        &self,
+        node_id: u32,
+        parser: &crate::tl_types::Parser,
+    ) -> Option<String> {
         let parent_id = self.parent_of(node_id)?;
         let parent_handle = self.node_handle(parent_id)?;
 

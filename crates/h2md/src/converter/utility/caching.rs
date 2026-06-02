@@ -10,7 +10,11 @@ use std::num::NonZeroUsize;
 ///
 /// Pre-computes parent-child relationships, sibling indices, and caches
 /// tag information for efficient DOM navigation during conversion.
-pub fn build_dom_context(dom: &tl::VDom, parser: &tl::Parser, input_len: usize) -> DomContext {
+pub fn build_dom_context(
+    dom: &crate::tl_types::Dom,
+    parser: &crate::tl_types::Parser,
+    input_len: usize,
+) -> DomContext {
     let cache_capacity = text_cache_capacity_for_input(input_len);
     let mut ctx = DomContext {
         parent_map: Vec::new(),
@@ -54,7 +58,7 @@ pub fn text_cache_capacity_for_input(input_len: usize) -> NonZeroUsize {
 pub fn record_node_hierarchy(
     node_handle: tl::NodeHandle,
     parent: Option<u32>,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     ctx: &mut DomContext,
 ) {
     let id = node_handle.get_inner();

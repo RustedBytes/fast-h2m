@@ -23,7 +23,7 @@ pub fn inline_ancestor_allows_block(tag_name: &str) -> bool {
 /// a structural impossibility in valid HTML that signals the `tl` parser absorbed
 /// a table into a paragraph because of an unclosed `<p>` (common in Word/Outlook
 /// HTML such as `<p class='MsoNormal'>` cells). Issue #336.
-pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bool {
+pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &crate::tl_types::Parser) -> bool {
     for handle in dom_ctx.node_map.iter().flatten() {
         if let Some(tl::Node::Tag(_tag)) = handle.get(parser) {
             let node_id = handle.get_inner();
@@ -90,7 +90,7 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bo
 ///
 /// Stops ascending once it leaves the table hierarchy (`table`/`body`/`html`)
 /// to avoid false positives where a `<p>` legitimately wraps a `<table>`.
-fn has_p_ancestor(dom_ctx: &DomContext, parser: &tl::Parser, node_id: u32) -> bool {
+fn has_p_ancestor(dom_ctx: &DomContext, parser: &crate::tl_types::Parser, node_id: u32) -> bool {
     let mut current = dom_ctx.parent_of(node_id);
     while let Some(parent_id) = current {
         if let Some(parent_info) = dom_ctx.tag_info(parent_id, parser) {

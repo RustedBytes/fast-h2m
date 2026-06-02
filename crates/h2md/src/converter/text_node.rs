@@ -33,7 +33,7 @@ type Context = crate::converter::Context;
 pub fn process_text_node(
     raw: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,

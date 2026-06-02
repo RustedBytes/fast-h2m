@@ -17,7 +17,7 @@ type DomContext = crate::converter::DomContext;
 /// Groups dt/dd pairs and formats them with proper Markdown separation.
 pub fn handle_dl(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,
@@ -72,7 +72,7 @@ pub fn handle_dl(
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 pub fn handle_dt(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,
@@ -164,7 +164,7 @@ pub fn handle_dt(
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 pub fn handle_dd(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,

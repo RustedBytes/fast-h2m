@@ -15,7 +15,8 @@ mod marks;
 mod typography;
 
 use crate::options::ConversionOptions;
-use tl::{NodeHandle, Parser};
+use crate::tl_types::Parser;
+use tl::NodeHandle;
 
 type Context = crate::converter::Context;
 type DomContext = crate::converter::DomContext;

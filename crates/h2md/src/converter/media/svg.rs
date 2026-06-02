@@ -2,9 +2,10 @@
 
 use crate::converter::main_helpers::tag_name_eq;
 use crate::converter::utility::content::normalized_tag_name;
+use crate::tl_types::Parser;
 #[allow(unused_imports)]
 use std::collections::BTreeMap;
-use tl::{NodeHandle, Parser};
+use tl::NodeHandle;
 
 #[cfg(feature = "inline-images")]
 use crate::inline_images::{InlineImageCollector, InlineImageFormat, InlineImageSource};

@@ -27,7 +27,7 @@ use super::walk_node;
 pub fn handle_details(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -146,7 +146,7 @@ pub fn handle_details(
 pub fn handle_summary(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -269,7 +269,7 @@ pub fn handle_summary(
 pub fn handle_dialog(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -316,7 +316,7 @@ pub fn handle_dialog(
 pub fn handle(
     tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,

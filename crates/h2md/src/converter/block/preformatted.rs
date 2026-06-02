@@ -10,9 +10,10 @@
 #[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::{CodeBlockStyle, ConversionOptions, WhitespaceMode};
+use crate::tl_types::Parser;
 #[allow(unused_imports)]
 use std::collections::BTreeMap;
-use tl::{NodeHandle, Parser};
+use tl::NodeHandle;
 
 // Type aliases for Context and DomContext to avoid circular imports
 type Context = crate::converter::Context;

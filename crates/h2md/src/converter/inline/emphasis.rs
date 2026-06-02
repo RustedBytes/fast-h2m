@@ -11,9 +11,10 @@
 #[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::{ConversionOptions, OutputFormat};
+use crate::tl_types::Parser;
 #[allow(unused_imports)]
 use std::collections::BTreeMap;
-use tl::{NodeHandle, Parser};
+use tl::NodeHandle;
 
 // Type aliases for Context and DomContext to avoid circular imports
 // These are imported from converter.rs and should be made accessible

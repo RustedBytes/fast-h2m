@@ -21,7 +21,7 @@ const MAX_TABLE_COLS: usize = 1000;
 /// The colspan value (minimum 1, maximum MAX_TABLE_COLS)
 #[allow(clippy::trivially_copy_pass_by_ref)]
 #[inline]
-pub fn get_colspan(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> usize {
+pub fn get_colspan(node_handle: &tl::NodeHandle, parser: &crate::tl_types::Parser) -> usize {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         if let Some(Some(bytes)) = tag.attributes().get("colspan") {
             if let Ok(colspan) = bytes.as_utf8_str().parse::<usize>() {
@@ -44,7 +44,10 @@ pub fn get_colspan(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> usize {
 /// A tuple of (colspan, rowspan), both minimum 1 and maximum MAX_TABLE_COLS
 #[allow(clippy::trivially_copy_pass_by_ref)]
 #[inline]
-pub fn get_colspan_rowspan(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> (usize, usize) {
+pub fn get_colspan_rowspan(
+    node_handle: &tl::NodeHandle,
+    parser: &crate::tl_types::Parser,
+) -> (usize, usize) {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let attrs = tag.attributes();
         let colspan = attrs
@@ -88,7 +91,7 @@ fn clamp_table_span(value: usize) -> usize {
 #[inline]
 pub fn collect_table_cells(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &super::super::super::DomContext,
     cells: &mut Vec<tl::NodeHandle>,
 ) {
@@ -120,7 +123,7 @@ pub fn collect_table_cells(
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn cell_text_content(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::super::Context,
     dom_ctx: &super::super::super::DomContext,
@@ -130,7 +133,7 @@ pub fn cell_text_content(
 
 pub fn render_cell_text(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::super::Context,
     dom_ctx: &super::super::super::DomContext,
@@ -219,7 +222,7 @@ fn escape_cell_text(text: &str, options: &crate::options::ConversionOptions) -> 
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn convert_table_cell(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::super::Context,

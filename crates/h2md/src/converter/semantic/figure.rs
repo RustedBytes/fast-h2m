@@ -31,7 +31,7 @@
 pub fn handle_figure(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -251,7 +251,7 @@ pub fn handle_figure(
 pub fn handle_figcaption(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -371,7 +371,7 @@ pub fn handle_figcaption(
 pub fn handle(
     tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,

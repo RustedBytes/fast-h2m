@@ -44,7 +44,7 @@ pub use caption::handle_caption;
 pub fn dispatch_table_handler(
     tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::Context,
@@ -84,7 +84,7 @@ pub fn dispatch_table_handler(
 /// * `depth` - Current nesting depth
 pub fn handle_table_with_context(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::Context,
@@ -147,7 +147,7 @@ pub fn handle_table_with_context(
 /// to build a structured grid representation.
 fn collect_table_grid(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::Context,
     dom_ctx: &super::super::DomContext,
@@ -222,7 +222,7 @@ fn collect_table_grid(
 #[allow(clippy::too_many_arguments)]
 fn collect_grid_row(
     row_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::Context,
     dom_ctx: &super::super::DomContext,

@@ -27,7 +27,7 @@ type DomContext = crate::converter::DomContext;
 pub fn handle_li(
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,
@@ -72,7 +72,7 @@ pub fn handle_li(
     #[allow(clippy::trivially_copy_pass_by_ref)]
     fn find_checkbox<'a>(
         node_handle: &tl::NodeHandle,
-        parser: &'a tl::Parser<'a>,
+        parser: &'a crate::tl_types::Parser<'a>,
     ) -> Option<(bool, tl::NodeHandle)> {
         if let Some(tl::Node::Tag(node_tag)) = node_handle.get(parser) {
             if tag_name_eq(node_tag.name().as_utf8_str(), "input") {
@@ -133,7 +133,7 @@ pub fn handle_li(
         #[allow(clippy::ref_option)]
         fn contains_checkbox<'a>(
             node_handle: &tl::NodeHandle,
-            parser: &'a tl::Parser<'a>,
+            parser: &'a crate::tl_types::Parser<'a>,
             checkbox: &Option<tl::NodeHandle>,
         ) -> bool {
             if is_checkbox_node(node_handle, checkbox) {
@@ -155,7 +155,7 @@ pub fn handle_li(
         #[allow(clippy::too_many_arguments, clippy::ref_option)]
         fn render_li_content<'a>(
             node_handle: &tl::NodeHandle,
-            parser: &'a tl::Parser<'a>,
+            parser: &'a crate::tl_types::Parser<'a>,
             output: &mut String,
             options: &ConversionOptions,
             ctx: &Context,

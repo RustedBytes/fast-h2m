@@ -16,9 +16,10 @@ use crate::converter::utility::content::{
 };
 use crate::converter::utility::preprocessing::sanitize_markdown_url;
 use crate::options::ConversionOptions;
+use crate::tl_types::Parser;
 #[cfg(any(feature = "metadata", feature = "visitor"))]
 use std::collections::BTreeMap;
-use tl::{NodeHandle, Parser};
+use tl::NodeHandle;
 
 // Type aliases for Context and DomContext to avoid circular imports
 // These are imported from converter.rs and should be made accessible

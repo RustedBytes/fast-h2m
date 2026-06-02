@@ -31,7 +31,7 @@ use crate::converter::utility::content::chomp_inline;
 pub fn handle_dfn(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -95,7 +95,7 @@ pub fn handle_dfn(
 pub fn handle_abbr(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -155,7 +155,7 @@ pub fn handle_abbr(
 pub fn handle_time_data(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -192,7 +192,7 @@ pub fn handle_time_data(
 pub fn handle_cite(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -248,7 +248,7 @@ pub fn handle_cite(
 pub fn handle_q(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -288,7 +288,7 @@ pub fn handle_q(
 pub fn handle(
     tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::Context,
@@ -359,7 +359,7 @@ fn append_inline_suffix(
     suffix: &str,
     _is_nonempty: bool,
     _node_handle: &tl::NodeHandle,
-    _parser: &tl::Parser,
+    _parser: &crate::tl_types::Parser,
     _dom_ctx: &super::DomContext,
 ) {
     output.push_str(suffix);

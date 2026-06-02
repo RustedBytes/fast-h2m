@@ -8,7 +8,8 @@
 
 use crate::converter::main_helpers::trim_trailing_whitespace;
 use crate::options::ConversionOptions;
-use tl::{NodeHandle, Parser};
+use crate::tl_types::Parser;
+use tl::NodeHandle;
 
 // Type aliases for Context and DomContext to avoid circular imports
 type Context = crate::converter::Context;

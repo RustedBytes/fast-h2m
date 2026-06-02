@@ -46,7 +46,7 @@ use crate::converter::utility::serialization::serialize_node;
 pub fn handle_link(
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,

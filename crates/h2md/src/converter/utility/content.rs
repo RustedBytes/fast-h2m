@@ -75,7 +75,7 @@ pub fn chomp_inline(text: &str) -> (&str, &str, &str) {
 #[inline]
 pub fn get_text_content(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &DomContext,
 ) -> String {
     dom_ctx.text_content(*node_handle, parser)
@@ -85,7 +85,7 @@ pub fn get_text_content(
 #[allow(clippy::match_wildcard_for_single_variants)]
 pub fn collect_link_label_text(
     children: &[tl::NodeHandle],
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &DomContext,
 ) -> (String, Vec<tl::NodeHandle>, bool) {
     let mut text = String::new();

@@ -33,7 +33,7 @@ pub type CellTextCache = HashMap<u32, String>;
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn append_layout_row(
     row_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::super::Context,
@@ -104,7 +104,7 @@ pub fn append_layout_row(
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn collect_row_cell_widths(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::super::Context,
     dom_ctx: &super::super::super::DomContext,
@@ -201,7 +201,7 @@ const MIN_SEPARATOR_DASHES: usize = 3;
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn convert_table_row(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &super::super::super::Context,

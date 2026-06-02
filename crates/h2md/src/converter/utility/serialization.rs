@@ -8,7 +8,7 @@ use crate::converter::utility::content::normalized_tag_name;
 /// Serialize an element to HTML string (for SVG and Math elements).
 #[allow(clippy::trivially_copy_pass_by_ref)]
 #[allow(dead_code)] // used with visitor feature
-pub fn serialize_element(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> String {
+pub fn serialize_element(node_handle: &tl::NodeHandle, parser: &crate::tl_types::Parser) -> String {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let tag_name = normalized_tag_name(tag.name().as_utf8_str());
         let mut html = String::with_capacity(256);
@@ -48,7 +48,7 @@ pub fn serialize_element(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> S
 /// Serialize a node to HTML string.
 #[allow(clippy::trivially_copy_pass_by_ref)]
 #[allow(dead_code)] // used with visitor feature
-pub fn serialize_node(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> String {
+pub fn serialize_node(node_handle: &tl::NodeHandle, parser: &crate::tl_types::Parser) -> String {
     if let Some(node) = node_handle.get(parser) {
         match node {
             tl::Node::Raw(bytes) => bytes.as_utf8_str().to_string(),
@@ -61,7 +61,7 @@ pub fn serialize_node(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> Stri
 }
 
 /// Serialize a tag to HTML, wrapping serialize_node_to_html.
-pub fn serialize_tag_to_html(handle: &tl::NodeHandle, parser: &tl::Parser) -> String {
+pub fn serialize_tag_to_html(handle: &tl::NodeHandle, parser: &crate::tl_types::Parser) -> String {
     let mut html = String::new();
     serialize_node_to_html(handle, parser, &mut html);
     html
@@ -70,7 +70,11 @@ pub fn serialize_tag_to_html(handle: &tl::NodeHandle, parser: &tl::Parser) -> St
 /// Recursively serialize a node to HTML.
 #[allow(clippy::trivially_copy_pass_by_ref)]
 #[allow(dead_code)] // used with visitor feature
-pub fn serialize_node_to_html(handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut String) {
+pub fn serialize_node_to_html(
+    handle: &tl::NodeHandle,
+    parser: &crate::tl_types::Parser,
+    output: &mut String,
+) {
     match handle.get(parser) {
         Some(tl::Node::Tag(tag)) => {
             let tag_name = normalized_tag_name(tag.name().as_utf8_str());

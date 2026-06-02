@@ -20,7 +20,7 @@ pub(super) use crate::converter::utility::content::normalized_tag_name;
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub(super) fn is_tag_name(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &super::super::super::DomContext,
     name: &str,
 ) -> bool {

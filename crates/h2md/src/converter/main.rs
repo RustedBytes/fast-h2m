@@ -372,7 +372,7 @@ fn finish_structure_collector(
 #[allow(clippy::cast_possible_truncation)]
 pub fn walk_node(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,
@@ -412,7 +412,7 @@ pub fn walk_node(
 
             #[cfg(feature = "visitor")]
             if let Some(ref visitor_handle) = ctx.visitor {
-                use crate::converter::visitor_hooks::{handle_visitor_element_start, VisitAction};
+                use crate::converter::visitor_hooks::{VisitAction, handle_visitor_element_start};
 
                 let action = handle_visitor_element_start(
                     visitor_handle,
@@ -839,7 +839,7 @@ pub fn walk_node(
 mod tests {
     use std::borrow::Cow;
 
-    use super::{preprocess_for_tier2, PreprocessedHtml};
+    use super::{PreprocessedHtml, preprocess_for_tier2};
     use crate::options::ConversionOptions;
 
     #[test]

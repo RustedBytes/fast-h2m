@@ -105,7 +105,7 @@ pub mod semantic;
 pub fn dispatch_inline_handler(
     tag_name: &str,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
     ctx: &crate::converter::Context,

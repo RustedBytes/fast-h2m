@@ -10,7 +10,7 @@ use crate::converter::DomContext;
 #[inline]
 pub fn get_next_sibling_tag<'a>(
     node_handle: &tl::NodeHandle,
-    parser: &'a tl::Parser,
+    parser: &'a crate::tl_types::Parser,
     dom_ctx: &'a DomContext,
 ) -> Option<&'a str> {
     dom_ctx.next_tag_name(*node_handle, parser)
@@ -20,7 +20,7 @@ pub fn get_next_sibling_tag<'a>(
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn get_previous_sibling_tag<'a>(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &'a DomContext,
 ) -> Option<&'a str> {
     let id = node_handle.get_inner();
@@ -57,7 +57,7 @@ pub fn get_previous_sibling_tag<'a>(
 #[inline]
 pub fn previous_sibling_is_inline_tag(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &DomContext,
 ) -> bool {
     dom_ctx.previous_inline_like(*node_handle, parser)
@@ -68,7 +68,7 @@ pub fn previous_sibling_is_inline_tag(
 #[inline]
 pub fn next_sibling_is_whitespace_text(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &DomContext,
 ) -> bool {
     dom_ctx.next_whitespace_text(*node_handle, parser)
@@ -79,7 +79,7 @@ pub fn next_sibling_is_whitespace_text(
 #[inline]
 pub fn next_sibling_is_inline_tag(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &DomContext,
 ) -> bool {
     dom_ctx.next_inline_like(*node_handle, parser)
@@ -94,7 +94,7 @@ pub fn append_inline_suffix(
     suffix: &str,
     has_core_content: bool,
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &DomContext,
 ) {
     if suffix.is_empty() {

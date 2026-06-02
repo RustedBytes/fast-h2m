@@ -36,7 +36,7 @@ type GraphicMetadataPayload = (BTreeMap<String, String>, Option<u32>, Option<u32
 pub fn handle_graphic(
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,

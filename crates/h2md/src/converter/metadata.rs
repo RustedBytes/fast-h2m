@@ -11,7 +11,8 @@ use crate::options::ConversionOptions;
 #[cfg(feature = "metadata")]
 use crate::text::decode_html_entities;
 use crate::text::escape;
-use tl::{NodeHandle, Parser};
+use crate::tl_types::Parser;
+use tl::NodeHandle;
 
 // Type aliases for Context and DomContext to avoid circular imports
 type Context = crate::converter::Context;

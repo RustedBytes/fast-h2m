@@ -100,8 +100,8 @@ impl WalkState<'_> {
 /// - When a visitor is configured, `visit_element_start`, `visit_element_end`, and
 ///   `visit_text` callbacks are fired and their results are honoured.
 pub fn extract_plain_text(
-    dom: &tl::VDom,
-    parser: &tl::Parser,
+    dom: &crate::tl_types::Dom,
+    parser: &crate::tl_types::Parser,
     options: &ConversionOptions,
 ) -> String {
     let mut buf = String::with_capacity(1024);
@@ -141,7 +141,7 @@ pub fn extract_plain_text(
 /// Recursive plain-text walker.
 fn walk_plain(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     buf: &mut String,
     in_pre: bool,
     list_ctx: &mut ListContext,
@@ -381,7 +381,7 @@ fn walk_plain(
 /// Walk all children of a tag.
 fn walk_children(
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     buf: &mut String,
     in_pre: bool,
     list_ctx: &mut ListContext,
@@ -397,7 +397,7 @@ fn walk_children(
 /// Walk a `<table>` element, extracting cells as tab-separated, rows as newline-separated.
 fn walk_table(
     table_tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     buf: &mut String,
     state: &WalkState<'_>,
 ) {
@@ -451,7 +451,7 @@ fn walk_table(
 /// Recursively collect all descendant `NodeHandle`s matching `target_tag` (by cloning handles).
 fn collect_descendant_handles(
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     target_tag: &str,
     result: &mut Vec<tl::NodeHandle>,
 ) {

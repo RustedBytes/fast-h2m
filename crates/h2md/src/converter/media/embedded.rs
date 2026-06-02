@@ -7,8 +7,9 @@
 //! - **source**: Media source elements (handled within parent elements)
 //! - **picture**: Picture elements with responsive image sources
 
+use crate::tl_types::Parser;
 use std::borrow::Cow;
-use tl::{HTMLTag, NodeHandle, Parser};
+use tl::{HTMLTag, NodeHandle};
 
 use crate::converter::Context;
 use crate::converter::dom_context::DomContext;

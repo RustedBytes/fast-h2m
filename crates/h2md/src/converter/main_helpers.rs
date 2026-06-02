@@ -336,7 +336,7 @@ pub fn format_metadata_frontmatter(metadata: &BTreeMap<String, String>) -> Strin
 /// Extract metadata from the head element.
 pub fn extract_head_metadata(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     options: &ConversionOptions,
 ) -> BTreeMap<String, String> {
     let mut metadata = BTreeMap::new();

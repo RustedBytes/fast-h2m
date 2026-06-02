@@ -28,7 +28,7 @@ type DomContext = crate::converter::DomContext;
 #[allow(clippy::too_many_arguments)]
 pub fn handle_ul(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     ctx: &Context,

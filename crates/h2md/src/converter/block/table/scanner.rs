@@ -45,7 +45,7 @@ pub struct TableScan {
 #[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn scan_table(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &super::super::super::DomContext,
 ) -> TableScan {
     let mut scan = TableScan::default();
@@ -66,7 +66,7 @@ pub fn scan_table(
 #[allow(clippy::trivially_copy_pass_by_ref)]
 fn scan_table_node(
     node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
+    parser: &crate::tl_types::Parser,
     dom_ctx: &super::super::super::DomContext,
     is_root: bool,
     scan: &mut TableScan,
