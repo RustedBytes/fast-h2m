@@ -196,7 +196,7 @@ pub fn handle_table(
                             }
                         }
                         "tr" | "row" => {
-                            append_layout_row(child_handle, parser, output, options, ctx, dom_ctx)
+                            append_layout_row(child_handle, parser, output, options, ctx, dom_ctx);
                         }
                         "colgroup" | "col" => {}
                         _ => {
