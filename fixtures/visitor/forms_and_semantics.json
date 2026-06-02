@@ -34,7 +34,7 @@
       "languages": [
         "wasm"
       ],
-      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/h2md-wasm public API"
     }
   },
   {
@@ -71,7 +71,7 @@
       "languages": [
         "wasm"
       ],
-      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/h2md-wasm public API"
     }
   },
   {
@@ -104,7 +104,7 @@
       "languages": [
         "wasm"
       ],
-      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/h2md-wasm public API"
     }
   },
   {
@@ -141,7 +141,7 @@
       "languages": [
         "wasm"
       ],
-      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/h2md-wasm public API"
     }
   },
   {
@@ -179,7 +179,7 @@
       "languages": [
         "wasm"
       ],
-      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/h2md-wasm public API"
     }
   },
   {
@@ -221,7 +221,7 @@
       "languages": [
         "wasm"
       ],
-      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/h2md-wasm public API"
     }
   },
   {
@@ -259,7 +259,7 @@
       "languages": [
         "wasm"
       ],
-      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/h2md-wasm public API"
     }
   }
 ]
