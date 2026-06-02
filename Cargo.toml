@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/h2md",
+    "crates/fast_h2m",
 ]
 exclude = [
     "e2e/rust",
@@ -13,9 +13,9 @@ edition = "2024"
 authors = ["Na'aman Hirschfeld <naaman@kreuzberg.dev>", "Yehor Smoliakov <egorsmkv@gmail.com>"]
 description = "High-performance HTML to Markdown converter"
 license = "MIT"
-repository = "https://github.com/RustedBytes/h2md"
-homepage = "https://github.com/RustedBytes/h2md"
-documentation = "https://docs.rs/h2md"
+repository = "https://github.com/RustedBytes/fast_h2m"
+homepage = "https://github.com/RustedBytes/fast_h2m"
+documentation = "https://docs.rs/fast_h2m"
 readme = "README.md"
 keywords = ["html", "markdown", "converter"]
 categories = ["text-processing", "web-programming"]
@@ -62,4 +62,4 @@ strip = true
 debug = 1
 
 [patch.crates-io]
-h2md = { path = "crates/h2md", version = "0.1.0" }
+fast_h2m = { path = "crates/fast_h2m", version = "0.1.0" }

@@ -30,7 +30,7 @@
       "languages": [
         "wasm"
       ],
-      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/h2md-wasm public API"
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/fast_h2m-wasm public API"
     }
   },
   {
@@ -68,7 +68,7 @@
       "languages": [
         "wasm"
       ],
-      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/h2md-wasm public API"
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/fast_h2m-wasm public API"
     }
   }
 ]

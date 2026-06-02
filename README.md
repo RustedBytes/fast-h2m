@@ -1,4 +1,4 @@
-# h2md
+# fast_h2m
 
 High-performance HTML to Markdown converter written in Rust.
 
@@ -6,13 +6,13 @@ High-performance HTML to Markdown converter written in Rust.
 
 ```toml
 [dependencies]
-h2md = "0.1"
+fast_h2m = "0.1"
 ```
 
 ## Usage
 
 ```rust
-use h2md::convert;
+use fast_h2m::convert;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let result = convert("<h1>Hello</h1><p>From HTML.</p>", None)?;
