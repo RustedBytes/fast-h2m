@@ -37,6 +37,7 @@ static ESCAPE_ASCII_RE: LazyLock<Regex> = LazyLock::new(|| {
 ///
 /// Escaped text
 #[allow(clippy::fn_params_excessive_bools)]
+#[inline]
 pub fn escape(
     text: &str,
     escape_misc: bool,
@@ -159,6 +160,7 @@ pub fn escape(
 /// This prevents trailing newlines from becoming trailing spaces in the output.
 /// The trimmed text has all leading/trailing whitespace removed.
 #[must_use]
+#[inline]
 pub fn chomp(text: &str) -> (&str, &str, &str) {
     if text.is_empty() {
         return ("", "", "");
@@ -240,6 +242,7 @@ pub fn normalize_whitespace(text: &str) -> String {
 ///
 /// `Cow::Borrowed` if text is already normalized, or `Cow::Owned` with normalized text
 #[must_use]
+#[inline]
 pub fn normalize_whitespace_cow(text: &str) -> Cow<'_, str> {
     let mut prev_was_space = false;
 
@@ -300,6 +303,7 @@ pub fn decode_html_entities(text: &str) -> String {
 ///
 /// `Cow::Borrowed` if no entities found, or `Cow::Owned` with entities decoded
 #[must_use]
+#[inline]
 pub fn decode_html_entities_cow(text: &str) -> Cow<'_, str> {
     if !text.contains('&') {
         return Cow::Borrowed(text);
@@ -311,6 +315,7 @@ pub fn decode_html_entities_cow(text: &str) -> Cow<'_, str> {
 /// Check if a character is a unicode space character.
 ///
 /// Includes: non-breaking space, various width spaces, etc.
+#[inline]
 const fn is_unicode_space(ch: char) -> bool {
     matches!(
         ch,

@@ -9,13 +9,14 @@
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::converter::utility::content::normalized_tag_name;
 use std::borrow::Cow;
+use std::collections::HashMap;
 
-use super::cell::{
-    cell_text_content, collect_table_cells, convert_table_cell, get_colspan_rowspan,
-};
+use super::cell::{collect_table_cells, convert_table_cell, get_colspan_rowspan, render_cell_text};
 
 /// Maximum allowed table columns to prevent unbounded memory usage.
 const MAX_TABLE_COLS: usize = 1000;
+
+pub type CellTextCache = HashMap<u32, String>;
 
 /// Append a layout table row as a list item.
 ///
@@ -109,6 +110,7 @@ pub fn collect_row_cell_widths(
     dom_ctx: &super::super::super::DomContext,
     col_widths: &mut Vec<usize>,
     rowspan_tracker: &mut Vec<Option<usize>>,
+    mut cell_text_cache: Option<&mut CellTextCache>,
 ) {
     let mut cells = Vec::new();
     collect_table_cells(node_handle, parser, dom_ctx, &mut cells);
@@ -136,8 +138,17 @@ pub fn collect_row_cell_widths(
             break;
         };
 
-        let text = cell_text_content(cell_handle, parser, options, ctx, dom_ctx);
-        let width = text.chars().count();
+        let width = if let Some(cache) = cell_text_cache.as_deref_mut() {
+            cache
+                .entry(cell_handle.get_inner())
+                .or_insert_with(|| render_cell_text(cell_handle, parser, options, ctx, dom_ctx))
+                .chars()
+                .count()
+        } else {
+            render_cell_text(cell_handle, parser, options, ctx, dom_ctx)
+                .chars()
+                .count()
+        };
 
         // Grow the widths vec if needed.
         if col >= col_widths.len() {
@@ -203,6 +214,7 @@ pub fn convert_table_row(
     depth: usize,
     is_header: bool,
     col_widths: &[usize],
+    cell_text_cache: Option<&CellTextCache>,
 ) {
     let mut row_text = String::with_capacity(256);
     let mut cells = Vec::new();
@@ -321,6 +333,7 @@ pub fn convert_table_row(
                     "",
                     dom_ctx,
                     col_width,
+                    cell_text_cache,
                 );
 
                 let (colspan, rowspan) = get_colspan_rowspan(cell_handle, parser);
@@ -346,6 +359,7 @@ pub fn convert_table_row(
                 "",
                 dom_ctx,
                 col_width,
+                cell_text_cache,
             );
         }
     }

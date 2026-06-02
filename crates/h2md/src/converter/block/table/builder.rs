@@ -6,7 +6,7 @@
 use std::borrow::Cow;
 
 use super::cell::{collect_table_cells, get_colspan};
-use super::cells::{append_layout_row, collect_row_cell_widths, convert_table_row};
+use super::cells::{CellTextCache, append_layout_row, collect_row_cell_widths, convert_table_row};
 use super::scanner::scan_table;
 use super::utils::{is_tag_name, normalized_tag_name};
 #[cfg(feature = "visitor")]
@@ -226,6 +226,12 @@ pub fn handle_table(
         let mut first_row_cols: Option<usize> = None;
         let mut rowspan_tracker = vec![None; total_cols];
         let mut row_cells = Vec::new();
+        #[cfg(feature = "visitor")]
+        let cache_cell_text = ctx.visitor.is_none();
+        #[cfg(not(feature = "visitor"))]
+        let cache_cell_text = true;
+        let mut cell_text_cache =
+            (!options.compact_tables && cache_cell_text).then(CellTextCache::default);
 
         // Pre-pass: compute per-column max content widths for aligned padding.
         // Uses a rowspan tracker so spanned columns are skipped just as they
@@ -254,6 +260,7 @@ pub fn handle_table(
                                         dom_ctx,
                                         &mut widths,
                                         &mut prepass_rowspan,
+                                        cell_text_cache.as_mut(),
                                     );
                                 }
                             }
@@ -267,6 +274,7 @@ pub fn handle_table(
                                 dom_ctx,
                                 &mut widths,
                                 &mut prepass_rowspan,
+                                cell_text_cache.as_mut(),
                             );
                         }
                         _ => {}
@@ -358,6 +366,7 @@ pub fn handle_table(
                                                 depth + 1,
                                                 is_header_section,
                                                 &col_widths,
+                                                cell_text_cache.as_ref(),
                                             );
                                             row_index += 1;
                                         }
@@ -389,6 +398,7 @@ pub fn handle_table(
                                 depth + 1,
                                 row_index == 0,
                                 &col_widths,
+                                cell_text_cache.as_ref(),
                             );
                             row_index += 1;
                         }

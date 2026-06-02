@@ -16,6 +16,7 @@ pub use crate::converter::DomContext;
 /// Boolean attributes (those with `None` as the value) are skipped; only
 /// attributes that carry an explicit value are included.
 #[cfg(feature = "visitor")]
+#[inline]
 pub fn collect_tag_attributes(tag: &tl::HTMLTag) -> BTreeMap<String, String> {
     tag.attributes()
         .iter()
@@ -28,6 +29,7 @@ pub fn collect_tag_attributes(tag: &tl::HTMLTag) -> BTreeMap<String, String> {
 /// Similar to `text::chomp` but handles line breaks from `<br>` tags specially.
 /// Line breaks are extracted as suffix to be placed outside formatting.
 /// Returns (prefix, suffix, `trimmed_text`).
+#[inline]
 pub fn chomp_inline(text: &str) -> (&str, &str, &str) {
     if text.is_empty() {
         return ("", "", "");
@@ -70,6 +72,7 @@ pub fn chomp_inline(text: &str) -> (&str, &str, &str) {
 
 /// Get the text content of a node and its children.
 #[allow(clippy::trivially_copy_pass_by_ref)]
+#[inline]
 pub fn get_text_content(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
@@ -133,6 +136,7 @@ pub fn collect_link_label_text(
 
 /// Normalize a link label by collapsing newlines and normalizing whitespace.
 #[allow(clippy::trivially_copy_pass_by_ref)]
+#[inline]
 pub fn normalize_link_label(label: &str) -> String {
     let mut needs_collapse = false;
     for ch in label.chars() {
@@ -161,6 +165,7 @@ pub fn normalize_link_label(label: &str) -> String {
 }
 
 /// Normalize a tag name to lowercase, preserving borrowed input when possible.
+#[inline]
 pub fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
     if raw.as_bytes().iter().any(u8::is_ascii_uppercase) {
         let mut owned = raw.into_owned();
@@ -172,6 +177,7 @@ pub fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
 }
 
 /// Check if an element is block-level (not inline).
+#[inline]
 pub fn is_block_level_element(tag_name: &str) -> bool {
     is_block_level_name(
         tag_name,
@@ -184,6 +190,7 @@ pub fn is_block_level_element(tag_name: &str) -> bool {
 /// If `index` is already a char boundary it is returned unchanged.
 /// Otherwise it walks backwards to find one.  Returns 0 if no boundary
 /// is found before `index`.
+#[inline]
 pub fn floor_char_boundary(s: &str, index: usize) -> usize {
     if index >= s.len() {
         s.len()
@@ -249,6 +256,7 @@ pub fn escape_link_label(text: &str) -> String {
 }
 
 /// Helper for block-level element detection.
+#[inline]
 pub fn is_block_level_name(tag_name: &str, is_inline: bool) -> bool {
     !is_inline
         && matches!(

@@ -3,7 +3,7 @@
 //! Caching mechanisms for expensive operations during conversion, including
 //! DOM context building and cache capacity management.
 
-use crate::converter::DomContext;
+use crate::converter::{DomContext, dom_context::ChildRange};
 use std::num::NonZeroUsize;
 
 /// Build a DOM context with hierarchical node information.
@@ -15,6 +15,7 @@ pub fn build_dom_context(dom: &tl::VDom, parser: &tl::Parser, input_len: usize) 
     let mut ctx = DomContext {
         parent_map: Vec::new(),
         children_map: Vec::new(),
+        child_handles: Vec::with_capacity(input_len / 32),
         sibling_index_map: Vec::new(),
         root_children: dom.children().to_vec(),
         node_map: Vec::new(),
@@ -62,13 +63,24 @@ pub fn record_node_hierarchy(
     ctx.node_map[id as usize] = Some(node_handle);
 
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-        let children: Vec<_> = tag.children().top().iter().copied().collect();
-        for (index, child) in children.iter().enumerate() {
+        let start = ctx.child_handles.len();
+        let children = tag.children();
+        let children = children.top();
+        for child in children.iter().copied() {
+            ctx.child_handles.push(child);
+        }
+        let len = ctx.child_handles.len() - start;
+
+        for index in 0..len {
+            let child = ctx.child_handles[start + index];
             let child_id = child.get_inner();
             ctx.ensure_capacity(child_id);
             ctx.sibling_index_map[child_id as usize] = Some(index);
-            record_node_hierarchy(*child, Some(id), parser, ctx);
+            record_node_hierarchy(child, Some(id), parser, ctx);
         }
-        ctx.children_map[id as usize] = Some(children);
+        ctx.children_map[id as usize] = Some(ChildRange {
+            start: start as u32,
+            len: len as u32,
+        });
     }
 }

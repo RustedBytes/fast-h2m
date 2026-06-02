@@ -8,11 +8,13 @@ use std::collections::BTreeMap;
 use crate::options::ConversionOptions;
 
 /// Compare two tag names case-insensitively.
+#[inline]
 pub fn tag_name_eq(a: impl AsRef<str>, b: &str) -> bool {
     a.as_ref().eq_ignore_ascii_case(b)
 }
 
 /// Remove trailing spaces and tabs from a string.
+#[inline]
 pub fn trim_trailing_whitespace(output: &mut String) {
     while output.ends_with([' ', '\t']) {
         output.pop();
@@ -429,12 +431,14 @@ pub fn extract_head_metadata(
 }
 
 /// Check if text has more than one character.
+#[inline]
 pub fn has_more_than_one_char(text: &str) -> bool {
     let mut chars = text.chars();
     chars.next().is_some() && chars.next().is_some()
 }
 
 /// Check if an element is inline (not block-level).
+#[inline]
 pub fn is_inline_element(tag_name: &str) -> bool {
     matches!(
         tag_name,

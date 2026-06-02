@@ -20,6 +20,7 @@ const MAX_TABLE_COLS: usize = 1000;
 /// # Returns
 /// The colspan value (minimum 1, maximum MAX_TABLE_COLS)
 #[allow(clippy::trivially_copy_pass_by_ref)]
+#[inline]
 pub fn get_colspan(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> usize {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         if let Some(Some(bytes)) = tag.attributes().get("colspan") {
@@ -42,6 +43,7 @@ pub fn get_colspan(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> usize {
 /// # Returns
 /// A tuple of (colspan, rowspan), both minimum 1 and maximum MAX_TABLE_COLS
 #[allow(clippy::trivially_copy_pass_by_ref)]
+#[inline]
 pub fn get_colspan_rowspan(node_handle: &tl::NodeHandle, parser: &tl::Parser) -> (usize, usize) {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let attrs = tag.attributes();
@@ -64,6 +66,7 @@ pub fn get_colspan_rowspan(node_handle: &tl::NodeHandle, parser: &tl::Parser) ->
 /// Clamp a table span value to safe bounds.
 ///
 /// Prevents memory exhaustion by clamping colspan/rowspan values.
+#[inline]
 fn clamp_table_span(value: usize) -> usize {
     if value == 0 {
         1
@@ -82,6 +85,7 @@ fn clamp_table_span(value: usize) -> usize {
 /// * `dom_ctx` - DOM context for tag name resolution
 /// * `cells` - Mutable vector to populate with cell handles
 #[allow(clippy::trivially_copy_pass_by_ref)]
+#[inline]
 pub fn collect_table_cells(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
@@ -121,8 +125,17 @@ pub fn cell_text_content(
     ctx: &super::super::super::Context,
     dom_ctx: &super::super::super::DomContext,
 ) -> String {
-    let mut text = String::with_capacity(64);
+    render_cell_text(node_handle, parser, options, ctx, dom_ctx)
+}
 
+pub fn render_cell_text(
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    options: &crate::options::ConversionOptions,
+    ctx: &super::super::super::Context,
+    dom_ctx: &super::super::super::DomContext,
+) -> String {
+    let mut text = String::with_capacity(64);
     let cell_ctx = super::super::super::Context {
         in_table_cell: true,
         ..ctx.clone()
@@ -148,12 +161,12 @@ pub fn cell_text_content(
                 );
             }
         } else {
-            let raw = dom_ctx.text_content(*node_handle, parser);
+            dom_ctx.append_text_content(*node_handle, parser, &mut text);
             let normalized =
                 if options.whitespace_mode == crate::options::WhitespaceMode::Normalized {
-                    crate::text::normalize_whitespace_cow(raw.as_str())
+                    crate::text::normalize_whitespace_cow(text.as_str())
                 } else {
-                    Cow::Borrowed(raw.as_str())
+                    Cow::Borrowed(text.as_str())
                 };
             let escaped = escape_cell_text(normalized.as_ref(), options);
             text = escaped;
@@ -175,13 +188,16 @@ pub fn cell_text_content(
 /// Always escapes `*` and `_` (to prevent unintended emphasis inside cells),
 /// applies `escape_misc` / `escape_ascii` per options, and escapes `|` (pipe)
 /// when `escape_misc` is not already handling it.
+#[inline]
 fn escape_cell_text(text: &str, options: &crate::options::ConversionOptions) -> String {
     // Always escape * and _ in table cells to prevent unintended emphasis.
     let escaped = crate::text::escape(text, options.escape_misc, true, true, options.escape_ascii);
     if options.escape_misc {
         escaped.into_owned()
-    } else {
+    } else if escaped.contains('|') {
         escaped.replace('|', r"\|")
+    } else {
+        escaped.into_owned()
     }
 }
 
@@ -210,56 +226,16 @@ pub fn convert_table_cell(
     _tag_name: &str,
     dom_ctx: &super::super::super::DomContext,
     col_width: Option<usize>,
+    cell_text_cache: Option<&super::cells::CellTextCache>,
 ) {
-    let mut text = String::with_capacity(128);
-
-    let cell_ctx = super::super::super::Context {
-        in_table_cell: true,
-        ..ctx.clone()
-    };
-
-    if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-        let children = tag.children();
-        let has_tag_child = children
-            .top()
-            .iter()
-            .any(|child_handle| matches!(child_handle.get(parser), Some(tl::Node::Tag(_))));
-
-        if has_tag_child {
-            for child_handle in children.top().iter() {
-                super::super::super::walk_node(
-                    child_handle,
-                    parser,
-                    &mut text,
-                    options,
-                    &cell_ctx,
-                    0,
-                    dom_ctx,
-                );
-            }
-        } else {
-            let raw = dom_ctx.text_content(*node_handle, parser);
-            let normalized =
-                if options.whitespace_mode == crate::options::WhitespaceMode::Normalized {
-                    crate::text::normalize_whitespace_cow(raw.as_str())
-                } else {
-                    Cow::Borrowed(raw.as_str())
-                };
-            text = escape_cell_text(normalized.as_ref(), options);
-        }
-    }
-
-    let text = text.trim();
-    let text = if options.br_in_tables {
-        // When br_in_tables is enabled, markdown line breaks from <br> HTML tags
-        // are already properly formatted, just pass them through unchanged
-        text.to_string()
-    } else if text.contains('\n') {
-        text.replace('\n', " ")
+    let cached = cell_text_cache.and_then(|cache| cache.get(&node_handle.get_inner()));
+    let rendered;
+    let text = if let Some(text) = cached {
+        text.as_str()
     } else {
-        text.to_string()
+        rendered = render_cell_text(node_handle, parser, options, ctx, dom_ctx);
+        rendered.as_str()
     };
-
     let colspan = get_colspan(node_handle, parser);
 
     output.push(' ');

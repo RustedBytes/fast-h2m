@@ -11,12 +11,19 @@ use crate::converter::main_helpers::is_inline_element;
 use crate::converter::utility::content::{is_block_level_name, normalized_tag_name};
 use crate::text;
 
+#[derive(Clone, Copy)]
+pub(crate) struct ChildRange {
+    pub(crate) start: u32,
+    pub(crate) len: u32,
+}
+
 pub enum TagName {
     Static(&'static str),
     Owned(String),
 }
 
 impl TagName {
+    #[inline]
     fn from_raw(raw: std::borrow::Cow<'_, str>) -> Self {
         if let Some(name) = common_html_tag(raw.as_ref()) {
             return Self::Static(name);
@@ -30,6 +37,7 @@ impl TagName {
         }
     }
 
+    #[inline]
     pub(crate) fn as_str(&self) -> &str {
         match self {
             Self::Static(name) => name,
@@ -50,83 +58,103 @@ impl AsRef<str> for TagName {
     }
 }
 
+#[inline]
 fn common_html_tag(raw: &str) -> Option<&'static str> {
-    match raw.len() {
-        1 if raw.eq_ignore_ascii_case("a") => Some("a"),
-        1 if raw.eq_ignore_ascii_case("b") => Some("b"),
-        1 if raw.eq_ignore_ascii_case("i") => Some("i"),
-        1 if raw.eq_ignore_ascii_case("p") => Some("p"),
-        1 if raw.eq_ignore_ascii_case("s") => Some("s"),
-        1 if raw.eq_ignore_ascii_case("u") => Some("u"),
-        2 if raw.eq_ignore_ascii_case("br") => Some("br"),
-        2 if raw.eq_ignore_ascii_case("dd") => Some("dd"),
-        2 if raw.eq_ignore_ascii_case("dl") => Some("dl"),
-        2 if raw.eq_ignore_ascii_case("dt") => Some("dt"),
-        2 if raw.eq_ignore_ascii_case("em") => Some("em"),
-        2 if raw.eq_ignore_ascii_case("h1") => Some("h1"),
-        2 if raw.eq_ignore_ascii_case("h2") => Some("h2"),
-        2 if raw.eq_ignore_ascii_case("h3") => Some("h3"),
-        2 if raw.eq_ignore_ascii_case("h4") => Some("h4"),
-        2 if raw.eq_ignore_ascii_case("h5") => Some("h5"),
-        2 if raw.eq_ignore_ascii_case("h6") => Some("h6"),
-        2 if raw.eq_ignore_ascii_case("hr") => Some("hr"),
-        2 if raw.eq_ignore_ascii_case("li") => Some("li"),
-        2 if raw.eq_ignore_ascii_case("ol") => Some("ol"),
-        2 if raw.eq_ignore_ascii_case("rb") => Some("rb"),
-        2 if raw.eq_ignore_ascii_case("rp") => Some("rp"),
-        2 if raw.eq_ignore_ascii_case("rt") => Some("rt"),
-        2 if raw.eq_ignore_ascii_case("td") => Some("td"),
-        2 if raw.eq_ignore_ascii_case("th") => Some("th"),
-        2 if raw.eq_ignore_ascii_case("tr") => Some("tr"),
-        2 if raw.eq_ignore_ascii_case("ul") => Some("ul"),
-        3 if raw.eq_ignore_ascii_case("div") => Some("div"),
-        3 if raw.eq_ignore_ascii_case("dfn") => Some("dfn"),
-        3 if raw.eq_ignore_ascii_case("img") => Some("img"),
-        3 if raw.eq_ignore_ascii_case("ins") => Some("ins"),
-        3 if raw.eq_ignore_ascii_case("kbd") => Some("kbd"),
-        3 if raw.eq_ignore_ascii_case("nav") => Some("nav"),
-        3 if raw.eq_ignore_ascii_case("pre") => Some("pre"),
-        3 if raw.eq_ignore_ascii_case("rtc") => Some("rtc"),
-        3 if raw.eq_ignore_ascii_case("sub") => Some("sub"),
-        3 if raw.eq_ignore_ascii_case("sup") => Some("sup"),
-        3 if raw.eq_ignore_ascii_case("var") => Some("var"),
-        3 if raw.eq_ignore_ascii_case("wbr") => Some("wbr"),
-        4 if raw.eq_ignore_ascii_case("abbr") => Some("abbr"),
-        4 if raw.eq_ignore_ascii_case("body") => Some("body"),
-        4 if raw.eq_ignore_ascii_case("code") => Some("code"),
-        4 if raw.eq_ignore_ascii_case("data") => Some("data"),
-        4 if raw.eq_ignore_ascii_case("form") => Some("form"),
-        4 if raw.eq_ignore_ascii_case("head") => Some("head"),
-        4 if raw.eq_ignore_ascii_case("html") => Some("html"),
-        4 if raw.eq_ignore_ascii_case("link") => Some("link"),
-        4 if raw.eq_ignore_ascii_case("main") => Some("main"),
-        4 if raw.eq_ignore_ascii_case("mark") => Some("mark"),
-        4 if raw.eq_ignore_ascii_case("ruby") => Some("ruby"),
-        4 if raw.eq_ignore_ascii_case("samp") => Some("samp"),
-        4 if raw.eq_ignore_ascii_case("span") => Some("span"),
-        4 if raw.eq_ignore_ascii_case("time") => Some("time"),
-        5 if raw.eq_ignore_ascii_case("aside") => Some("aside"),
-        5 if raw.eq_ignore_ascii_case("small") => Some("small"),
-        5 if raw.eq_ignore_ascii_case("style") => Some("style"),
-        5 if raw.eq_ignore_ascii_case("table") => Some("table"),
-        5 if raw.eq_ignore_ascii_case("tbody") => Some("tbody"),
-        5 if raw.eq_ignore_ascii_case("tfoot") => Some("tfoot"),
-        5 if raw.eq_ignore_ascii_case("thead") => Some("thead"),
-        6 if raw.eq_ignore_ascii_case("figure") => Some("figure"),
-        6 if raw.eq_ignore_ascii_case("footer") => Some("footer"),
-        6 if raw.eq_ignore_ascii_case("header") => Some("header"),
-        6 if raw.eq_ignore_ascii_case("iframe") => Some("iframe"),
-        6 if raw.eq_ignore_ascii_case("script") => Some("script"),
-        6 if raw.eq_ignore_ascii_case("source") => Some("source"),
-        6 if raw.eq_ignore_ascii_case("strong") => Some("strong"),
-        7 if raw.eq_ignore_ascii_case("address") => Some("address"),
-        7 if raw.eq_ignore_ascii_case("article") => Some("article"),
-        7 if raw.eq_ignore_ascii_case("caption") => Some("caption"),
-        7 if raw.eq_ignore_ascii_case("details") => Some("details"),
-        7 if raw.eq_ignore_ascii_case("section") => Some("section"),
-        7 if raw.eq_ignore_ascii_case("summary") => Some("summary"),
-        10 if raw.eq_ignore_ascii_case("blockquote") => Some("blockquote"),
-        10 if raw.eq_ignore_ascii_case("figcaption") => Some("figcaption"),
+    if raw.as_bytes().iter().any(u8::is_ascii_uppercase) {
+        let mut buf = [0u8; 10];
+        let bytes = raw.as_bytes();
+        if bytes.len() > buf.len() || !bytes.is_ascii() {
+            return None;
+        }
+        for (slot, byte) in buf.iter_mut().zip(bytes.iter().copied()) {
+            *slot = byte.to_ascii_lowercase();
+        }
+        return std::str::from_utf8(&buf[..bytes.len()])
+            .ok()
+            .and_then(common_lowercase_html_tag);
+    }
+
+    common_lowercase_html_tag(raw)
+}
+
+#[inline]
+fn common_lowercase_html_tag(raw: &str) -> Option<&'static str> {
+    match raw {
+        "a" => Some("a"),
+        "b" => Some("b"),
+        "i" => Some("i"),
+        "p" => Some("p"),
+        "s" => Some("s"),
+        "u" => Some("u"),
+        "br" => Some("br"),
+        "dd" => Some("dd"),
+        "dl" => Some("dl"),
+        "dt" => Some("dt"),
+        "em" => Some("em"),
+        "h1" => Some("h1"),
+        "h2" => Some("h2"),
+        "h3" => Some("h3"),
+        "h4" => Some("h4"),
+        "h5" => Some("h5"),
+        "h6" => Some("h6"),
+        "hr" => Some("hr"),
+        "li" => Some("li"),
+        "ol" => Some("ol"),
+        "rb" => Some("rb"),
+        "rp" => Some("rp"),
+        "rt" => Some("rt"),
+        "td" => Some("td"),
+        "th" => Some("th"),
+        "tr" => Some("tr"),
+        "ul" => Some("ul"),
+        "div" => Some("div"),
+        "dfn" => Some("dfn"),
+        "img" => Some("img"),
+        "ins" => Some("ins"),
+        "kbd" => Some("kbd"),
+        "nav" => Some("nav"),
+        "pre" => Some("pre"),
+        "rtc" => Some("rtc"),
+        "sub" => Some("sub"),
+        "sup" => Some("sup"),
+        "var" => Some("var"),
+        "wbr" => Some("wbr"),
+        "abbr" => Some("abbr"),
+        "body" => Some("body"),
+        "code" => Some("code"),
+        "data" => Some("data"),
+        "form" => Some("form"),
+        "head" => Some("head"),
+        "html" => Some("html"),
+        "link" => Some("link"),
+        "main" => Some("main"),
+        "mark" => Some("mark"),
+        "ruby" => Some("ruby"),
+        "samp" => Some("samp"),
+        "span" => Some("span"),
+        "time" => Some("time"),
+        "aside" => Some("aside"),
+        "small" => Some("small"),
+        "style" => Some("style"),
+        "table" => Some("table"),
+        "tbody" => Some("tbody"),
+        "tfoot" => Some("tfoot"),
+        "thead" => Some("thead"),
+        "figure" => Some("figure"),
+        "footer" => Some("footer"),
+        "header" => Some("header"),
+        "iframe" => Some("iframe"),
+        "script" => Some("script"),
+        "source" => Some("source"),
+        "strong" => Some("strong"),
+        "address" => Some("address"),
+        "article" => Some("article"),
+        "caption" => Some("caption"),
+        "details" => Some("details"),
+        "section" => Some("section"),
+        "summary" => Some("summary"),
+        "blockquote" => Some("blockquote"),
+        "figcaption" => Some("figcaption"),
         _ => None,
     }
 }
@@ -150,7 +178,8 @@ pub struct TagInfo {
 /// via precomputed maps. It also includes an LRU cache for text content extraction.
 pub struct DomContext {
     pub(crate) parent_map: Vec<Option<u32>>,
-    pub(crate) children_map: Vec<Option<Vec<tl::NodeHandle>>>,
+    pub(crate) children_map: Vec<Option<ChildRange>>,
+    pub(crate) child_handles: Vec<tl::NodeHandle>,
     pub(crate) sibling_index_map: Vec<Option<usize>>,
     pub(crate) root_children: Vec<tl::NodeHandle>,
     pub(crate) node_map: Vec<Option<tl::NodeHandle>>,
@@ -163,6 +192,7 @@ pub struct DomContext {
 }
 
 impl DomContext {
+    #[inline]
     pub(crate) fn ensure_capacity(&mut self, id: u32) {
         let idx = id as usize;
         if self.parent_map.len() <= idx {
@@ -181,26 +211,32 @@ impl DomContext {
         }
     }
 
+    #[inline]
     pub(crate) fn parent_of(&self, id: u32) -> Option<u32> {
         self.parent_map.get(id as usize).copied().flatten()
     }
 
+    #[inline]
     pub(crate) fn node_handle(&self, id: u32) -> Option<&tl::NodeHandle> {
         self.node_map
             .get(id as usize)
             .and_then(|node| node.as_ref())
     }
 
-    pub(crate) fn children_of(&self, id: u32) -> Option<&Vec<tl::NodeHandle>> {
-        self.children_map
-            .get(id as usize)
-            .and_then(|children| children.as_ref())
+    #[inline]
+    pub(crate) fn children_of(&self, id: u32) -> Option<&[tl::NodeHandle]> {
+        let range = self.children_map.get(id as usize).and_then(|r| *r)?;
+        let start = range.start as usize;
+        let len = range.len as usize;
+        self.child_handles.get(start..start + len)
     }
 
+    #[inline]
     pub(crate) fn sibling_index(&self, id: u32) -> Option<usize> {
         self.sibling_index_map.get(id as usize).copied().flatten()
     }
 
+    #[inline]
     pub(crate) fn tag_info(&self, id: u32, parser: &tl::Parser) -> Option<&TagInfo> {
         self.tag_info_map.get(id as usize).and_then(|cell| {
             cell.get_or_init(|| self.build_tag_info(id, parser))
@@ -208,6 +244,7 @@ impl DomContext {
         })
     }
 
+    #[inline]
     pub(crate) fn tag_name_for<'a>(
         &'a self,
         node_handle: tl::NodeHandle,
@@ -222,6 +259,7 @@ impl DomContext {
         None
     }
 
+    #[inline]
     pub(crate) fn next_tag_name<'a>(
         &'a self,
         node_handle: tl::NodeHandle,
@@ -432,29 +470,61 @@ impl DomContext {
         value
     }
 
+    pub(crate) fn append_text_content(
+        &self,
+        node_handle: tl::NodeHandle,
+        parser: &tl::Parser,
+        output: &mut String,
+    ) {
+        if let Some(value) = {
+            let mut cache = self.text_cache.borrow_mut();
+            cache.get(&node_handle.get_inner()).cloned()
+        } {
+            output.push_str(&value);
+            return;
+        }
+
+        let start = output.len();
+        self.append_text_content_uncached(node_handle, parser, output);
+        if output.len() > start {
+            self.text_cache
+                .borrow_mut()
+                .put(node_handle.get_inner(), output[start..].to_string());
+        }
+    }
+
     pub(crate) fn text_content_uncached(
         &self,
         node_handle: tl::NodeHandle,
         parser: &tl::Parser,
     ) -> String {
         let mut text = String::with_capacity(64);
+        self.append_text_content_uncached(node_handle, parser, &mut text);
+        text
+    }
+
+    pub(crate) fn append_text_content_uncached(
+        &self,
+        node_handle: tl::NodeHandle,
+        parser: &tl::Parser,
+        output: &mut String,
+    ) {
         if let Some(node) = node_handle.get(parser) {
             match node {
                 tl::Node::Raw(bytes) => {
                     let raw = bytes.as_utf8_str();
                     let decoded = text::decode_html_entities_cow(raw.as_ref());
-                    text.push_str(decoded.as_ref());
+                    output.push_str(decoded.as_ref());
                 }
                 tl::Node::Tag(tag) => {
                     let children = tag.children();
                     for child_handle in children.top().iter() {
-                        text.push_str(&self.text_content(*child_handle, parser));
+                        self.append_text_content(*child_handle, parser, output);
                     }
                 }
                 tl::Node::Comment(_) => {}
             }
         }
-        text
     }
 
     /// Get the parent tag name for a given node ID.
