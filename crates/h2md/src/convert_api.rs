@@ -4,13 +4,13 @@
 
 use std::borrow::Cow;
 
-#[cfg(any(feature = "metadata", feature = "inline-images"))]
-use crate::ConversionError;
 use crate::error::Result;
 use crate::options::{ConversionOptions, WhitespaceMode};
 use crate::text;
 use crate::types::ConversionResult;
-use crate::validation::{Utf16Encoding, detect_utf16_encoding, validate_input};
+use crate::validation::{detect_utf16_encoding, validate_input, Utf16Encoding};
+#[cfg(any(feature = "metadata", feature = "inline-images"))]
+use crate::ConversionError;
 
 #[cfg(feature = "metadata")]
 use crate::{HtmlMetadata, MetadataConfig};
@@ -62,6 +62,16 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     use std::cell::RefCell;
     #[cfg(any(feature = "metadata", feature = "inline-images"))]
     use std::rc::Rc;
+
+    // Plain text without normalization-sensitive bytes can return before the
+    // Tier-1 prescan/router and before Tier-2 parsing. Keep validation first so
+    // binary/control-heavy inputs are still rejected.
+    if !options.wrap && can_fast_text_only_before_normalize(html) {
+        validate_input(html)?;
+        if let Some(markdown) = fast_text_only(html, &options) {
+            return Ok(conversion_result_from_content(markdown));
+        }
+    }
 
     // Tier-1 dispatcher.
     //
@@ -153,10 +163,7 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     // Fast path: plain text with no HTML tags — skip full parsing pipeline.
     if !options.wrap {
         if let Some(markdown) = fast_text_only(normalized_html.as_ref(), &options) {
-            return Ok(ConversionResult {
-                content: Some(markdown),
-                ..ConversionResult::default()
-            });
+            return Ok(conversion_result_from_content(markdown));
         }
     }
 
@@ -183,7 +190,7 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
 
     #[cfg(feature = "inline-images")]
     let image_collector = if wants_images {
-        use crate::inline_images::{DEFAULT_INLINE_IMAGE_LIMIT, InlineImageConfig as IIC};
+        use crate::inline_images::{InlineImageConfig as IIC, DEFAULT_INLINE_IMAGE_LIMIT};
         Some(Rc::new(RefCell::new(
             crate::inline_images::InlineImageCollector::new(IIC::new(DEFAULT_INLINE_IMAGE_LIMIT))?,
         )))
@@ -312,6 +319,13 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     })
 }
 
+fn conversion_result_from_content(markdown: String) -> ConversionResult {
+    ConversionResult {
+        content: Some(markdown),
+        ..ConversionResult::default()
+    }
+}
+
 /// Validate and normalize HTML input for conversion.
 fn normalize_input(html: &str) -> Result<Cow<'_, str>> {
     let decoded = decode_utf16_if_needed(html);
@@ -433,6 +447,17 @@ fn normalize_line_endings(html: &str) -> Cow<'_, str> {
     } else {
         Cow::Borrowed(html)
     }
+}
+
+/// Check whether raw input can safely use the plain-text path before normalization.
+///
+/// Inputs containing CR or NUL need `normalize_input` first for line-ending
+/// normalization, NUL stripping, or UTF-16 recovery.
+fn can_fast_text_only_before_normalize(html: &str) -> bool {
+    !html
+        .as_bytes()
+        .iter()
+        .any(|&byte| matches!(byte, b'<' | b'\r' | 0))
 }
 
 /// Fast path for plain text (no HTML) conversion.
