@@ -1,0 +1,124 @@
+[
+  {
+    "id": "options_preprocessing_minimal",
+    "description": "Minimal preset preserves nav, footer, aside",
+    "input": {
+      "html": "<nav>Navigation</nav><p>Content</p><footer>Footer</footer>",
+      "options": {
+        "preprocessing": {
+          "preset": "Minimal"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Navigation",
+          "Content",
+          "Footer"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_preprocessing_aggressive",
+    "description": "Aggressive preset removes nav, footer, aside unconditionally",
+    "input": {
+      "html": "<nav>Menu</nav><article><h1>Title</h1><p>Content</p></article><aside>Sidebar</aside><footer>Footer</footer>",
+      "options": {
+        "preprocessing": {
+          "preset": "Aggressive"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Title",
+          "Content"
+        ]
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Menu"
+      }
+    ]
+  },
+  {
+    "id": "options_preprocessing_remove_forms",
+    "description": "Forms are removed when remove_forms is true",
+    "input": {
+      "html": "<p>Before</p><form><input type='text'/><button>Submit</button></form><p>After</p>",
+      "options": {
+        "preprocessing": {
+          "remove_forms": true
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Before",
+          "After"
+        ]
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Submit"
+      }
+    ]
+  },
+  {
+    "id": "options_preprocessing_remove_navigation_false_keeps_nav",
+    "description": "Setting remove_navigation to false preserves nav and aside elements",
+    "input": {
+      "html": "<nav>SiteMenu</nav><main><p>MainContent</p></main><aside>SidebarText</aside>",
+      "options": {
+        "preprocessing": {
+          "remove_navigation": false
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "SiteMenu",
+          "MainContent",
+          "SidebarText"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_preprocessing_enabled_false_skips_cleanup",
+    "description": "Disabling preprocessing entirely preserves elements the standard preset would remove",
+    "input": {
+      "html": "<nav>NavSection</nav><p>Paragraph</p>",
+      "options": {
+        "preprocessing": {
+          "enabled": false
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "NavSection",
+          "Paragraph"
+        ]
+      }
+    ]
+  }
+]

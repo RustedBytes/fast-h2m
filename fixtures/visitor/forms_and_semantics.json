@@ -1,0 +1,265 @@
+[
+  {
+    "id": "visitor_form_custom",
+    "description": "Visitor replaces form with custom output",
+    "input": {
+      "html": "<div><form action=\"/submit\" method=\"POST\"><label>Name: <input type=\"text\" name=\"name\"></label><button type=\"submit\">Submit</button></form></div>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_form": {
+          "action": "custom",
+          "output": "[FORM PLACEHOLDER]"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[FORM PLACEHOLDER]"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "submit"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "input"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_form_skip",
+    "description": "Visitor skips form elements entirely",
+    "input": {
+      "html": "<p>Before form</p><form><input type=\"email\" name=\"email\"></form><p>After form</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_form": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Before form"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "After form"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "email"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_input_custom",
+    "description": "Visitor replaces input with labeled output",
+    "input": {
+      "html": "<form><label>Username: <input type=\"text\" name=\"username\" value=\"\"></label><label>Password: <input type=\"password\" name=\"password\"></label></form>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_input": {
+          "action": "custom_template",
+          "template": "[INPUT:{input_type}]"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[INPUT:text]"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[INPUT:password]"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_input_skip",
+    "description": "Visitor skips all input elements",
+    "input": {
+      "html": "<p>Sign up:</p><input type=\"text\" name=\"email\" placeholder=\"your@email.com\"><input type=\"checkbox\" name=\"agree\"><p>Continue</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_input": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Sign up:"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Continue"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "email"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_button_custom",
+    "description": "Visitor replaces button with bracketed text",
+    "input": {
+      "html": "<p>Confirm action: <button type=\"submit\">Click me</button> or <button type=\"reset\">Cancel</button></p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_button": {
+          "action": "custom_template",
+          "template": "[BTN:{text}]"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[BTN:Click me]"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[BTN:Cancel]"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Confirm action:"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_button_skip",
+    "description": "Visitor removes all buttons from output",
+    "input": {
+      "html": "<p>Actions available: <button>Save</button> <button>Delete</button> <button>Export</button></p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_button": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Actions available:"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Save"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Delete"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Export"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_definition_list_custom",
+    "description": "Visitor customizes definition list items",
+    "input": {
+      "html": "<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_definition_term": {
+          "action": "custom_template",
+          "template": "**{text}**"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "**HTML**"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "**CSS**"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "HyperText Markup Language"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]

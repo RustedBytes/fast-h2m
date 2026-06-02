@@ -1,0 +1,77 @@
+[
+  {
+    "id": "options_escape_asterisks",
+    "description": "escape_asterisks option escapes asterisks in plain text",
+    "input": {
+      "html": "<p>Use 2*3 = 6 in math.</p>",
+      "options": {
+        "escape_asterisks": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "2",
+          "3",
+          "6"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_escape_underscores",
+    "description": "escape_underscores option escapes underscores in plain text",
+    "input": {
+      "html": "<p>The variable_name is defined.</p>",
+      "options": {
+        "escape_underscores": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "variable",
+          "name",
+          "defined."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_escape_misc",
+    "description": "escape_misc option escapes miscellaneous markdown characters",
+    "input": {
+      "html": "<p>Use # and | and ~ in text.</p>",
+      "options": {
+        "escape_misc": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Use",
+          "and",
+          "in text."
+        ]
+      }
+    ]
+  }
+]

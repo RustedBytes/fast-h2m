@@ -1,0 +1,168 @@
+[
+  {
+    "id": "visitor_custom_element_with_nesting",
+    "description": "Visitor handles custom elements with nested content",
+    "input": {
+      "html": "<div><custom-widget data-value=\"123\"><p>Widget content here</p><span>With nested elements</span></custom-widget></div>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_custom_element": {
+          "action": "custom",
+          "output": "[CUSTOM WIDGET]"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[CUSTOM WIDGET]"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Widget content here"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_unknown_tag_preservation",
+    "description": "Visitor preserves unknown HTML tags as raw HTML",
+    "input": {
+      "html": "<article><p>Article text</p><x-custom>Custom element with content</x-custom><p>More article text</p></article>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_custom_element": {
+          "action": "preserve_html"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Article text"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "More article text"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "<x-custom>"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_deeply_nested_skip",
+    "description": "Visitor skips deeply nested elements",
+    "input": {
+      "html": "<div><p>Outer <em>emphasis <strong>with bold <mark>and highlight</mark></strong></em> text</p></div>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_mark": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Outer"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "text"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "highlight"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_element_start_skip_entire_subtree",
+    "description": "Visitor skips at element_start level removes entire subtree",
+    "input": {
+      "html": "<div><h1>Title</h1><p>Content</p></div>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_element_start": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Title"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Content"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_element_end_modification",
+    "description": "Visitor modifies element at end after children processed",
+    "input": {
+      "html": "<blockquote><p>Original quote</p></blockquote>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_element_end": {
+          "action": "custom",
+          "output": "MODIFIED OUTPUT"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]

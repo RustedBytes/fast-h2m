@@ -1,0 +1,139 @@
+[
+  {
+    "id": "visitor_custom_link_format",
+    "description": "Visitor reformats links using template interpolation",
+    "input": {
+      "html": "<p>Visit <a href=\"https://example.com\">Example</a> for more info.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_link": {
+          "action": "custom_template",
+          "template": "{text} ({href})"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Example (https://example.com)"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "[Example]"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_skip_links",
+    "description": "Visitor skips all links entirely",
+    "input": {
+      "html": "<p>Before <a href=\"https://example.com\">link text</a> after</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_link": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "link text"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "example.com"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_link_bare_string_preserves_case",
+    "description": "Visitor returns rendered template as a bare string (not a dict) and original mixed-case content is preserved end-to-end (regression guard for issue #350)",
+    "input": {
+      "html": "<a href=\"https://old-cdn.com/file.pdf\">Download</a>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_link": {
+          "action": "custom_template",
+          "template": "[{text}](https://new-cdn.com/file.pdf)",
+          "return_form": "bare_string"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[Download](https://new-cdn.com/file.pdf)"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "[download]"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "old-cdn.com"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_custom_link_static",
+    "description": "Visitor replaces link with static custom output",
+    "input": {
+      "html": "<a href=\"https://example.com\">Click here</a>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_link": {
+          "action": "custom",
+          "output": "[REDACTED LINK]"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[REDACTED LINK]"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "example.com"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]

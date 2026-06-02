@@ -1,0 +1,395 @@
+//! Handlers for HTML5 figure elements.
+//!
+//! Processes figure-related semantic elements:
+//! - `<figure>` - Self-contained illustration, diagram, photo, code listing, etc.
+//! - `<figcaption>` - Caption or legend for a figure
+//!
+//! Figure elements group an image (or other media) with its associated caption.
+//! The Markdown output preserves this relationship through content organization.
+
+// Note: Context and DomContext are defined in converter.rs
+// walk_node is also defined there and must be called via the parent module
+
+/// Handles the `<figure>` element.
+///
+/// A figure element contains content (typically images) and optionally a figcaption.
+/// The handler collects all content and cleans up extra line breaks.
+///
+/// # Behavior
+///
+/// - **Inline mode**: Children are processed inline without block spacing
+/// - **Block mode**: Content is collected, line breaks normalized, and wrapped with blank lines
+/// - **Image normalization**: Removes extra spaces before `![` to improve Markdown formatting
+///
+/// # Implementation Details
+///
+/// The handler performs the following on the collected content:
+/// 1. Normalizes newline + image sequences: `\n![` → `![`
+/// 2. Normalizes space + image sequences: ` ![` → `![`
+/// 3. Trims the final content and wraps it with blank lines
+#[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
+pub fn handle_figure(
+    _tag_name: &str,
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    output: &mut String,
+    options: &crate::options::ConversionOptions,
+    ctx: &super::Context,
+    depth: usize,
+    dom_ctx: &super::DomContext,
+) {
+    if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
+        // In inline context, just process children inline
+        if ctx.convert_as_inline {
+            let children = tag.children();
+            {
+                for child_handle in children.top().iter() {
+                    super::walk_node(child_handle, parser, output, options, ctx, depth, dom_ctx);
+                }
+            }
+            return;
+        }
+
+        // Check visit_figure_start before processing children.
+        #[cfg(feature = "visitor")]
+        if let Some(ref visitor_handle) = ctx.visitor {
+            use crate::converter::utility::content::collect_tag_attributes;
+            use crate::visitor::{NodeContext, NodeType, VisitResult};
+
+            let attributes = collect_tag_attributes(tag);
+            let node_id = node_handle.get_inner();
+            let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
+            let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
+            let node_ctx = NodeContext {
+                node_type: NodeType::Figure,
+                tag_name: "figure".to_string(),
+                attributes,
+                depth,
+                index_in_parent,
+                parent_tag,
+                is_inline: false,
+            };
+            let visit_result = {
+                let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
+                visitor.visit_figure_start(&node_ctx)
+            };
+            match visit_result {
+                VisitResult::Continue => {}
+                VisitResult::Skip => return,
+                VisitResult::Custom(custom) => {
+                    // Record where custom content starts so visit_figure_end can see it
+                    let start_pos = output.len();
+                    if !output.is_empty() && !output.ends_with("\n\n") {
+                        output.push_str("\n\n");
+                    }
+                    output.push_str(&custom);
+                    // Still call visit_figure_end with the custom content.
+                    // Clamp to a valid char boundary in case a pop landed mid-codepoint (#380).
+                    let safe_start =
+                        crate::converter::utility::content::floor_char_boundary(output, start_pos.min(output.len()));
+                    let figure_output = output[safe_start..].to_owned();
+                    let end_result = {
+                        let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
+                        visitor.visit_figure_end(&node_ctx, &figure_output)
+                    };
+                    match end_result {
+                        VisitResult::Continue => {
+                            if !output.ends_with('\n') {
+                                output.push_str("\n\n");
+                            } else if !output.ends_with("\n\n") {
+                                output.push('\n');
+                            }
+                        }
+                        VisitResult::Custom(end_custom) => {
+                            output.truncate(safe_start);
+                            output.push_str(&end_custom);
+                        }
+                        VisitResult::Skip => {
+                            output.truncate(safe_start);
+                        }
+                        VisitResult::PreserveHtml => {
+                            use crate::converter::utility::serialization::serialize_node;
+                            output.truncate(safe_start);
+                            output.push_str(&serialize_node(node_handle, parser));
+                        }
+                        VisitResult::Error(err) => {
+                            if ctx.visitor_error.borrow().is_none() {
+                                *ctx.visitor_error.borrow_mut() = Some(err);
+                            }
+                        }
+                    }
+                    return;
+                }
+                VisitResult::PreserveHtml => {
+                    use crate::converter::utility::serialization::serialize_node;
+                    output.push_str(&serialize_node(node_handle, parser));
+                    return;
+                }
+                VisitResult::Error(err) => {
+                    if ctx.visitor_error.borrow().is_none() {
+                        *ctx.visitor_error.borrow_mut() = Some(err);
+                    }
+                    return;
+                }
+            }
+        }
+
+        // Ensure spacing before the figure
+        if !output.is_empty() && !output.ends_with("\n\n") {
+            output.push_str("\n\n");
+        }
+
+        let figure_start = output.len();
+
+        // Collect content in a separate buffer
+        let mut figure_content = String::new();
+        let children = tag.children();
+        {
+            for child_handle in children.top().iter() {
+                super::walk_node(child_handle, parser, &mut figure_content, options, ctx, depth, dom_ctx);
+            }
+        }
+
+        // Normalize image syntax
+        figure_content = figure_content.replace("\n![", "![");
+        figure_content = figure_content.replace(" ![", "![");
+
+        // Trim and output
+        let trimmed = figure_content.trim_matches(|c| c == '\n' || c == ' ' || c == '\t');
+        if !trimmed.is_empty() {
+            output.push_str(trimmed);
+            if !output.ends_with('\n') {
+                output.push('\n');
+            }
+            if !output.ends_with("\n\n") {
+                output.push('\n');
+            }
+        }
+
+        // Call visit_figure_end after collecting content.
+        #[cfg(feature = "visitor")]
+        if let Some(ref visitor_handle) = ctx.visitor {
+            use crate::converter::utility::content::collect_tag_attributes;
+            use crate::visitor::{NodeContext, NodeType, VisitResult};
+
+            let attributes = collect_tag_attributes(tag);
+            let node_id = node_handle.get_inner();
+            let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
+            let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
+            let node_ctx = NodeContext {
+                node_type: NodeType::Figure,
+                tag_name: "figure".to_string(),
+                attributes,
+                depth,
+                index_in_parent,
+                parent_tag,
+                is_inline: false,
+            };
+            // Clamp to a valid char boundary in case a pop landed mid-codepoint (#380).
+            let safe_start =
+                crate::converter::utility::content::floor_char_boundary(output, figure_start.min(output.len()));
+            let figure_output = output[safe_start..].to_owned();
+            let visit_result = {
+                let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
+                visitor.visit_figure_end(&node_ctx, &figure_output)
+            };
+            match visit_result {
+                VisitResult::Continue => {}
+                VisitResult::Skip => {
+                    output.truncate(safe_start);
+                }
+                VisitResult::Custom(custom) => {
+                    output.truncate(safe_start);
+                    output.push_str(&custom);
+                }
+                VisitResult::PreserveHtml => {
+                    use crate::converter::utility::serialization::serialize_node;
+                    output.truncate(safe_start);
+                    output.push_str(&serialize_node(node_handle, parser));
+                }
+                VisitResult::Error(err) => {
+                    if ctx.visitor_error.borrow().is_none() {
+                        *ctx.visitor_error.borrow_mut() = Some(err);
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Handles the `<figcaption>` element.
+///
+/// A figcaption element contains text that describes or supplements the figure.
+/// It is rendered as emphasized (italic) text to distinguish it from regular content.
+///
+/// # Behavior
+///
+/// - Content is collected and trimmed
+/// - Non-empty content is wrapped in `*text*` (emphasis) markers
+/// - Proper spacing is maintained around the caption
+///
+/// # Implementation Details
+///
+/// The handler:
+/// 1. Collects and processes all children
+/// 2. Checks for existing output and adds spacing as needed
+/// 3. Wraps content in emphasis markers: `*caption*`
+/// 4. Ensures proper blank-line spacing after the caption
+#[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
+pub fn handle_figcaption(
+    _tag_name: &str,
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    output: &mut String,
+    options: &crate::options::ConversionOptions,
+    ctx: &super::Context,
+    depth: usize,
+    dom_ctx: &super::DomContext,
+) {
+    if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
+        let mut text = String::new();
+        let children = tag.children();
+        {
+            for child_handle in children.top().iter() {
+                super::walk_node(child_handle, parser, &mut text, options, ctx, depth + 1, dom_ctx);
+            }
+        }
+
+        let text = text.trim().to_owned();
+        if text.is_empty() {
+            return;
+        }
+
+        #[cfg(feature = "visitor")]
+        if let Some(ref visitor_handle) = ctx.visitor {
+            use crate::converter::utility::content::collect_tag_attributes;
+            use crate::visitor::{NodeContext, NodeType, VisitResult};
+
+            let attributes = collect_tag_attributes(tag);
+            let node_id = node_handle.get_inner();
+            let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
+            let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
+            let node_ctx = NodeContext {
+                node_type: NodeType::Figcaption,
+                tag_name: "figcaption".to_string(),
+                attributes,
+                depth,
+                index_in_parent,
+                parent_tag,
+                is_inline: false,
+            };
+            let visit_result = {
+                let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
+                visitor.visit_figcaption(&node_ctx, &text)
+            };
+            match visit_result {
+                VisitResult::Continue => {}
+                VisitResult::Skip => return,
+                VisitResult::Custom(custom) => {
+                    // Add spacing before caption if needed
+                    if !output.is_empty() {
+                        if output.ends_with("```\n") {
+                            output.push('\n');
+                        } else {
+                            while output.ends_with(' ') || output.ends_with('\t') {
+                                output.pop();
+                            }
+                            if output.ends_with('\n') && !output.ends_with("\n\n") {
+                                output.push('\n');
+                            } else if !output.ends_with('\n') {
+                                output.push_str("\n\n");
+                            }
+                        }
+                    }
+                    output.push_str(&custom);
+                    if !custom.ends_with('\n') {
+                        output.push_str("\n\n");
+                    }
+                    return;
+                }
+                VisitResult::PreserveHtml => {
+                    use crate::converter::utility::serialization::serialize_node;
+                    output.push_str(&serialize_node(node_handle, parser));
+                    return;
+                }
+                VisitResult::Error(err) => {
+                    if ctx.visitor_error.borrow().is_none() {
+                        *ctx.visitor_error.borrow_mut() = Some(err);
+                    }
+                    return;
+                }
+            }
+        }
+
+        // Add spacing before caption if needed
+        if !output.is_empty() {
+            if output.ends_with("```\n") {
+                output.push('\n');
+            } else {
+                // Trim trailing whitespace and ensure single blank line
+                while output.ends_with(' ') || output.ends_with('\t') {
+                    output.pop();
+                }
+                if output.ends_with('\n') && !output.ends_with("\n\n") {
+                    output.push('\n');
+                } else if !output.ends_with('\n') {
+                    output.push_str("\n\n");
+                }
+            }
+        }
+
+        // Output caption as emphasized text
+        output.push('*');
+        output.push_str(&text);
+        output.push_str("*\n\n");
+    }
+}
+
+/// Dispatcher for figure-related elements.
+///
+/// Routes `<figure>` and `<figcaption>` elements to their respective handlers.
+pub fn handle(
+    tag_name: &str,
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    output: &mut String,
+    options: &crate::options::ConversionOptions,
+    ctx: &super::Context,
+    depth: usize,
+    dom_ctx: &super::DomContext,
+) {
+    match tag_name {
+        "figure" => handle_figure(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
+        "figcaption" => handle_figcaption(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
+        _ => {}
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn figure_caption_separated_from_image() {
+        let html = r#"<figure><img src="photo.jpg" alt="Photo"><figcaption>A nice photo</figcaption></figure>"#;
+        let result = crate::convert(html, None).unwrap();
+        let content = result.content.unwrap_or_default();
+        assert!(
+            content.contains("![Photo](photo.jpg)"),
+            "image should be present: {}",
+            content
+        );
+        assert!(
+            content.contains("A nice photo"),
+            "caption should be present: {}",
+            content
+        );
+        // Image and caption should not be on the same line
+        let lines: Vec<&str> = content.lines().filter(|l| !l.trim().is_empty()).collect();
+        let img_line = lines.iter().position(|l| l.contains("![")).unwrap_or(999);
+        let cap_line = lines.iter().position(|l| l.contains("A nice photo")).unwrap_or(999);
+        assert!(
+            cap_line > img_line,
+            "caption should be on a separate line after image, lines: {:?}",
+            lines
+        );
+    }
+}

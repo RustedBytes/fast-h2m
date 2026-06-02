@@ -1,0 +1,55 @@
+[
+  {
+    "id": "options_max_depth_default_unlimited",
+    "description": "Default max_depth (null) converts deeply nested content fully",
+    "input": {
+      "html": "<div><div><div><div><p>Deep content</p></div></div></div></div>"
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Deep content"
+      }
+    ]
+  },
+  {
+    "id": "options_max_depth_truncates",
+    "description": "max_depth truncates content beyond the specified depth",
+    "input": {
+      "html": "<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>",
+      "options": {
+        "max_depth": 3
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Shallow"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Too deep"
+      }
+    ]
+  },
+  {
+    "id": "options_max_depth_zero_empty",
+    "description": "max_depth of 0 produces empty output",
+    "input": {
+      "html": "<p>Hello</p>",
+      "options": {
+        "max_depth": 0
+      }
+    },
+    "assertions": [
+      {
+        "type": "equals",
+        "field": "content",
+        "value": ""
+      }
+    ]
+  }
+]

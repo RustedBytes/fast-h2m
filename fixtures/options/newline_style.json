@@ -1,0 +1,42 @@
+[
+  {
+    "id": "options_newline_backslash",
+    "description": "Hard line breaks rendered with backslash",
+    "input": {
+      "html": "<p>Line one<br>Line two</p>",
+      "options": {
+        "newline_style": "Backslash"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Line one",
+          "Line two"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_newline_spaces",
+    "description": "Hard line breaks rendered with trailing spaces",
+    "input": {
+      "html": "<p>First<br>Second</p>",
+      "options": {
+        "newline_style": "Spaces"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "First",
+          "Second"
+        ]
+      }
+    ]
+  }
+]

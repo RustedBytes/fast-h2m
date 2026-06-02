@@ -1,0 +1,74 @@
+[
+  {
+    "id": "visitor_heading_bare_string_preserves_case",
+    "description": "Visitor returns rendered heading template as bare string; mixed-case is preserved (regression guard for issue #350)",
+    "input": {
+      "html": "<h2>Important Section Title</h2><p>Body.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_heading": {
+          "action": "custom_template",
+          "template": "## {text} ##",
+          "return_form": "bare_string"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "## Important Section Title ##"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "important section title"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_custom_heading",
+    "description": "Visitor replaces heading with custom format",
+    "input": {
+      "html": "<h2>Section Title</h2><p>Content below heading.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_heading": {
+          "action": "custom_template",
+          "template": "--- {text} ---"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "--- Section Title ---"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "## Section Title"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Content below heading."
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]

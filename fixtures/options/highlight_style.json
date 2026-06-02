@@ -1,0 +1,64 @@
+[
+  {
+    "id": "options_highlight_double_equal",
+    "description": "Mark tag with double equal highlight style",
+    "input": {
+      "html": "<p>Text with <mark>highlighted</mark> here.</p>",
+      "options": {
+        "highlight_style": "DoubleEqual"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "==highlighted=="
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_highlight_bold",
+    "description": "Mark tag rendered as bold",
+    "input": {
+      "html": "<p>Text with <mark>highlighted</mark> text.</p>",
+      "options": {
+        "highlight_style": "Bold"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "**highlighted**"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_highlight_none",
+    "description": "Mark tag with no highlight style strips the mark",
+    "input": {
+      "html": "<p>Text with <mark>plain</mark> content.</p>",
+      "options": {
+        "highlight_style": "None"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "plain"
+        ]
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "=="
+      }
+    ]
+  }
+]

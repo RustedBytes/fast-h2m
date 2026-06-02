@@ -1,0 +1,222 @@
+[
+  {
+    "id": "visitor_audio_custom",
+    "description": "Visitor replaces audio element with custom output",
+    "input": {
+      "html": "<p>Listen to this: <audio src=\"podcast.mp3\" controls></audio></p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_audio": {
+          "action": "custom",
+          "output": "[AUDIO: podcast.mp3]"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[AUDIO: podcast.mp3]"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Listen to this:"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_audio_skip",
+    "description": "Visitor removes audio elements from output",
+    "input": {
+      "html": "<p>Background music:</p><audio src=\"music.ogg\" autoplay></audio><p>Enjoy!</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_audio": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Background music:"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Enjoy!"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "music.ogg"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_video_custom",
+    "description": "Visitor replaces video with custom link",
+    "input": {
+      "html": "<p>Watch our tutorial:</p><video src=\"tutorial.mp4\" width=\"320\" height=\"240\" controls></video><p>Great content!</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_video": {
+          "action": "custom_template",
+          "template": "[VIDEO: {src}]"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[VIDEO: tutorial.mp4]"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Watch our tutorial:"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Great content!"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_video_skip",
+    "description": "Visitor removes video elements entirely",
+    "input": {
+      "html": "<h2>Demo</h2><video src=\"demo.webm\"></video><p>See the demo above.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_video": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Demo"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "See the demo above."
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "demo.webm"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_iframe_custom",
+    "description": "Visitor replaces embedded iframe with custom text",
+    "input": {
+      "html": "<p>Embedded map:</p><iframe src=\"https://maps.example.com/embed\" width=\"400\" height=\"300\"></iframe><p>End of map</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_iframe": {
+          "action": "custom",
+          "output": "[EMBEDDED: https://maps.example.com/embed]"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[EMBEDDED: https://maps.example.com/embed]"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Embedded map:"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "End of map"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_iframe_skip",
+    "description": "Visitor removes embedded iframes",
+    "input": {
+      "html": "<h3>Reviews</h3><iframe src=\"https://widget.example.com/reviews\"></iframe><p>See reviews from our partners.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_iframe": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Reviews"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "See reviews from our partners."
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "widget.example.com"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]

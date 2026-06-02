@@ -1,0 +1,57 @@
+[
+  {
+    "id": "line_break_br_tag",
+    "description": "Single br tag produces a line break in output",
+    "input": {
+      "html": "<p>First line.<br>Second line.</p>"
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "First line.",
+          "Second line."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "line_break_hr_tag",
+    "description": "hr tag produces a horizontal separator between content",
+    "input": {
+      "html": "<p>Before rule.</p><hr><p>After rule.</p>"
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Before rule.",
+          "After rule."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "line_break_multiple_br",
+    "description": "Multiple consecutive br tags in sequence",
+    "input": {
+      "html": "<p>Start.<br><br>End.</p>"
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Start.",
+          "End."
+        ]
+      }
+    ]
+  }
+]

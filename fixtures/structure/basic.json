@@ -1,0 +1,102 @@
+[
+  {
+    "id": "structure_heading_paragraph",
+    "description": "Simple heading followed by paragraph produces Heading and Paragraph nodes",
+    "input": {
+      "html": "<h1>Title</h1><p>A paragraph of text.</p>",
+      "options": {
+        "include_document_structure": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "not_empty",
+        "field": "document.nodes"
+      },
+      {
+        "type": "count_min",
+        "field": "document.nodes",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "id": "structure_multiple_headings",
+    "description": "Multiple headings create multiple Heading nodes with correct levels",
+    "input": {
+      "html": "<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>",
+      "options": {
+        "include_document_structure": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "not_empty",
+        "field": "document.nodes"
+      },
+      {
+        "type": "count_min",
+        "field": "document.nodes",
+        "value": 4
+      }
+    ]
+  },
+  {
+    "id": "structure_list",
+    "description": "Unordered list produces List and ListItem nodes",
+    "input": {
+      "html": "<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>",
+      "options": {
+        "include_document_structure": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "not_empty",
+        "field": "document.nodes"
+      },
+      {
+        "type": "count_min",
+        "field": "document.nodes",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "id": "structure_code_block",
+    "description": "Fenced code block produces Code node",
+    "input": {
+      "html": "<p>Example code:</p><pre><code class=\"language-rust\">fn main() { println!(\"Hello\"); }</code></pre>",
+      "options": {
+        "include_document_structure": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "not_empty",
+        "field": "document.nodes"
+      },
+      {
+        "type": "count_min",
+        "field": "document.nodes",
+        "value": 2
+      }
+    ]
+  }
+]

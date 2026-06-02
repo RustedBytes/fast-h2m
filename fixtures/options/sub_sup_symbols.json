@@ -1,0 +1,40 @@
+[
+  {
+    "id": "options_sub_symbol_tilde",
+    "description": "Subscript rendered with tilde symbol",
+    "input": {
+      "html": "<p>H<sub>2</sub>O</p>",
+      "options": {
+        "sub_symbol": "~"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "~2~"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_sup_symbol_caret",
+    "description": "Superscript rendered with caret symbol",
+    "input": {
+      "html": "<p>x<sup>2</sup></p>",
+      "options": {
+        "sup_symbol": "^"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "^2^"
+        ]
+      }
+    ]
+  }
+]

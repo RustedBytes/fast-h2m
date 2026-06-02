@@ -1,0 +1,60 @@
+[
+  {
+    "id": "structured_data_json_ld",
+    "description": "JSON-LD script tag is stripped from output (security) but metadata may be extracted",
+    "input": {
+      "html": "<html><head><title>Article</title><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"My Article\",\"author\":{\"@type\":\"Person\",\"name\":\"Jane Doe\"},\"datePublished\":\"2024-01-15\"}</script></head><body><h1>My Article</h1><p>Article body text.</p></body></html>"
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "My Article"
+        ]
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "values": [
+          "application/ld+json",
+          "@context",
+          "schema.org"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "structured_data_multiple_json_ld",
+    "description": "Multiple JSON-LD blocks are all stripped from output",
+    "input": {
+      "html": "<html><head><title>Shop Page</title><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"Product\",\"name\":\"Widget\",\"price\":\"9.99\"}</script><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\"}]}</script></head><body><h1>Widget</h1><p>A great widget for all purposes.</p></body></html>"
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Widget"
+        ]
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "values": [
+          "@context",
+          "BreadcrumbList",
+          "ListItem"
+        ]
+      }
+    ]
+  }
+]

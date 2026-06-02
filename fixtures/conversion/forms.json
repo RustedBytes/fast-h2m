@@ -1,0 +1,77 @@
+[
+  {
+    "id": "form_input_elements",
+    "description": "Form input elements produce readable output without form mechanics",
+    "input": {
+      "html": "<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" placeholder=\"Enter name\"></form>",
+      "options": {
+        "preprocessing": {
+          "remove_forms": false
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Name"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "form_textarea",
+    "description": "Textarea element produces readable output",
+    "input": {
+      "html": "<form><label>Message:</label><textarea>Default text content</textarea></form>",
+      "options": {
+        "preprocessing": {
+          "remove_forms": false
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Message"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "form_select_options",
+    "description": "Select element with options produces readable output",
+    "input": {
+      "html": "<form><label>Color:</label><select><option value=\"red\">Red</option><option value=\"blue\" selected>Blue</option><option value=\"green\">Green</option></select></form>",
+      "options": {
+        "preprocessing": {
+          "remove_forms": false
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Color"
+        ]
+      }
+    ]
+  }
+]

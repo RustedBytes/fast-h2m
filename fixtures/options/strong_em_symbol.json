@@ -1,0 +1,22 @@
+[
+  {
+    "id": "options_strong_em_underscore",
+    "description": "Strong and em tags use underscore symbol instead of asterisk",
+    "input": {
+      "html": "<p><strong>bold</strong> and <em>italic</em></p>",
+      "options": {
+        "strong_em_symbol": "_"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "__bold__",
+          "_italic_"
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,291 @@
+[
+  {
+    "id": "visitor_definition_list_skip",
+    "description": "Visitor skips definition list items from output",
+    "input": {
+      "html": "<p>Glossary:</p><dl><dt>Term A</dt><dd>Definition of term A</dd><dt>Term B</dt><dd>Definition of term B</dd></dl><p>End of glossary</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_definition_term": {
+          "action": "skip"
+        },
+        "visit_definition_description": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Glossary:"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "End of glossary"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Term A"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Definition"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_definition_list_custom_format",
+    "description": "Visitor formats definition lists with custom templates",
+    "input": {
+      "html": "<dl><dt>Python</dt><dd>A high-level programming language</dd><dt>JavaScript</dt><dd>A scripting language for web browsers</dd></dl>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_definition_term": {
+          "action": "custom_template",
+          "template": "### {text}"
+        },
+        "visit_definition_description": {
+          "action": "custom_template",
+          "template": "> {text}"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "### Python"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "### JavaScript"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "> A high-level programming language"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "> A scripting language for web browsers"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_details_summary_custom",
+    "description": "Visitor customizes details/summary disclosure elements",
+    "input": {
+      "html": "<details><summary>Click to expand</summary><p>This content is initially hidden.</p><p>But can be revealed by the user.</p></details>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_summary": {
+          "action": "custom_template",
+          "template": "[EXPANDABLE] {text}"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[EXPANDABLE] Click to expand"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "This content is initially hidden."
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_details_summary_skip",
+    "description": "Visitor removes details/summary elements entirely",
+    "input": {
+      "html": "<p>Main content here.</p><details><summary>Hidden section</summary><p>Secret details</p></details><p>More main content.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_details": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Main content here."
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "More main content."
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Hidden section"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Secret details"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_figure_custom",
+    "description": "Visitor customizes figure and figcaption elements",
+    "input": {
+      "html": "<article><h1>Article Title</h1><p>Introduction paragraph.</p><figure><img src=\"diagram.png\" alt=\"System architecture diagram\"><figcaption>Figure 1: System Architecture</figcaption></figure><p>Explanation of the figure.</p></article>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_figcaption": {
+          "action": "custom_template",
+          "template": "*{text}*"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Article Title"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "*Figure 1: System Architecture*"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Explanation of the figure."
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_figure_skip",
+    "description": "Visitor removes figure elements with their captions",
+    "input": {
+      "html": "<p>See the chart below:</p><figure><img src=\"chart.svg\"><figcaption>Revenue Trends 2020-2024</figcaption></figure><p>As shown in the chart above.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_figure_start": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "See the chart below:"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "As shown in the chart above."
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Revenue Trends"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "chart.svg"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_figure_custom_wrap",
+    "description": "Visitor wraps figure content with custom formatting",
+    "input": {
+      "html": "<section><h2>Gallery</h2><figure><img src=\"photo1.jpg\" alt=\"Photo\"><figcaption>Beautiful sunset</figcaption></figure></section>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_figure_start": {
+          "action": "custom",
+          "output": "\n[FIGURE]\n"
+        },
+        "visit_figure_end": {
+          "action": "custom_template",
+          "template": "{output}\n[/FIGURE]\n"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[FIGURE]"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[/FIGURE]"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Gallery"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]

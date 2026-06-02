@@ -1,0 +1,79 @@
+[
+  {
+    "id": "result_tables_simple",
+    "description": "Simple table populates the tables array in result",
+    "input": {
+      "html": "<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>",
+      "options": {
+        "include_document_structure": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "count_min",
+        "field": "tables",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": "result_tables_multiple",
+    "description": "Multiple tables each appear in the tables array",
+    "input": {
+      "html": "<table><tr><th>A</th></tr><tr><td>1</td></tr></table><p>Between</p><table><tr><th>B</th></tr><tr><td>2</td></tr></table>",
+      "options": {
+        "include_document_structure": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "count_min",
+        "field": "tables",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "id": "result_tables_empty_when_no_tables",
+    "description": "Result tables array is empty when input has no tables",
+    "input": {
+      "html": "<p>No tables here</p>",
+      "options": {
+        "include_document_structure": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "count_equals",
+        "field": "tables",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": "result_tables_without_structure_flag",
+    "description": "Tables array is empty when includeDocumentStructure is false",
+    "input": {
+      "html": "<table><tr><th>X</th></tr><tr><td>Y</td></tr></table>"
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "count_equals",
+        "field": "tables",
+        "value": 0
+      }
+    ]
+  }
+]

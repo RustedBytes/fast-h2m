@@ -1,0 +1,24 @@
+[
+  {
+    "id": "options_escape_ascii_enabled",
+    "description": "ASCII Markdown characters are escaped when escapeAscii is true",
+    "input": {
+      "html": "<p>Text with # hash and [brackets] and * star</p>",
+      "options": {
+        "escape_ascii": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Text",
+          "hash",
+          "brackets",
+          "star"
+        ]
+      }
+    ]
+  }
+]

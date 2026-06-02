@@ -1,0 +1,223 @@
+# Claude Code local state
+.claude/
+
+# Go FFI download cache (populated by `go generate ./...` post-install)
+packages/go/.lib/
+packages/go/**/.lib/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+.Python
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.lcov
+
+# Rust
+target/
+Cargo.lock
+rust-coverage.lcov
+examples/**/.cargo/config.toml
+
+# Node.js / TypeScript
+**/node_modules/
+dist/
+dist-node/
+dist-web/
+*.tsbuildinfo
+.pnpm-debug.log
+
+# C / C++ build outputs
+*.so
+*.o
+*.dSYM/
+*.h.bak
+*.node
+
+# Ruby
+!packages/ruby/lib/
+!packages/ruby/lib/**/*.rb
+packages/ruby/lib/bin/
+packages/ruby/lib/**/*.bundle
+packages/ruby/ext/**/*.bundle
+packages/ruby/ext/**/mkmf.log
+packages/ruby/ext/**/Makefile
+packages/ruby/tmp/
+packages/ruby/vendor/html-to-markdown-rs/
+packages/ruby/vendor/Cargo.toml
+*.gem
+.gems/
+
+# PHP
+packages/php-ext/workspace/
+packages/php/.php-cs-fixer.cache
+
+# R
+!packages/r/R/
+!packages/r/R/**/*.R
+packages/r/src/*.o
+packages/r/src/*.so
+packages/r/src/*.dll
+packages/r/src/*.dylib
+packages/r/*.tar.gz
+packages/r/src/rust/html-to-markdown/
+
+# Elixir
+!packages/elixir/lib/
+!packages/elixir/lib/**/*.ex
+erl_crash.dump
+e2e/elixir/test_convert_debug.exs
+e2e/elixir/test_convert_with_metadata.exs
+e2e/elixir/test_visitor_debug.exs
+e2e/elixir/deps/
+e2e/elixir/_build/
+e2e/elixir/.elixir_ls/
+e2e/elixir/.fetch
+e2e/elixir/erl_crash.dump
+test_apps/elixir/deps/
+test_apps/elixir/_build/
+
+# C# / .NET
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.nupkg
+packages/csharp/HtmlToMarkdown/runtimes/
+
+# Java
+*.class
+packages/java/src/main/resources/natives/
+
+# Kotlin Android JNI test libs (built locally / in CI, never committed)
+e2e/kotlin_android/src/test/jniLibs/
+
+# Dart
+e2e/dart/libhtml_to_markdown_rs_dart.dylib
+e2e/dart/libhtml_to_markdown_rs_dart.so
+e2e/dart/html_to_markdown_rs_dart.dll
+packages/dart/rust/target/
+
+# C FFI test binaries
+crates/html-to-markdown-ffi/tests/c/test_*
+!crates/html-to-markdown-ffi/tests/c/test_*.c
+crates/html-to-markdown-ffi/tests/c/*.o
+crates/html-to-markdown-ffi/tests/c/*.dSYM/
+
+# C e2e test binaries
+e2e/c/run_tests
+e2e/c/test_*
+!e2e/c/test_*.c
+!e2e/c/test_runner.h
+e2e/c/*.o
+e2e/c/*.dSYM/
+test_apps/c/run_tests
+test_apps/c/test_*
+!test_apps/c/test_*.c
+test_apps/c/*.o
+test_apps/c/*.dSYM/
+# Download cache (populated by download_ffi.sh at smoke time).
+test_apps/c/ffi/
+
+# Vendor / package managers
+**/vendor/
+**/vendor/bundle/
+pkg/
+
+# IDEs & editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursorrules
+.windsurfrules
+
+# Environment & virtualenvs
+.env
+.env.local
+**/.venv/
+
+# MkDocs
+site/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Benchmarks
+.benchmarks/
+benchmark-harness-results-*/
+tools/runtime-bench/results/
+tools/benchmark-harness/results/
+tools/benchmark-harness/artifacts/
+tools/benchmark-harness/artifacts-*/
+tools/benchmark-harness/results-consolidated/
+tools/benchmark-harness/results-local-*/
+artifacts/
+
+# Cache & temp
+*.cache
+.cache/
+.tmp/
+.wrangler/
+.rumdl_cache/
+[Tt][Oo][Dd][Oo]*
+
+# Generated artifacts
+.remote-cache/
+.alef/
+.gemini/
+GEMINI.md
+*.test
+
+# Go benchmarks
+!packages/go/v2/bin/
+!packages/go/v2/bin/benchmark.go
+
+.venv/
+node_modules/
+vendor/bundle/
+vendor/
+
+
+# Build caches (added by docs-quality sweep)
+**/.zig-cache/
+**/.dart_tool/
+**/.build/
+e2e/kotlin_android/build/
+test_apps/kotlin_android/build/
+packages/kotlin-android/build/
+**/.gradle/
+
+**/logs/
+
+# BEGIN ai-rulez (DO NOT EDIT - managed by ai-rulez)
+.agents/
+.codex/
+.cursor/
+.github/agents/
+.github/commands/
+.github/copilot-instructions.md
+.github/skills/
+.mcp.json
+AGENTS.md
+CLAUDE.md
+# END ai-rulez

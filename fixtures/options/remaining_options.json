@@ -1,0 +1,130 @@
+[
+  {
+    "id": "options_extract_metadata_true",
+    "description": "Extract metadata returns document metadata when enabled",
+    "input": {
+      "html": "<html><head><title>Test Page</title><meta name='description' content='A test page'></head><body><p>Content</p></body></html>",
+      "options": {
+        "extract_metadata": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "equals",
+        "field": "metadata.title",
+        "value": "Test Page"
+      },
+      {
+        "type": "equals",
+        "field": "metadata.description",
+        "value": "A test page"
+      }
+    ]
+  },
+  {
+    "id": "options_skip_images_true",
+    "description": "Images are omitted from output when skipImages is true",
+    "input": {
+      "html": "<p>Before <img src='test.jpg' alt='photo'> After</p>",
+      "options": {
+        "skip_images": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Before",
+          "After"
+        ]
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "photo"
+      }
+    ]
+  },
+  {
+    "id": "options_keep_inline_images_in_paragraph",
+    "description": "Images inside specified tags stay inline",
+    "input": {
+      "html": "<p>Text <img src='icon.png' alt='icon'> more text</p>",
+      "options": {
+        "keep_inline_images_in": [
+          "p"
+        ]
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Text",
+          "more text"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_list_indent_width_four",
+    "description": "Nested lists indented with 4 spaces per level",
+    "input": {
+      "html": "<ul><li>Outer<ul><li>Inner</li></ul></li></ul>",
+      "options": {
+        "list_indent_width": 4
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Outer",
+          "Inner"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_encoding_utf8",
+    "description": "UTF-8 encoding hint for special characters",
+    "input": {
+      "html": "<p>Café naïve résumé</p>",
+      "options": {
+        "encoding": "utf-8"
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      }
+    ]
+  },
+  {
+    "id": "options_debug_true",
+    "description": "Debug mode enabled does not crash and produces output",
+    "input": {
+      "html": "<p>Debug test</p>",
+      "options": {
+        "debug": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Debug test"
+        ]
+      }
+    ]
+  }
+]

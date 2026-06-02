@@ -1,0 +1,234 @@
+[
+  {
+    "id": "metadata_text_direction_ltr",
+    "description": "Extract text direction from lang attribute on html element",
+    "input": {
+      "html": "<html lang=\"en\" dir=\"ltr\"><head><title>LTR Document</title></head><body><p>This is left-to-right text.</p></body></html>",
+      "options": {
+        "extract_metadata": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "left-to-right text"
+      }
+    ]
+  },
+  {
+    "id": "metadata_text_direction_rtl",
+    "description": "Extract right-to-left text direction",
+    "input": {
+      "html": "<html lang=\"ar\" dir=\"rtl\"><head><title>RTL Document</title></head><body><p>This is right-to-left text.</p></body></html>",
+      "options": {
+        "extract_metadata": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "right-to-left text"
+      }
+    ]
+  },
+  {
+    "id": "metadata_lang_attribute",
+    "description": "Extract language from html lang attribute",
+    "input": {
+      "html": "<html lang=\"es\"><head><title>Spanish Page</title></head><body><h1>Hola Mundo</h1><p>Este es un documento en español.</p></body></html>",
+      "options": {
+        "extract_metadata": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Hola Mundo"
+      }
+    ]
+  },
+  {
+    "id": "metadata_microdata_schema_person",
+    "description": "Extract schema.org microdata for Person",
+    "input": {
+      "html": "<html><head><title>Contact</title></head><body><div itemscope itemtype=\"https://schema.org/Person\"><span itemprop=\"name\">John Smith</span><span itemprop=\"email\">john@example.com</span><span itemprop=\"telephone\">+1-555-0100</span></div></body></html>",
+      "options": {
+        "extract_metadata": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "John Smith"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "john@example.com"
+      }
+    ]
+  },
+  {
+    "id": "metadata_microdata_schema_organization",
+    "description": "Extract schema.org microdata for Organization",
+    "input": {
+      "html": "<html><head><title>Company</title></head><body><div itemscope itemtype=\"https://schema.org/Organization\"><span itemprop=\"name\">Acme Corp</span><span itemprop=\"foundingDate\">2020</span><span itemprop=\"url\">https://acmecorp.example.com</span><span itemprop=\"logo\">https://acmecorp.example.com/logo.png</span></div></body></html>",
+      "options": {
+        "extract_metadata": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Acme Corp"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "2020"
+      }
+    ]
+  },
+  {
+    "id": "metadata_microdata_schema_article",
+    "description": "Extract schema.org microdata for Article",
+    "input": {
+      "html": "<html><head><title>Article</title></head><body><article itemscope itemtype=\"https://schema.org/Article\"><h1 itemprop=\"headline\">Breaking News Today</h1><span itemprop=\"author\">Jane Reporter</span><span itemprop=\"datePublished\">2024-04-22</span><div itemprop=\"articleBody\"><p>The article content goes here with important information about the breaking news story.</p></div></article></body></html>",
+      "options": {
+        "extract_metadata": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Breaking News Today"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Jane Reporter"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "important information"
+      }
+    ]
+  },
+  {
+    "id": "metadata_microdata_schema_breadcrumb",
+    "description": "Extract schema.org breadcrumb navigation microdata",
+    "input": {
+      "html": "<html><head><title>Navigation</title></head><body><nav itemscope itemtype=\"https://schema.org/BreadcrumbList\"><span itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\"><a itemprop=\"item\" href=\"https://example.com\"><span itemprop=\"name\">Home</span></a></span><span itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\"><a itemprop=\"item\" href=\"https://example.com/products\"><span itemprop=\"name\">Products</span></a></span><span itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\"><span itemprop=\"name\">Current Page</span></span></nav></body></html>",
+      "options": {
+        "extract_metadata": true,
+        "preprocessing": {
+          "remove_navigation": false
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Home"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Products"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Current Page"
+      }
+    ]
+  },
+  {
+    "id": "metadata_microdata_schema_product",
+    "description": "Extract schema.org microdata for Product",
+    "input": {
+      "html": "<html><head><title>Product</title></head><body><div itemscope itemtype=\"https://schema.org/Product\"><h1 itemprop=\"name\">Awesome Widget</h1><span itemprop=\"description\">The best widget on the market</span><span itemprop=\"price\">29.99</span><span itemprop=\"priceCurrency\">USD</span><img itemprop=\"image\" src=\"widget.jpg\" alt=\"Widget\"><span itemprop=\"ratingValue\">4.5</span></div></body></html>",
+      "options": {
+        "extract_metadata": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Awesome Widget"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "best widget"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "29.99"
+      }
+    ]
+  },
+  {
+    "id": "metadata_dublin_core",
+    "description": "Extract Dublin Core metadata tags",
+    "input": {
+      "html": "<html><head><title>Scholarly Work</title><meta name=\"DC.title\" content=\"Principles of Knowledge Management\"><meta name=\"DC.creator\" content=\"Dr. Alice Johnson\"><meta name=\"DC.date\" content=\"2023-06-15\"><meta name=\"DC.subject\" content=\"Knowledge Management\"><meta name=\"DC.publisher\" content=\"Academic Press\"></head><body><p>This is a scholarly article.</p></body></html>",
+      "options": {
+        "extract_metadata": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "scholarly article"
+      }
+    ]
+  }
+]

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "result_warnings_empty_for_clean_input",
+    "description": "Warnings array is empty for well-formed HTML without problematic content",
+    "input": {
+      "html": "<h1>Title</h1><p>Clean content with <a href='https://example.com'>a link</a>.</p>"
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "count_equals",
+        "field": "warnings",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": "result_warnings_empty_for_complex_input",
+    "description": "Warnings array is empty for complex but valid HTML",
+    "input": {
+      "html": "<article><h1>Article</h1><p>Paragraph with <strong>bold</strong> and <em>italic</em>.</p><table><tr><th>Col</th></tr><tr><td>Val</td></tr></table><ul><li>Item 1</li><li>Item 2</li></ul></article>"
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "count_equals",
+        "field": "warnings",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": "result_warnings_empty_for_malformed_html",
+    "description": "Warnings array is empty even for malformed HTML (parser is lenient)",
+    "input": {
+      "html": "<p>Unclosed paragraph<div>Mixed nesting</p></div>"
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "count_equals",
+        "field": "warnings",
+        "value": 0
+      }
+    ]
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "id": "options_heading_style_atx",
+    "description": "ATX heading style produces hash-prefixed headings",
+    "input": {
+      "html": "<h1>Title</h1><h2>Subtitle</h2>",
+      "options": {
+        "heading_style": "Atx"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "# Title",
+          "## Subtitle"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_heading_style_underlined",
+    "description": "Underlined heading style produces setext-style headings for h1 and h2",
+    "input": {
+      "html": "<h1>Main Title</h1>",
+      "options": {
+        "heading_style": "Underlined"
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Main Title"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_heading_style_atx_closed",
+    "description": "ATX closed heading style adds closing hashes",
+    "input": {
+      "html": "<h1>Closed Heading</h1>",
+      "options": {
+        "heading_style": "AtxClosed"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "# Closed Heading #"
+        ]
+      }
+    ]
+  }
+]

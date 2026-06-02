@@ -1,0 +1,199 @@
+[
+  {
+    "id": "options_exclude_selectors_class",
+    "description": "Elements matching CSS class selector are excluded entirely",
+    "input": {
+      "html": "<body><div class=\"cookie-banner\">Accept cookies</div><p>Main content</p></body>",
+      "options": {
+        "exclude_selectors": [
+          ".cookie-banner"
+        ]
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Main content"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "cookies"
+      }
+    ]
+  },
+  {
+    "id": "options_exclude_selectors_id",
+    "description": "Elements matching CSS id selector are excluded entirely",
+    "input": {
+      "html": "<body><div id=\"ad-container\">Buy stuff</div><p>Article text</p></body>",
+      "options": {
+        "exclude_selectors": [
+          "#ad-container"
+        ]
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Article text"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Buy stuff"
+      }
+    ]
+  },
+  {
+    "id": "options_exclude_selectors_attribute",
+    "description": "Elements matching CSS attribute selector are excluded entirely",
+    "input": {
+      "html": "<body><div role=\"complementary\">Sidebar</div><p>Primary text</p></body>",
+      "options": {
+        "exclude_selectors": [
+          "[role='complementary']"
+        ]
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Primary text"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Sidebar"
+      }
+    ]
+  },
+  {
+    "id": "options_exclude_selectors_multiple",
+    "description": "Multiple CSS selectors each exclude their matched elements",
+    "input": {
+      "html": "<body><nav class=\"nav\">Menu</nav><p>Content</p><footer>Footer</footer></body>",
+      "options": {
+        "exclude_selectors": [
+          ".nav",
+          "footer"
+        ]
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Content"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Menu"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Footer"
+      }
+    ]
+  },
+  {
+    "id": "options_exclude_selectors_nested_content_dropped",
+    "description": "All descendants of excluded elements are dropped",
+    "input": {
+      "html": "<body><aside class=\"sidebar\"><h2>Related</h2><p>Sidebar text</p></aside><main><p>Main text</p></main></body>",
+      "options": {
+        "exclude_selectors": [
+          ".sidebar"
+        ]
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Main text"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Related"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Sidebar text"
+      }
+    ]
+  },
+  {
+    "id": "options_exclude_selectors_empty_noop",
+    "description": "Empty exclude_selectors list does not affect output",
+    "input": {
+      "html": "<p>Hello world</p>",
+      "options": {
+        "exclude_selectors": []
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Hello world"
+      }
+    ]
+  },
+  {
+    "id": "options_exclude_selectors_plain_text_mode",
+    "description": "Exclude selectors work in plain text output mode",
+    "input": {
+      "html": "<body><div class=\"nav\">Navigation</div><p>Article body</p></body>",
+      "options": {
+        "exclude_selectors": [
+          ".nav"
+        ],
+        "output_format": "Plain"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Article body"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Navigation"
+      }
+    ]
+  },
+  {
+    "id": "options_exclude_selectors_vs_strip_tags",
+    "description": "exclude_selectors drops entire subtree unlike strip_tags which keeps children",
+    "input": {
+      "html": "<body><div class=\"wrapper\"><p>Inner paragraph</p></div><p>Outer text</p></body>",
+      "options": {
+        "exclude_selectors": [
+          ".wrapper"
+        ]
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Outer text"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Inner paragraph"
+      }
+    ]
+  }
+]

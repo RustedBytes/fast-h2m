@@ -1,0 +1,50 @@
+[
+  {
+    "id": "smoke_empty_string",
+    "description": "Empty string produces empty output",
+    "input": {
+      "html": ""
+    },
+    "assertions": [
+      {
+        "type": "equals",
+        "field": "content",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "id": "smoke_simple_paragraph",
+    "description": "Simple paragraph converts correctly",
+    "input": {
+      "html": "<p>Hello World</p>"
+    },
+    "assertions": [
+      {
+        "type": "equals",
+        "field": "content",
+        "value": "Hello World"
+      },
+      {
+        "type": "not_empty",
+        "field": "content"
+      }
+    ]
+  },
+  {
+    "id": "smoke_simple_heading",
+    "description": "H1 heading converts to ATX markdown",
+    "input": {
+      "html": "<h1>Title</h1>"
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "# Title"
+        ]
+      }
+    ]
+  }
+]

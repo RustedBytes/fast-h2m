@@ -1,0 +1,137 @@
+[
+  {
+    "id": "visitor_skip_code_blocks",
+    "description": "Visitor skips code blocks from output",
+    "input": {
+      "html": "<p>Intro text</p><pre><code>let x = 42;</code></pre><p>Outro text</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_code_block": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Intro text"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Outro text"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "let x = 42"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_custom_emphasis",
+    "description": "Visitor replaces emphasis with custom output",
+    "input": {
+      "html": "<p>This is <em>important</em> text.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_emphasis": {
+          "action": "custom_template",
+          "template": ">>>{text}<<<"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": ">>>important<<<"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "*important*"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_custom_blockquote",
+    "description": "Visitor replaces blockquote with custom format",
+    "input": {
+      "html": "<blockquote><p>A wise quote.</p></blockquote>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_blockquote": {
+          "action": "custom_template",
+          "template": "QUOTE: \"{content}\""
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "QUOTE:"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "A wise quote."
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_skip_strong",
+    "description": "Visitor skips bold/strong elements",
+    "input": {
+      "html": "<p>Normal <strong>bold text</strong> normal</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_strong": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "bold text"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Normal"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]

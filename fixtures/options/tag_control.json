@@ -1,0 +1,108 @@
+[
+  {
+    "id": "options_preserve_tags_iframe",
+    "description": "Iframe tags preserved as raw HTML in output",
+    "input": {
+      "html": "<p>Before</p><iframe src='video.html' width='560'></iframe><p>After</p>",
+      "options": {
+        "preserve_tags": [
+          "iframe"
+        ]
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Before",
+          "After",
+          "<iframe"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_strip_tags_div_span",
+    "description": "Div and span tags stripped but content preserved",
+    "input": {
+      "html": "<div class='wrapper'><p>Inside div</p></div><p>Outside <span class='hl'>span text</span></p>",
+      "options": {
+        "strip_tags": [
+          "div",
+          "span"
+        ]
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Inside div",
+          "span text"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_default_title_true",
+    "description": "Links without title get empty title attribute when defaultTitle is true",
+    "input": {
+      "html": "<p><a href='https://example.com'>Link</a></p>",
+      "options": {
+        "default_title": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Link",
+          "https://example.com"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_autolinks_false",
+    "description": "Bare URL links rendered as regular markdown links when autolinks disabled",
+    "input": {
+      "html": "<p><a href='https://example.com'>https://example.com</a></p>",
+      "options": {
+        "autolinks": false
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "example.com"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_link_style_reference",
+    "description": "Links use reference-style formatting",
+    "input": {
+      "html": "<p><a href='https://example.com'>Example</a> and <a href='https://other.com'>Other</a></p>",
+      "options": {
+        "link_style": "Reference"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Example",
+          "Other",
+          "example.com"
+        ]
+      }
+    ]
+  }
+]

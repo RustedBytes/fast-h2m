@@ -1,0 +1,75 @@
+[
+  {
+    "id": "options_output_format_markdown",
+    "description": "Default markdown output format produces standard markdown",
+    "input": {
+      "html": "<h1>Title</h1><p>Some text.</p>",
+      "options": {
+        "output_format": "Markdown",
+        "heading_style": "Atx"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "# Title",
+          "Some text."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_output_format_plain",
+    "description": "Plain text output format strips markdown syntax",
+    "input": {
+      "html": "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>",
+      "options": {
+        "output_format": "Plain"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Title",
+          "bold",
+          "text."
+        ]
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "values": [
+          "**bold**",
+          "# Title"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "options_output_format_djot",
+    "description": "Djot output format produces djot-compatible markup",
+    "input": {
+      "html": "<p>Simple paragraph.</p>",
+      "options": {
+        "output_format": "Djot"
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_empty",
+        "field": "content"
+      },
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": [
+          "Simple paragraph."
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,407 @@
+[
+  {
+    "id": "visitor_underline_skip",
+    "description": "Visitor skips underline elements from output",
+    "input": {
+      "html": "<p>Normal text with <u>underlined part</u> and more text.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_underline": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Normal text with"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "and more text."
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "underlined part"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_underline_custom",
+    "description": "Visitor replaces underline with custom markup",
+    "input": {
+      "html": "<p>This is <u>very important</u> text.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_underline": {
+          "action": "custom_template",
+          "template": "_{text}_"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "_very important_"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "**"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_subscript_custom",
+    "description": "Visitor replaces subscript with custom template",
+    "input": {
+      "html": "<p>H<sub>2</sub>O is water.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_subscript": {
+          "action": "custom_template",
+          "template": "~{text}~"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "H~2~O"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "is water"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_subscript_skip",
+    "description": "Visitor skips subscript elements entirely",
+    "input": {
+      "html": "<p>The formula C<sub>12</sub>H<sub>22</sub>O<sub>11</sub> is sugar.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_subscript": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "The formula CHO is sugar."
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_superscript_custom",
+    "description": "Visitor replaces superscript with custom template",
+    "input": {
+      "html": "<p>Einstein's E=mc<sup>2</sup> revolutionized physics.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_superscript": {
+          "action": "custom_template",
+          "template": "^{text}^"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "E=mc^2^"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "revolutionized physics"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_superscript_skip",
+    "description": "Visitor skips superscript from output",
+    "input": {
+      "html": "<p>The equation x<sup>3</sup> + y<sup>3</sup> = z<sup>3</sup> has no solutions.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_superscript": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "The equation x + y = z has no solutions."
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_mark_custom",
+    "description": "Visitor replaces highlight/mark with custom template",
+    "input": {
+      "html": "<p>This is a <mark>highlighted passage</mark> in the text.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_mark": {
+          "action": "custom_template",
+          "template": "=={text}=="
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "==highlighted passage=="
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "This is a"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_mark_skip",
+    "description": "Visitor skips mark elements entirely",
+    "input": {
+      "html": "<p>Key insight: <mark>always validate input</mark> for security.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_mark": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "always validate input"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Key insight:"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "for security."
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_line_break_custom",
+    "description": "Visitor replaces line break with custom output",
+    "input": {
+      "html": "<p>First line<br>Second line<br>Third line</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_line_break": {
+          "action": "custom",
+          "output": " | "
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "First line | Second line | Third line"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "\n\n"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_line_break_skip",
+    "description": "Visitor removes all line breaks",
+    "input": {
+      "html": "<p>Address Line 1<br>Address Line 2<br>Address Line 3</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_line_break": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Address Line 1Address Line 2Address Line 3"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_horizontal_rule_custom",
+    "description": "Visitor replaces horizontal rule with custom output",
+    "input": {
+      "html": "<h1>Section A</h1><p>Content A</p><hr><h1>Section B</h1><p>Content B</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_horizontal_rule": {
+          "action": "custom",
+          "output": "\n[DIVIDER]\n"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[DIVIDER]"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Section A"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Section B"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "---"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_horizontal_rule_skip",
+    "description": "Visitor removes all horizontal rules",
+    "input": {
+      "html": "<p>Part 1</p><hr><p>Part 2</p><hr><p>Part 3</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_horizontal_rule": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Part 1"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Part 2"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Part 3"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "---"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]

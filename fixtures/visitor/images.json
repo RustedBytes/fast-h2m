@@ -1,0 +1,116 @@
+[
+  {
+    "id": "visitor_image_bare_string_preserves_case",
+    "description": "Visitor returns bare-string image replacement; mixed-case alt/src preserved (regression guard for issue #350)",
+    "input": {
+      "html": "<img src=\"PhotoOne.JPG\" alt=\"Sunset Over Bay\">"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_image": {
+          "action": "custom_template",
+          "template": "[image: {alt} -> {src}]",
+          "return_form": "bare_string"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[image: Sunset Over Bay -> PhotoOne.JPG]"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "sunset over bay"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "photoone.jpg"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_skip_images",
+    "description": "Visitor skips all images from output",
+    "input": {
+      "html": "<p>Before image</p><img src=\"photo.jpg\" alt=\"A photo\"><p>After image</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_image": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Before image"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "After image"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "photo.jpg"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "A photo"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_custom_image",
+    "description": "Visitor replaces image with custom output using template",
+    "input": {
+      "html": "<img src=\"banner.png\" alt=\"Banner\">"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_image": {
+          "action": "custom_template",
+          "template": "[Image: {alt}]"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "[Image: Banner]"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "banner.png"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]

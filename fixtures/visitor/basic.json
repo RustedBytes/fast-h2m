@@ -1,0 +1,121 @@
+[
+  {
+    "id": "visitor_skip_heading",
+    "description": "Visitor skip action omits all headings from output",
+    "input": {
+      "html": "<h1>Title</h1><p>Body text remains.</p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_heading": {
+          "action": "skip"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "Title"
+      },
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "Body text remains."
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_custom_output",
+    "description": "Visitor custom action replaces element output",
+    "input": {
+      "html": "<h1>Original Heading</h1>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_heading": {
+          "action": "custom",
+          "output": "## REPLACED HEADING"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "## REPLACED HEADING"
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "# Original Heading"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_preserve_html",
+    "description": "Visitor preserve_html action includes raw HTML in output",
+    "input": {
+      "html": "<div><custom-tag>Custom content</custom-tag></div>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_custom_element": {
+          "action": "preserve_html"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "<custom-tag>"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  },
+  {
+    "id": "visitor_continue_default",
+    "description": "Visitor continue action preserves default conversion",
+    "input": {
+      "html": "<p>Hello <strong>World</strong></p>"
+    },
+    "visitor": {
+      "callbacks": {
+        "visit_strong": {
+          "action": "continue"
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains",
+        "field": "content",
+        "value": "**World**"
+      }
+    ],
+    "skip": {
+      "languages": [
+        "wasm"
+      ],
+      "reason": "WASM visitor bridge not yet exposed via @kreuzberg/html-to-markdown-wasm public API"
+    }
+  }
+]
