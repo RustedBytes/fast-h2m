@@ -36,8 +36,14 @@ fn test_strip_newlines_preserves_block_spacing() {
     );
 
     assert!(result.contains("Heading"), "heading missing from: {result}");
-    assert!(result.contains("Paragraph one"), "paragraph one missing from: {result}");
-    assert!(result.contains("Paragraph two"), "paragraph two missing from: {result}");
+    assert!(
+        result.contains("Paragraph one"),
+        "paragraph one missing from: {result}"
+    );
+    assert!(
+        result.contains("Paragraph two"),
+        "paragraph two missing from: {result}"
+    );
 }
 
 #[test]

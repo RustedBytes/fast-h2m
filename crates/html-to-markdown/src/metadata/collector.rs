@@ -77,7 +77,14 @@ impl MetadataCollector {
     /// * `id` - Optional HTML id attribute
     /// * `depth` - Current document nesting depth
     /// * `html_offset` - Byte offset in original HTML
-    pub(crate) fn add_header(&mut self, level: u8, text: String, id: Option<String>, depth: usize, html_offset: usize) {
+    pub(crate) fn add_header(
+        &mut self,
+        level: u8,
+        text: String,
+        id: Option<String>,
+        depth: usize,
+        html_offset: usize,
+    ) {
         if !self.config.extract_headers {
             return;
         }
@@ -415,7 +422,13 @@ mod tests {
         let config = MetadataConfig::default();
         let mut collector = MetadataCollector::new(config);
 
-        collector.add_link("#anchor".to_string(), "Anchor".to_string(), None, None, BTreeMap::new());
+        collector.add_link(
+            "#anchor".to_string(),
+            "Anchor".to_string(),
+            None,
+            None,
+            BTreeMap::new(),
+        );
         collector.add_link(
             "https://example.com".to_string(),
             "External".to_string(),

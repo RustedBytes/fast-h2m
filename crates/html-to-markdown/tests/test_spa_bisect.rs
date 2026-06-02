@@ -13,9 +13,13 @@ use std::path::PathBuf;
 use html_to_markdown_rs::ConversionOptions;
 
 fn fixture_path(name: &str) -> PathBuf {
-    [env!("CARGO_MANIFEST_DIR"), "../../test_documents/html/issues", name]
-        .iter()
-        .collect()
+    [
+        env!("CARGO_MANIFEST_DIR"),
+        "../../test_documents/html/issues",
+        name,
+    ]
+    .iter()
+    .collect()
 }
 
 #[test]

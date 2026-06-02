@@ -1,4 +1,8 @@
-#![allow(clippy::cast_precision_loss, clippy::cast_sign_loss, clippy::unused_self)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss,
+    clippy::unused_self
+)]
 //! Metadata extraction for HTML to Markdown conversion.
 //!
 //! This module provides comprehensive, type-safe metadata extraction during HTML-to-Markdown
@@ -146,8 +150,8 @@ pub mod types;
 pub use collector::MetadataCollector;
 pub use config::{DEFAULT_MAX_STRUCTURED_DATA_SIZE, MetadataConfig, MetadataConfigUpdate};
 pub use types::{
-    DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, ImageType, LinkMetadata, LinkType, StructuredData,
-    StructuredDataType, TextDirection,
+    DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, ImageType, LinkMetadata,
+    LinkType, StructuredData, StructuredDataType, TextDirection,
 };
 
 // Internal handle type for shared mutable access during tree traversal
@@ -178,11 +182,20 @@ mod tests {
 
     #[test]
     fn test_text_direction_parse() {
-        assert_eq!(TextDirection::parse("ltr"), Some(TextDirection::LeftToRight));
-        assert_eq!(TextDirection::parse("rtl"), Some(TextDirection::RightToLeft));
+        assert_eq!(
+            TextDirection::parse("ltr"),
+            Some(TextDirection::LeftToRight)
+        );
+        assert_eq!(
+            TextDirection::parse("rtl"),
+            Some(TextDirection::RightToLeft)
+        );
         assert_eq!(TextDirection::parse("auto"), Some(TextDirection::Auto));
         assert_eq!(TextDirection::parse("invalid"), None);
-        assert_eq!(TextDirection::parse("LTR"), Some(TextDirection::LeftToRight));
+        assert_eq!(
+            TextDirection::parse("LTR"),
+            Some(TextDirection::LeftToRight)
+        );
     }
 
     #[test]
@@ -195,12 +208,30 @@ mod tests {
     #[test]
     fn test_link_classification() {
         assert_eq!(LinkMetadata::classify_link("#section"), LinkType::Anchor);
-        assert_eq!(LinkMetadata::classify_link("mailto:test@example.com"), LinkType::Email);
-        assert_eq!(LinkMetadata::classify_link("tel:+1234567890"), LinkType::Phone);
-        assert_eq!(LinkMetadata::classify_link("https://example.com"), LinkType::External);
-        assert_eq!(LinkMetadata::classify_link("http://example.com"), LinkType::External);
-        assert_eq!(LinkMetadata::classify_link("/path/to/page"), LinkType::Internal);
-        assert_eq!(LinkMetadata::classify_link("../relative"), LinkType::Internal);
+        assert_eq!(
+            LinkMetadata::classify_link("mailto:test@example.com"),
+            LinkType::Email
+        );
+        assert_eq!(
+            LinkMetadata::classify_link("tel:+1234567890"),
+            LinkType::Phone
+        );
+        assert_eq!(
+            LinkMetadata::classify_link("https://example.com"),
+            LinkType::External
+        );
+        assert_eq!(
+            LinkMetadata::classify_link("http://example.com"),
+            LinkType::External
+        );
+        assert_eq!(
+            LinkMetadata::classify_link("/path/to/page"),
+            LinkType::Internal
+        );
+        assert_eq!(
+            LinkMetadata::classify_link("../relative"),
+            LinkType::Internal
+        );
         assert_eq!(LinkMetadata::classify_link("./same"), LinkType::Internal);
     }
 

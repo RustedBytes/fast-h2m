@@ -135,7 +135,8 @@ pub fn has_custom_element_tags(html: &str) -> bool {
 /// equivalent to `<br>`.  We must leave them as-is when pre-processing XML-style
 /// self-closing syntax so that `repair_with_html5ever` can parse them correctly.
 const HTML5_VOID_ELEMENTS: &[&str] = &[
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr",
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
+    "track", "wbr",
 ];
 
 /// Expand XML-style self-closing tags to explicit open+close pairs.
@@ -211,7 +212,10 @@ pub fn expand_xml_self_closing_tags(input: &str) -> String {
         }
 
         // Check whether this is a known HTML5 void element (case-insensitive).
-        let tag_name_lower = tag_name_bytes.iter().map(u8::to_ascii_lowercase).collect::<Vec<_>>();
+        let tag_name_lower = tag_name_bytes
+            .iter()
+            .map(u8::to_ascii_lowercase)
+            .collect::<Vec<_>>();
         let is_void = HTML5_VOID_ELEMENTS
             .iter()
             .any(|v| v.as_bytes() == tag_name_lower.as_slice());
@@ -361,7 +365,8 @@ pub fn extract_head_metadata(
                         ) {
                             let property_str = property.as_utf8_str();
                             let content_str = content.as_utf8_str();
-                            metadata.insert(format!("meta-{}", property_str), content_str.to_string());
+                            metadata
+                                .insert(format!("meta-{}", property_str), content_str.to_string());
                         }
                     }
                     // Look for title tag
@@ -388,7 +393,9 @@ pub fn extract_head_metadata(
                             let rel_str = rel_attr.as_utf8_str();
                             // Check for canonical link
                             if rel_str.contains("canonical") {
-                                if let Some(href_attr) = child_tag.attributes().get("href").flatten() {
+                                if let Some(href_attr) =
+                                    child_tag.attributes().get("href").flatten()
+                                {
                                     let href_str = href_attr.as_utf8_str();
                                     metadata.insert("canonical".to_string(), href_str.to_string());
                                 }

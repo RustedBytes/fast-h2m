@@ -21,7 +21,10 @@ fn tier1(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 fn tier2(html: &str) -> String {
@@ -30,7 +33,10 @@ fn tier2(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 /// Assert that Tier-1 output byte-equals Tier-2 output.
@@ -241,7 +247,11 @@ fn tier1_bails_on_cdata_falls_back_to_tier2() {
         }),
     );
     // Should not error — bail falls through to Tier-2.
-    assert!(result.is_ok(), "expected Ok after bail, got: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "expected Ok after bail, got: {:?}",
+        result.err()
+    );
 }
 
 #[test]

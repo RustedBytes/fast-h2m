@@ -17,20 +17,27 @@ fn test_skip_images_enabled() {
     let result = convert(html, Some(options)).unwrap();
 
     // Should contain text content
-    assert!(result.contains("Here is an image"), "Should contain text before image");
+    assert!(
+        result.contains("Here is an image"),
+        "Should contain text before image"
+    );
     assert!(
         result.contains("And here is some text after"),
         "Should contain text after image"
     );
 
     // Should NOT contain the image markdown
-    assert!(!result.contains("![Test Image]"), "Should not contain image markdown");
+    assert!(
+        !result.contains("![Test Image]"),
+        "Should not contain image markdown"
+    );
     assert!(!result.contains("test.jpg"), "Should not contain image URL");
 }
 
 #[test]
 fn test_skip_images_skips_svg_output() {
-    let html = r#"<svg width="10" height="10"><title>Logo</title><rect width="10" height="10"/></svg>"#;
+    let html =
+        r#"<svg width="10" height="10"><title>Logo</title><rect width="10" height="10"/></svg>"#;
 
     let options = ConversionOptions {
         skip_images: true,
@@ -64,14 +71,20 @@ fn test_skip_images_disabled() {
     let result = convert(html, Some(options)).unwrap();
 
     // Should contain text content
-    assert!(result.contains("Here is an image"), "Should contain text before image");
+    assert!(
+        result.contains("Here is an image"),
+        "Should contain text before image"
+    );
     assert!(
         result.contains("And here is some text after"),
         "Should contain text after image"
     );
 
     // Should contain the image markdown
-    assert!(result.contains("![Test Image]"), "Should contain image markdown");
+    assert!(
+        result.contains("![Test Image]"),
+        "Should contain image markdown"
+    );
     assert!(result.contains("test.jpg"), "Should contain image URL");
 }
 
@@ -83,8 +96,14 @@ fn test_skip_images_default_behavior() {
     let result = convert(html, None).unwrap();
 
     // Default should be to include images (skip_images: false)
-    assert!(result.contains("![Default Image]"), "Default should include images");
-    assert!(result.contains("default.png"), "Default should include image URLs");
+    assert!(
+        result.contains("![Default Image]"),
+        "Default should include images"
+    );
+    assert!(
+        result.contains("default.png"),
+        "Default should include image URLs"
+    );
 }
 
 #[test]
@@ -114,25 +133,52 @@ fn test_skip_images_mixed_content() {
 
     // Should contain all text content
     assert!(result.contains("Article Title"), "Should contain heading");
-    assert!(result.contains("Introduction paragraph"), "Should contain intro");
-    assert!(result.contains("Section One"), "Should contain section heading");
-    assert!(result.contains("Section content"), "Should contain section content");
+    assert!(
+        result.contains("Introduction paragraph"),
+        "Should contain intro"
+    );
+    assert!(
+        result.contains("Section One"),
+        "Should contain section heading"
+    );
+    assert!(
+        result.contains("Section content"),
+        "Should contain section content"
+    );
     assert!(result.contains("bold text"), "Should contain bold text");
     assert!(result.contains("italic text"), "Should contain italic text");
-    assert!(result.contains("Section Two"), "Should contain second section");
-    assert!(result.contains("More content"), "Should contain more content");
+    assert!(
+        result.contains("Section Two"),
+        "Should contain second section"
+    );
+    assert!(
+        result.contains("More content"),
+        "Should contain more content"
+    );
     assert!(result.contains("Footer text"), "Should contain footer");
     assert!(result.contains("example.com"), "Should contain link");
 
     // Should NOT contain any images
-    assert!(!result.contains("![Hero Image]"), "Should not contain hero image");
-    assert!(!result.contains("hero.jpg"), "Should not contain hero image URL");
-    assert!(!result.contains("![Section Image]"), "Should not contain section image");
+    assert!(
+        !result.contains("![Hero Image]"),
+        "Should not contain hero image"
+    );
+    assert!(
+        !result.contains("hero.jpg"),
+        "Should not contain hero image URL"
+    );
+    assert!(
+        !result.contains("![Section Image]"),
+        "Should not contain section image"
+    );
     assert!(
         !result.contains("section-image.png"),
         "Should not contain section image URL"
     );
-    assert!(!result.contains("![Footer Image]"), "Should not contain footer image");
+    assert!(
+        !result.contains("![Footer Image]"),
+        "Should not contain footer image"
+    );
     assert!(
         !result.contains("footer-image.gif"),
         "Should not contain footer image URL"
@@ -154,13 +200,28 @@ fn test_skip_images_with_base64_data_uri() {
     let result = convert(html, Some(options)).unwrap();
 
     // Should contain text
-    assert!(result.contains("Before image"), "Should contain text before image");
-    assert!(result.contains("After image"), "Should contain text after image");
+    assert!(
+        result.contains("Before image"),
+        "Should contain text before image"
+    );
+    assert!(
+        result.contains("After image"),
+        "Should contain text after image"
+    );
 
     // Should NOT contain base64 data or image markdown
-    assert!(!result.contains("![Embedded PNG]"), "Should not contain base64 image");
-    assert!(!result.contains("data:image"), "Should not contain data URI");
-    assert!(!result.contains("iVBORw0KGgo"), "Should not contain base64 content");
+    assert!(
+        !result.contains("![Embedded PNG]"),
+        "Should not contain base64 image"
+    );
+    assert!(
+        !result.contains("data:image"),
+        "Should not contain data URI"
+    );
+    assert!(
+        !result.contains("iVBORw0KGgo"),
+        "Should not contain base64 content"
+    );
 }
 
 #[test]
@@ -183,9 +244,15 @@ fn test_skip_images_with_external_urls() {
     let result = convert(html, Some(options)).unwrap();
 
     // Should contain text content
-    assert!(result.contains("Photo Gallery"), "Should contain gallery heading");
+    assert!(
+        result.contains("Photo Gallery"),
+        "Should contain gallery heading"
+    );
     assert!(result.contains("Check out"), "Should contain intro text");
-    assert!(result.contains("Thanks for viewing"), "Should contain closing text");
+    assert!(
+        result.contains("Thanks for viewing"),
+        "Should contain closing text"
+    );
 
     // Should NOT contain any image references
     assert!(
@@ -200,8 +267,14 @@ fn test_skip_images_with_external_urls() {
         !result.contains("![Photo 3]"),
         "Should not contain third photo markdown"
     );
-    assert!(!result.contains("example.com/images"), "Should not contain photo URLs");
-    assert!(!result.contains("cdn.example.org"), "Should not contain CDN URLs");
+    assert!(
+        !result.contains("example.com/images"),
+        "Should not contain photo URLs"
+    );
+    assert!(
+        !result.contains("cdn.example.org"),
+        "Should not contain CDN URLs"
+    );
 }
 
 #[test]
@@ -223,7 +296,10 @@ fn test_skip_images_preserves_alt_text_context() {
     let result = convert(html, Some(options)).unwrap();
 
     // Verify all surrounding text is present and properly ordered
-    assert!(result.contains("following image"), "Should contain introductory text");
+    assert!(
+        result.contains("following image"),
+        "Should contain introductory text"
+    );
     assert!(
         result.contains("how the interface looks"),
         "Should contain descriptive text"
@@ -234,13 +310,22 @@ fn test_skip_images_preserves_alt_text_context() {
     );
 
     // Verify images are not present (alt text is not included as text)
-    assert!(!result.contains("Product Screenshot"), "Should not include alt text");
+    assert!(
+        !result.contains("Product Screenshot"),
+        "Should not include alt text"
+    );
     assert!(
         !result.contains("Feature Comparison Chart"),
         "Should not include alt text"
     );
-    assert!(!result.contains("product.jpg"), "Should not contain image URL");
-    assert!(!result.contains("feature.png"), "Should not contain image URL");
+    assert!(
+        !result.contains("product.jpg"),
+        "Should not contain image URL"
+    );
+    assert!(
+        !result.contains("feature.png"),
+        "Should not contain image URL"
+    );
 }
 
 #[test]
@@ -258,15 +343,36 @@ fn test_skip_images_inline_vs_block_images() {
     let result = convert(html, Some(options)).unwrap();
 
     // Should contain paragraph text
-    assert!(result.contains("Start of paragraph"), "Should contain paragraph start");
-    assert!(result.contains("in the middle"), "Should contain paragraph content");
-    assert!(result.contains("End of content"), "Should contain paragraph end");
+    assert!(
+        result.contains("Start of paragraph"),
+        "Should contain paragraph start"
+    );
+    assert!(
+        result.contains("in the middle"),
+        "Should contain paragraph content"
+    );
+    assert!(
+        result.contains("End of content"),
+        "Should contain paragraph end"
+    );
 
     // Should not contain either image
-    assert!(!result.contains("![Inline]"), "Should not contain inline image");
-    assert!(!result.contains("inline.jpg"), "Should not contain inline image URL");
-    assert!(!result.contains("![Block]"), "Should not contain block image");
-    assert!(!result.contains("block.png"), "Should not contain block image URL");
+    assert!(
+        !result.contains("![Inline]"),
+        "Should not contain inline image"
+    );
+    assert!(
+        !result.contains("inline.jpg"),
+        "Should not contain inline image URL"
+    );
+    assert!(
+        !result.contains("![Block]"),
+        "Should not contain block image"
+    );
+    assert!(
+        !result.contains("block.png"),
+        "Should not contain block image URL"
+    );
 }
 
 #[test]
@@ -283,13 +389,28 @@ fn test_skip_images_with_multiple_attributes() {
     let result = convert(html, Some(options)).unwrap();
 
     // Should contain text
-    assert!(result.contains("Image with attributes"), "Should contain text");
+    assert!(
+        result.contains("Image with attributes"),
+        "Should contain text"
+    );
 
     // Should not contain image or its attributes
-    assert!(!result.contains("![Styled Image]"), "Should not contain image markdown");
-    assert!(!result.contains("image.jpg"), "Should not contain image URL");
-    assert!(!result.contains("500"), "Should not contain width attribute");
-    assert!(!result.contains("300"), "Should not contain height attribute");
+    assert!(
+        !result.contains("![Styled Image]"),
+        "Should not contain image markdown"
+    );
+    assert!(
+        !result.contains("image.jpg"),
+        "Should not contain image URL"
+    );
+    assert!(
+        !result.contains("500"),
+        "Should not contain width attribute"
+    );
+    assert!(
+        !result.contains("300"),
+        "Should not contain height attribute"
+    );
 }
 
 #[test]
@@ -308,9 +429,18 @@ fn test_skip_images_empty_document() {
 
     // Result should be empty or near-empty (no meaningful content)
     // Just verify no images appear
-    assert!(!result.contains("![Image 1]"), "Should not contain first image");
-    assert!(!result.contains("![Image 2]"), "Should not contain second image");
-    assert!(!result.contains("![Image 3]"), "Should not contain third image");
+    assert!(
+        !result.contains("![Image 1]"),
+        "Should not contain first image"
+    );
+    assert!(
+        !result.contains("![Image 2]"),
+        "Should not contain second image"
+    );
+    assert!(
+        !result.contains("![Image 3]"),
+        "Should not contain third image"
+    );
 }
 
 #[test]
@@ -330,9 +460,18 @@ fn test_skip_images_with_lists_and_images() {
     let result = convert(html, Some(options)).unwrap();
 
     // Should contain list items
-    assert!(result.contains("First item"), "Should contain first list item");
-    assert!(result.contains("Item with image"), "Should contain list item text");
-    assert!(result.contains("Third item"), "Should contain third list item");
+    assert!(
+        result.contains("First item"),
+        "Should contain first list item"
+    );
+    assert!(
+        result.contains("Item with image"),
+        "Should contain list item text"
+    );
+    assert!(
+        result.contains("Third item"),
+        "Should contain third list item"
+    );
 
     // Should not contain image
     assert!(
@@ -372,7 +511,10 @@ fn test_skip_images_with_table_images() {
     assert!(result.contains("Cell 4"), "Should contain table cell 4");
 
     // Should not contain image
-    assert!(!result.contains("![Table Image]"), "Should not contain image in table");
+    assert!(
+        !result.contains("![Table Image]"),
+        "Should not contain image in table"
+    );
     assert!(
         !result.contains("table-image.jpg"),
         "Should not contain image URL in table"
@@ -400,11 +542,20 @@ fn test_skip_images_with_figure_figcaption() {
         result.contains("This is a diagram caption"),
         "Should contain figcaption text"
     );
-    assert!(result.contains("More content"), "Should contain following content");
+    assert!(
+        result.contains("More content"),
+        "Should contain following content"
+    );
 
     // Should not contain image
-    assert!(!result.contains("![Diagram]"), "Should not contain image markdown");
-    assert!(!result.contains("diagram.svg"), "Should not contain image URL");
+    assert!(
+        !result.contains("![Diagram]"),
+        "Should not contain image markdown"
+    );
+    assert!(
+        !result.contains("diagram.svg"),
+        "Should not contain image URL"
+    );
 }
 
 #[test]
@@ -476,8 +627,14 @@ fn test_skip_images_with_picture_element() {
         !result.contains("![Fallback Image]"),
         "Should not contain fallback image"
     );
-    assert!(!result.contains("image.webp"), "Should not contain webp source");
-    assert!(!result.contains("image.jpg"), "Should not contain jpg source");
+    assert!(
+        !result.contains("image.webp"),
+        "Should not contain webp source"
+    );
+    assert!(
+        !result.contains("image.jpg"),
+        "Should not contain jpg source"
+    );
 }
 
 #[test]
@@ -505,10 +662,16 @@ fn test_skip_images_preserves_links_and_formatting() {
 
     // Should preserve links
     assert!(result.contains("[link]"), "Should preserve link text");
-    assert!(result.contains("https://example.com"), "Should preserve link URL");
+    assert!(
+        result.contains("https://example.com"),
+        "Should preserve link URL"
+    );
 
     // Should preserve blockquote
-    assert!(result.contains("This is a blockquote"), "Should preserve blockquote");
+    assert!(
+        result.contains("This is a blockquote"),
+        "Should preserve blockquote"
+    );
 
     // Should not contain image
     assert!(!result.contains("![Ignored]"), "Should not contain image");

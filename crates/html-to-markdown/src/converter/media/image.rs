@@ -94,7 +94,10 @@ pub fn handle_inline_data_image(
 
     let payload_clean = payload.trim();
     let max_size = collector.max_decoded_size();
-    let max_encoded = max_size.saturating_div(3).saturating_mul(4).saturating_add(4);
+    let max_encoded = max_size
+        .saturating_div(3)
+        .saturating_mul(4)
+        .saturating_add(4);
     if payload_clean.len() as u64 > max_encoded {
         collector.warn_skip(
             index,

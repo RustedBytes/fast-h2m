@@ -13,9 +13,13 @@ use std::path::PathBuf;
 use html_to_markdown_rs::ConversionOptions;
 
 fn fixture_path(name: &str) -> PathBuf {
-    [env!("CARGO_MANIFEST_DIR"), "../../test_documents/html/issues", name]
-        .iter()
-        .collect()
+    [
+        env!("CARGO_MANIFEST_DIR"),
+        "../../test_documents/html/issues",
+        name,
+    ]
+    .iter()
+    .collect()
 }
 
 fn default_options() -> ConversionOptions {
@@ -43,13 +47,15 @@ fn normalize_newlines(input: &str) -> String {
 fn converts_should_not_escape_in_pre_or_code_fixture() {
     let pre_html = r"<pre>This pipe | should not be escaped.<pre/>";
 
-    let pre_markdown_without_misc = convert(pre_html, Some(default_options())).expect("conversion should succeed");
+    let pre_markdown_without_misc =
+        convert(pre_html, Some(default_options())).expect("conversion should succeed");
     assert_eq!(
         pre_markdown_without_misc.trim(),
         "```\nThis pipe | should not be escaped.\n```"
     );
 
-    let pre_markdown_with_misc = convert(pre_html, Some(escape_misc_options())).expect("conversion should succeed");
+    let pre_markdown_with_misc =
+        convert(pre_html, Some(escape_misc_options())).expect("conversion should succeed");
     assert_eq!(
         pre_markdown_with_misc.trim(),
         "```\nThis pipe | should not be escaped.\n```"
@@ -63,23 +69,31 @@ fn converts_should_not_escape_in_pre_or_code_fixture() {
         "`This pipe | should not be escaped.`"
     );
 
-    let code_markdown_with_misc = convert(code_html, Some(escape_misc_options())).expect("conversion should succeed");
-    assert_eq!(code_markdown_with_misc.trim(), "`This pipe | should not be escaped.`");
+    let code_markdown_with_misc =
+        convert(code_html, Some(escape_misc_options())).expect("conversion should succeed");
+    assert_eq!(
+        code_markdown_with_misc.trim(),
+        "`This pipe | should not be escaped.`"
+    );
 }
 
 #[test]
 fn converts_table_cell_pipe_fixture() {
     let html = fs::read_to_string(fixture_path("gh-140-table-cell-pipe.html")).unwrap();
-    let expected_without_misc = fs::read_to_string(fixture_path("gh-140-table-cell-pipe.md")).unwrap();
-    let expected_with_misc = fs::read_to_string(fixture_path("gh-140-table-cell-pipe-with-escape-misc.md")).unwrap();
+    let expected_without_misc =
+        fs::read_to_string(fixture_path("gh-140-table-cell-pipe.md")).unwrap();
+    let expected_with_misc =
+        fs::read_to_string(fixture_path("gh-140-table-cell-pipe-with-escape-misc.md")).unwrap();
 
-    let result_without_misc = convert(&html, Some(default_options())).expect("conversion should succeed");
+    let result_without_misc =
+        convert(&html, Some(default_options())).expect("conversion should succeed");
     assert_eq!(
         normalize_newlines(&result_without_misc),
         normalize_newlines(&expected_without_misc)
     );
 
-    let result_with_misc = convert(&html, Some(escape_misc_options())).expect("conversion should succeed");
+    let result_with_misc =
+        convert(&html, Some(escape_misc_options())).expect("conversion should succeed");
     assert_eq!(
         normalize_newlines(&result_with_misc),
         normalize_newlines(&expected_with_misc)
@@ -123,7 +137,8 @@ fn escapes_only_literal_pipes_in_table_cells() {
         "pre/code block content should not be escaped"
     );
 
-    let markdown_with_misc = convert(html, Some(escape_misc_options())).expect("conversion should succeed");
+    let markdown_with_misc =
+        convert(html, Some(escape_misc_options())).expect("conversion should succeed");
     assert!(
         markdown_with_misc.contains("text \\| content"),
         "literal pipe in text cell should be escaped when escape_misc=true"

@@ -43,7 +43,10 @@ fn tier2(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 /// `convert()` via the Auto path (classifier decides; falls back on bail).
@@ -53,7 +56,10 @@ fn auto(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 /// `convert()` with `Tier1` — bails silently and falls back to Tier-2.
@@ -63,7 +69,10 @@ fn force_tier1(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 // ── Tripwire 1: LiteralLt ─────────────────────────────────────────────────────
@@ -73,7 +82,10 @@ fn bails_on_literal_lt_in_text() {
     // `<` not followed by a tag-name start byte → LiteralLt.
     // The prescan escapes this to `&lt;` so we must use tier1_raw.
     let html = "<p>a < b</p>";
-    assert!(matches!(tier1_raw(html).unwrap_err(), BailReason::LiteralLt { .. }));
+    assert!(matches!(
+        tier1_raw(html).unwrap_err(),
+        BailReason::LiteralLt { .. }
+    ));
     // Fallback via convert still produces correct output.
     assert_eq!(force_tier1(html), tier2(html));
 }
@@ -82,7 +94,10 @@ fn bails_on_literal_lt_in_text() {
 fn bails_on_literal_lt_numeric() {
     // Another common case: `3 < 5`
     let html = "<p>3 < 5</p>";
-    assert!(matches!(tier1_raw(html).unwrap_err(), BailReason::LiteralLt { .. }));
+    assert!(matches!(
+        tier1_raw(html).unwrap_err(),
+        BailReason::LiteralLt { .. }
+    ));
     assert_eq!(force_tier1(html), tier2(html));
 }
 
@@ -105,7 +120,10 @@ fn scanner_bails_on_cdata_direct() {
     // Call tier1::run without prescanning so `<![CDATA[` survives to the scanner.
     let html = "<p><![CDATA[data]]></p>";
     let err = tier1_raw(html).unwrap_err();
-    assert!(matches!(err, BailReason::Cdata { .. }), "expected Cdata, got {err:?}");
+    assert!(
+        matches!(err, BailReason::Cdata { .. }),
+        "expected Cdata, got {err:?}"
+    );
 }
 
 #[test]
@@ -119,7 +137,9 @@ fn bails_on_cdata_or_classifier_via_prescan() {
     assert!(
         matches!(
             err,
-            BailReason::Cdata { .. } | BailReason::Classifier | BailReason::UnknownCustomElement { .. }
+            BailReason::Cdata { .. }
+                | BailReason::Classifier
+                | BailReason::UnknownCustomElement { .. }
         ),
         "expected a bail reason, got {err:?}"
     );
@@ -159,7 +179,11 @@ fn bails_on_custom_element_fallback_matches_tier2() {
         "<ui-card><p>hi</p></ui-card>",
         "<foo-bar baz=\"1\">text</foo-bar>",
     ] {
-        assert_eq!(force_tier1(html), tier2(html), "fallback mismatch for {html:?}");
+        assert_eq!(
+            force_tier1(html),
+            tier2(html),
+            "fallback mismatch for {html:?}"
+        );
     }
 }
 
@@ -181,7 +205,10 @@ fn eof_open_count_reflects_stack_depth() {
     // Two unclosed block elements: <p> and <strong>
     let html = "<p>hello <strong>world";
     if let Err(BailReason::EofWithOpenBlock { open_count }) = tier1_run(html) {
-        assert_eq!(open_count, 2, "expected 2 unclosed elements, got {open_count}");
+        assert_eq!(
+            open_count, 2,
+            "expected 2 unclosed elements, got {open_count}"
+        );
     } else {
         panic!("expected EofWithOpenBlock");
     }
@@ -334,7 +361,10 @@ fn bail_reason_display_is_non_empty() {
     ];
     for reason in &reasons {
         let s = reason.to_string();
-        assert!(!s.is_empty(), "Display for {reason:?} produced empty string");
+        assert!(
+            !s.is_empty(),
+            "Display for {reason:?} produced empty string"
+        );
     }
 }
 
@@ -346,7 +376,10 @@ fn bail_reason_display_contains_contextual_info() {
         actual: 0,
     };
     let s = r.to_string();
-    assert!(s.contains("section"), "Display should contain tag name: {s}");
+    assert!(
+        s.contains("section"),
+        "Display should contain tag name: {s}"
+    );
 
     let r2 = BailReason::LiteralLt { offset: 99 };
     let s2 = r2.to_string();

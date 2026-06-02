@@ -1,4 +1,8 @@
-#![allow(clippy::cast_precision_loss, clippy::cast_sign_loss, clippy::unused_self)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss,
+    clippy::unused_self
+)]
 use std::collections::BTreeMap;
 
 use crate::error::ConversionError;
@@ -25,8 +29,14 @@ pub const DEFAULT_INLINE_IMAGE_LIMIT: u64 = 5 * 1024 * 1024;
 /// Only specified fields (Some values) will override existing options; None values leave the
 /// corresponding fields unchanged when applied via [`InlineImageConfig::apply_update`].
 #[derive(Debug, Clone, Default)]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), derive(serde::Deserialize))]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), serde(deny_unknown_fields))]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    derive(serde::Deserialize)
+)]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    serde(deny_unknown_fields)
+)]
 pub struct InlineImageConfigUpdate {
     /// Optional maximum decoded size override in bytes.
     pub max_decoded_size_bytes: Option<u64>,
@@ -240,7 +250,12 @@ impl InlineImageCollector {
         self.next_index
     }
 
-    pub(crate) fn finalize_filename(&self, provided: Option<&str>, index: usize, format: &InlineImageFormat) -> String {
+    pub(crate) fn finalize_filename(
+        &self,
+        provided: Option<&str>,
+        index: usize,
+        format: &InlineImageFormat,
+    ) -> String {
         if let Some(name) = provided {
             return name.to_string();
         }

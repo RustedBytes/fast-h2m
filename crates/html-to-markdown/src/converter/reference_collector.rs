@@ -40,7 +40,8 @@ impl ReferenceCollector {
         }
         let num = self.entries.len() + 1;
         self.map.insert(key, num);
-        self.entries.push((num, url.to_string(), title.map(String::from)));
+        self.entries
+            .push((num, url.to_string(), title.map(String::from)));
         num
     }
 

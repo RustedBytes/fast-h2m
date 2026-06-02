@@ -13,9 +13,13 @@ use std::path::PathBuf;
 use html_to_markdown_rs::ConversionOptions;
 
 fn fixture_path(name: &str) -> PathBuf {
-    [env!("CARGO_MANIFEST_DIR"), "../../test_documents/html/issues", name]
-        .iter()
-        .collect()
+    [
+        env!("CARGO_MANIFEST_DIR"),
+        "../../test_documents/html/issues",
+        name,
+    ]
+    .iter()
+    .collect()
 }
 
 fn default_options() -> ConversionOptions {
@@ -33,7 +37,8 @@ fn normalize_newlines(input: &str) -> String {
 #[test]
 fn test_nested_simple() {
     let html = fs::read_to_string(fixture_path("test-nested-simple.html")).expect("read html");
-    let expected = fs::read_to_string(fixture_path("test-nested-simple.md")).expect("read markdown");
+    let expected =
+        fs::read_to_string(fixture_path("test-nested-simple.md")).expect("read markdown");
 
     eprintln!("HTML: {html}");
     eprintln!("Expected: {expected}");

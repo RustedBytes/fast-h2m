@@ -31,8 +31,10 @@ pub fn handle(
 
     let content_start_pos = output.len();
 
-    let is_table_continuation =
-        ctx.in_table_cell && !output.is_empty() && !output.ends_with('|') && !output.ends_with("<br>");
+    let is_table_continuation = ctx.in_table_cell
+        && !output.is_empty()
+        && !output.ends_with('|')
+        && !output.ends_with("<br>");
 
     let is_list_continuation = ctx.in_list_item
         && !output.is_empty()
@@ -86,7 +88,15 @@ pub fn handle(
                     }
                 }
 
-                walk_node(child_handle, parser, output, options, &p_ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    &p_ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
     }
@@ -104,7 +114,8 @@ pub fn handle(
             // separator that was appended after `content_start_pos` was captured, leaving
             // `content_start_pos` pointing at the interior of a multibyte character.
             // Clamp to the nearest valid char boundary to avoid a slice panic (#380).
-            let safe_start = crate::converter::utility::content::floor_char_boundary(output, content_start_pos);
+            let safe_start =
+                crate::converter::utility::content::floor_char_boundary(output, content_start_pos);
             let text = output[safe_start..].trim().to_string();
             if !text.is_empty() {
                 sc.borrow_mut().push_paragraph(&text);
@@ -129,13 +140,20 @@ fn add_list_continuation_indent(
 }
 
 /// Check if an element is empty (has no text content).
-fn is_empty_inline_element(node_handle: &NodeHandle, parser: &Parser, _dom_ctx: &DomContext) -> bool {
+fn is_empty_inline_element(
+    node_handle: &NodeHandle,
+    parser: &Parser,
+    _dom_ctx: &DomContext,
+) -> bool {
     if let Some(node) = node_handle.get(parser) {
         match node {
             tl::Node::Tag(tag) => {
                 let tag_name = tag.name().as_utf8_str();
                 // Elements that are always empty or only contain attributes
-                matches!(tag_name.as_ref(), "br" | "hr" | "img" | "input" | "meta" | "link")
+                matches!(
+                    tag_name.as_ref(),
+                    "br" | "hr" | "img" | "input" | "meta" | "link"
+                )
             }
             _ => false,
         }

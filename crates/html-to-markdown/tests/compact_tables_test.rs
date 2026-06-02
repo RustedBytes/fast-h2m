@@ -25,12 +25,24 @@ fn compact_tables_emits_no_padding() {
 
     // Every cell must be immediately followed by ` |` with no trailing spaces.
     // Check a short cell that would normally be padded.
-    assert!(result.contains("| 42 |"), "short cell should not be padded: {result}");
-    assert!(result.contains("| 100 |"), "medium cell should not be padded: {result}");
+    assert!(
+        result.contains("| 42 |"),
+        "short cell should not be padded: {result}"
+    );
+    assert!(
+        result.contains("| 100 |"),
+        "medium cell should not be padded: {result}"
+    );
 
     // Separator must be exactly `---` per column, not padded to column width.
-    assert!(result.contains("| --- |"), "separator should be exactly ---: {result}");
-    assert!(!result.contains("| ---- |"), "separator must not be padded: {result}");
+    assert!(
+        result.contains("| --- |"),
+        "separator should be exactly ---: {result}"
+    );
+    assert!(
+        !result.contains("| ---- |"),
+        "separator must not be padded: {result}"
+    );
 }
 
 // Default behavior (compact_tables: false) must be unchanged — aligned output.
@@ -126,8 +138,14 @@ fn compact_tables_with_rowspan_does_not_panic() {
     let result = convert(html, Some(opts));
 
     // Must produce a pipe table (not panic, not empty).
-    assert!(result.contains('|'), "result must contain pipe table: {result}");
-    assert!(result.contains("| --- |"), "separator must be present: {result}");
+    assert!(
+        result.contains('|'),
+        "result must contain pipe table: {result}"
+    );
+    assert!(
+        result.contains("| --- |"),
+        "separator must be present: {result}"
+    );
 }
 
 // A single-column table in compact mode.
@@ -153,7 +171,10 @@ fn compact_tables_serde_round_trip() {
     let opts = ConversionOptions::builder().compact_tables(true).build();
     let json = serde_json::to_string(&opts).expect("serialize");
     let restored: ConversionOptions = serde_json::from_str(&json).expect("deserialize");
-    assert!(restored.compact_tables, "compact_tables must survive serde round-trip");
+    assert!(
+        restored.compact_tables,
+        "compact_tables must survive serde round-trip"
+    );
 }
 
 // Partial JSON without compact_tables must default to false.

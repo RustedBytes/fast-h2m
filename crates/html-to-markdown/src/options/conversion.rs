@@ -1,11 +1,15 @@
-#![allow(clippy::cast_precision_loss, clippy::cast_sign_loss, clippy::unused_self)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss,
+    clippy::unused_self
+)]
 
 //! Main conversion options with builder pattern.
 
 use crate::options::preprocessing::PreprocessingOptions;
 use crate::options::validation::{
-    CodeBlockStyle, HeadingStyle, HighlightStyle, LinkStyle, ListIndentType, NewlineStyle, OutputFormat,
-    UrlEscapeStyle, WhitespaceMode,
+    CodeBlockStyle, HeadingStyle, HighlightStyle, LinkStyle, ListIndentType, NewlineStyle,
+    OutputFormat, UrlEscapeStyle, WhitespaceMode,
 };
 
 /// Controls which conversion tier is used.
@@ -14,7 +18,10 @@ use crate::options::validation::{
     any(feature = "serde", feature = "metadata"),
     derive(serde::Serialize, serde::Deserialize)
 )]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), serde(rename_all = "snake_case"))]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    serde(rename_all = "snake_case")
+)]
 pub enum TierStrategy {
     /// Automatically pick the best tier for the input (default).
     ///
@@ -51,7 +58,10 @@ pub enum TierStrategy {
     any(feature = "serde", feature = "metadata"),
     derive(serde::Serialize, serde::Deserialize)
 )]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), serde(default, deny_unknown_fields))]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    serde(default, deny_unknown_fields)
+)]
 pub struct ConversionOptions {
     /// Heading style to use in Markdown output (ATX `#` or Setext underline).
     pub heading_style: HeadingStyle,
@@ -440,7 +450,10 @@ use crate::options::preprocessing::PreprocessingOptionsUpdate;
     any(feature = "serde", feature = "metadata"),
     derive(serde::Serialize, serde::Deserialize)
 )]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), serde(deny_unknown_fields))]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    serde(deny_unknown_fields)
+)]
 pub struct ConversionOptionsUpdate {
     /// Optional override for [`ConversionOptions::heading_style`].
     pub heading_style: Option<HeadingStyle>,
@@ -629,7 +642,8 @@ mod tests {
             .build();
 
         let json = serde_json::to_string(&options).expect("Failed to serialize");
-        let deserialized: ConversionOptions = serde_json::from_str(&json).expect("Failed to deserialize");
+        let deserialized: ConversionOptions =
+            serde_json::from_str(&json).expect("Failed to deserialize");
 
         assert_eq!(deserialized.list_indent_width, 4);
         assert_eq!(deserialized.bullets, "*");

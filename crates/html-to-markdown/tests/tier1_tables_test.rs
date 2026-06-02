@@ -43,7 +43,10 @@ fn tier1(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 fn tier2(html: &str) -> String {
@@ -52,7 +55,10 @@ fn tier2(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 /// Assert Tier-1 and Tier-2 produce byte-identical output.
@@ -155,7 +161,10 @@ fn test_cells_with_inline_formatting() {
     assert!(out.contains("**bold**"), "bold missing: {out:?}");
     assert!(out.contains("*italic*"), "italic missing: {out:?}");
     assert!(out.contains("`code`"), "code missing: {out:?}");
-    assert!(out.contains("[link](http://example.com)"), "link missing: {out:?}");
+    assert!(
+        out.contains("[link](http://example.com)"),
+        "link missing: {out:?}"
+    );
 }
 
 /// Test 8: cells with entity references.
@@ -207,7 +216,10 @@ fn test_multiple_sequential_tables() {
     assert_matches_tier2(html);
     let out = tier1(html);
     assert!(out.contains("| A |"), "first table header missing: {out:?}");
-    assert!(out.contains("| B |"), "second table header missing: {out:?}");
+    assert!(
+        out.contains("| B |"),
+        "second table header missing: {out:?}"
+    );
     assert!(out.contains("Between"), "paragraph missing: {out:?}");
 }
 

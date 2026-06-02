@@ -14,8 +14,8 @@ fn curl_changes_does_not_overflow_stack() {
         html.len(),
     );
     let start = std::time::Instant::now();
-    let result =
-        html_to_markdown_rs::convert(html, None).expect("convert must not abort the process on curl.se/changes.html");
+    let result = html_to_markdown_rs::convert(html, None)
+        .expect("convert must not abort the process on curl.se/changes.html");
     assert!(
         start.elapsed() < std::time::Duration::from_secs(30),
         "conversion took too long: {:?}",

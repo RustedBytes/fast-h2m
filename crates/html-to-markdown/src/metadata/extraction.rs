@@ -81,7 +81,9 @@ pub(crate) fn extract_document_metadata(
                 }
             }
             k if k.starts_with("dcterms.") || k.starts_with("dcterms-") => {
-                let dc_field = k.trim_start_matches("dcterms.").trim_start_matches("dcterms-");
+                let dc_field = k
+                    .trim_start_matches("dcterms.")
+                    .trim_start_matches("dcterms-");
                 match dc_field {
                     "title" | "alternative" => {
                         if doc.title.is_none() {
@@ -110,8 +112,8 @@ pub(crate) fn extract_document_metadata(
                 }
             }
             // All keyword-bearing meta tag variants
-            "keywords" | "news_keywords" | "citation_keywords" | "subject" | "topic" | "category"
-            | "classification" => {
+            "keywords" | "news_keywords" | "citation_keywords" | "subject" | "topic"
+            | "category" | "classification" => {
                 if doc.keywords.is_empty() {
                     doc.keywords = split_keywords(&value);
                 }
@@ -159,10 +161,12 @@ pub(crate) fn extract_structured_data(json_ld: Vec<String>) -> Vec<StructuredDat
         let schema_type = scan_schema_type(&json_str)
             .or_else(|| {
                 if json_str.contains("\"@type\"") {
-                    serde_json::from_str::<serde_json::Value>(&json_str).ok().and_then(|v| {
-                        v.get("@type")
-                            .and_then(|t| t.as_str().map(std::string::ToString::to_string))
-                    })
+                    serde_json::from_str::<serde_json::Value>(&json_str)
+                        .ok()
+                        .and_then(|v| {
+                            v.get("@type")
+                                .and_then(|t| t.as_str().map(std::string::ToString::to_string))
+                        })
                 } else {
                     None
                 }
@@ -261,7 +265,11 @@ mod tests {
         head_metadata.insert("description".to_string(), "Test Description".to_string());
         head_metadata.insert("keywords".to_string(), "rust, testing".to_string());
 
-        let doc = extract_document_metadata(head_metadata, Some("en".to_string()), Some("ltr".to_string()));
+        let doc = extract_document_metadata(
+            head_metadata,
+            Some("en".to_string()),
+            Some("ltr".to_string()),
+        );
 
         assert_eq!(doc.title, Some("Test Title".to_string()));
         assert_eq!(doc.description, Some("Test Description".to_string()));
@@ -278,13 +286,19 @@ mod tests {
         let doc = extract_document_metadata(head_metadata, None, None);
 
         assert_eq!(doc.open_graph.get("title"), Some(&"OG Title".to_string()));
-        assert_eq!(doc.open_graph.get("description"), Some(&"OG Description".to_string()));
+        assert_eq!(
+            doc.open_graph.get("description"),
+            Some(&"OG Description".to_string())
+        );
     }
 
     #[test]
     fn test_keywords_case_insensitive() {
         let mut head_metadata = BTreeMap::new();
-        head_metadata.insert("meta-Keywords".to_string(), "Rust, HTML, Markdown".to_string());
+        head_metadata.insert(
+            "meta-Keywords".to_string(),
+            "Rust, HTML, Markdown".to_string(),
+        );
 
         let doc = extract_document_metadata(head_metadata, None, None);
         assert_eq!(doc.keywords, vec!["Rust", "HTML", "Markdown"]);
@@ -293,7 +307,10 @@ mod tests {
     #[test]
     fn test_keywords_dc_subject() {
         let mut head_metadata = BTreeMap::new();
-        head_metadata.insert("meta-DC.subject".to_string(), "weather, forecast".to_string());
+        head_metadata.insert(
+            "meta-DC.subject".to_string(),
+            "weather, forecast".to_string(),
+        );
 
         let doc = extract_document_metadata(head_metadata, None, None);
         assert_eq!(doc.keywords, vec!["weather", "forecast"]);
@@ -311,7 +328,10 @@ mod tests {
     #[test]
     fn test_keywords_dcterms_subject() {
         let mut head_metadata = BTreeMap::new();
-        head_metadata.insert("meta-DCTERMS.subject".to_string(), "science, research".to_string());
+        head_metadata.insert(
+            "meta-DCTERMS.subject".to_string(),
+            "science, research".to_string(),
+        );
 
         let doc = extract_document_metadata(head_metadata, None, None);
         assert_eq!(doc.keywords, vec!["science", "research"]);
@@ -320,7 +340,10 @@ mod tests {
     #[test]
     fn test_keywords_news_keywords() {
         let mut head_metadata = BTreeMap::new();
-        head_metadata.insert("meta-news_keywords".to_string(), "breaking, world".to_string());
+        head_metadata.insert(
+            "meta-news_keywords".to_string(),
+            "breaking, world".to_string(),
+        );
 
         let doc = extract_document_metadata(head_metadata, None, None);
         assert_eq!(doc.keywords, vec!["breaking", "world"]);
@@ -329,7 +352,10 @@ mod tests {
     #[test]
     fn test_keywords_citation_keywords() {
         let mut head_metadata = BTreeMap::new();
-        head_metadata.insert("meta-citation_keywords".to_string(), "biology, genetics".to_string());
+        head_metadata.insert(
+            "meta-citation_keywords".to_string(),
+            "biology, genetics".to_string(),
+        );
 
         let doc = extract_document_metadata(head_metadata, None, None);
         assert_eq!(doc.keywords, vec!["biology", "genetics"]);
@@ -339,7 +365,10 @@ mod tests {
     fn test_dc_title_and_description_fallback() {
         let mut head_metadata = BTreeMap::new();
         head_metadata.insert("meta-DC.title".to_string(), "DC Title".to_string());
-        head_metadata.insert("meta-DC.description".to_string(), "DC Description".to_string());
+        head_metadata.insert(
+            "meta-DC.description".to_string(),
+            "DC Description".to_string(),
+        );
         head_metadata.insert("meta-DC.creator".to_string(), "DC Author".to_string());
 
         let doc = extract_document_metadata(head_metadata, None, None);
@@ -352,8 +381,14 @@ mod tests {
     fn test_dc_does_not_override_standard_fields() {
         let mut head_metadata = BTreeMap::new();
         // Standard fields come first alphabetically in BTreeMap
-        head_metadata.insert("description".to_string(), "Standard Description".to_string());
-        head_metadata.insert("meta-DC.description".to_string(), "DC Description".to_string());
+        head_metadata.insert(
+            "description".to_string(),
+            "Standard Description".to_string(),
+        );
+        head_metadata.insert(
+            "meta-DC.description".to_string(),
+            "DC Description".to_string(),
+        );
         head_metadata.insert("title".to_string(), "Standard Title".to_string());
         head_metadata.insert("meta-DC.title".to_string(), "DC Title".to_string());
 
@@ -381,7 +416,10 @@ mod tests {
         head_metadata.insert("meta-DCTERMS.license".to_string(), "MIT".to_string());
 
         let doc = extract_document_metadata(head_metadata, None, None);
-        assert_eq!(doc.meta_tags.get("dcterms_license"), Some(&"MIT".to_string()));
+        assert_eq!(
+            doc.meta_tags.get("dcterms_license"),
+            Some(&"MIT".to_string())
+        );
     }
 
     #[test]

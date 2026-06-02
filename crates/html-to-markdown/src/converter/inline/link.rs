@@ -11,7 +11,9 @@
 
 #[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
-use crate::converter::utility::content::{collect_link_label_text, escape_link_label, normalize_link_label};
+use crate::converter::utility::content::{
+    collect_link_label_text, escape_link_label, normalize_link_label,
+};
 use crate::converter::utility::preprocessing::sanitize_markdown_url;
 use crate::options::ConversionOptions;
 #[cfg(any(feature = "metadata", feature = "visitor"))]
@@ -81,15 +83,24 @@ pub fn handle(
         .map(|v| v.as_utf8_str().to_string());
 
     if let Some(href) = href_attr {
-        let raw_text = crate::text::normalize_whitespace(&get_text_content(node_handle, parser, dom_ctx))
-            .trim()
-            .to_string();
+        let raw_text =
+            crate::text::normalize_whitespace(&get_text_content(node_handle, parser, dom_ctx))
+                .trim()
+                .to_string();
 
         // If we're already inside a link, just render the text content, don't create a nested link
         if ctx.in_link {
             let children = tag.children();
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
             return;
         }
@@ -115,10 +126,13 @@ pub fn handle(
         }
 
         // Check if link contains a single heading child element
-        if let Some((heading_level, heading_handle)) = find_single_heading_child(*node_handle, parser) {
+        if let Some((heading_level, heading_handle)) =
+            find_single_heading_child(*node_handle, parser)
+        {
             if let Some(heading_node) = heading_handle.get(parser) {
                 if let tl::Node::Tag(heading_tag) = heading_node {
-                    let heading_name = normalized_tag_name(heading_tag.name().as_utf8_str()).into_owned();
+                    let heading_name =
+                        normalized_tag_name(heading_tag.name().as_utf8_str()).into_owned();
                     let mut heading_text = String::new();
                     let heading_ctx = Context {
                         in_heading: true,
@@ -160,7 +174,8 @@ pub fn handle(
 
         // Collect link label from children
         let children: Vec<_> = tag.children().top().iter().copied().collect();
-        let (inline_label, _block_nodes, saw_block) = collect_link_label_text(&children, parser, dom_ctx);
+        let (inline_label, _block_nodes, saw_block) =
+            collect_link_label_text(&children, parser, dom_ctx);
         let mut label = if saw_block {
             let mut content = String::new();
             let link_ctx = Context {
@@ -217,7 +232,8 @@ pub fn handle(
 
         // Apply fallback label strategies
         if label.is_empty() && saw_block {
-            let fallback = crate::text::normalize_whitespace(&get_text_content(node_handle, parser, dom_ctx));
+            let fallback =
+                crate::text::normalize_whitespace(&get_text_content(node_handle, parser, dom_ctx));
             label = normalize_link_label(&fallback);
         }
 
@@ -333,16 +349,28 @@ pub fn handle(
                     let value = value_opt.map(|v| v.to_string()).unwrap_or_default();
                     attributes_map.insert(key_str, value);
                 }
-                collector
-                    .borrow_mut()
-                    .add_link(href.clone(), label, title.clone(), rel_attr, attributes_map);
+                collector.borrow_mut().add_link(
+                    href.clone(),
+                    label,
+                    title.clone(),
+                    rel_attr,
+                    attributes_map,
+                );
             }
         }
     } else {
         // No href: just process children as inline content
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 }
@@ -556,7 +584,10 @@ mod tests {
 
     #[test]
     fn percent_encode_url_encodes_angle_brackets() {
-        assert_eq!(percent_encode_url("/file <draft>.pdf"), "/file%20%3Cdraft%3E.pdf");
+        assert_eq!(
+            percent_encode_url("/file <draft>.pdf"),
+            "/file%20%3Cdraft%3E.pdf"
+        );
     }
 
     #[test]
@@ -582,7 +613,15 @@ mod tests {
     fn append_markdown_link_angle_wraps_space_in_angle_brackets() {
         let mut out = String::new();
         let options = opts_with_style(UrlEscapeStyle::Angle);
-        append_markdown_link(&mut out, "file", "/file (1).pdf", None, "file", &options, None);
+        append_markdown_link(
+            &mut out,
+            "file",
+            "/file (1).pdf",
+            None,
+            "file",
+            &options,
+            None,
+        );
         assert_eq!(out, "[file](</file (1).pdf>)");
     }
 
@@ -592,7 +631,15 @@ mod tests {
     fn append_markdown_link_percent_encodes_spaces() {
         let mut out = String::new();
         let options = opts_with_style(UrlEscapeStyle::Percent);
-        append_markdown_link(&mut out, "file", "/file (1).pdf", None, "file", &options, None);
+        append_markdown_link(
+            &mut out,
+            "file",
+            "/file (1).pdf",
+            None,
+            "file",
+            &options,
+            None,
+        );
         assert_eq!(out, "[file](/file%20%281%29.pdf)");
     }
 
@@ -600,7 +647,15 @@ mod tests {
     fn append_markdown_link_percent_encodes_angle_brackets() {
         let mut out = String::new();
         let options = opts_with_style(UrlEscapeStyle::Percent);
-        append_markdown_link(&mut out, "file", "/file <draft>.pdf", None, "file", &options, None);
+        append_markdown_link(
+            &mut out,
+            "file",
+            "/file <draft>.pdf",
+            None,
+            "file",
+            &options,
+            None,
+        );
         assert_eq!(out, "[file](/file%20%3Cdraft%3E.pdf)");
     }
 
@@ -608,7 +663,15 @@ mod tests {
     fn append_markdown_link_percent_full_issue_example() {
         let mut out = String::new();
         let options = opts_with_style(UrlEscapeStyle::Percent);
-        append_markdown_link(&mut out, "file", "/file (1) <draft>.pdf", None, "file", &options, None);
+        append_markdown_link(
+            &mut out,
+            "file",
+            "/file (1) <draft>.pdf",
+            None,
+            "file",
+            &options,
+            None,
+        );
         assert_eq!(out, "[file](/file%20%281%29%20%3Cdraft%3E.pdf)");
     }
 

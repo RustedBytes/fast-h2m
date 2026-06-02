@@ -55,12 +55,18 @@ use crate::options::ConversionOptions;
 ///
 /// Returns `Err(BailReason::*)` when the scanner encounters a construct it
 /// cannot handle.  The dispatcher falls back to Tier-2 transparently.
-pub fn run(html: &str, report: &PrescanReport, options: &ConversionOptions) -> Result<String, bail::BailReason> {
+pub fn run(
+    html: &str,
+    report: &PrescanReport,
+    options: &ConversionOptions,
+) -> Result<String, bail::BailReason> {
     let body = scanner::scan(html, options)?;
 
     // Prepend YAML frontmatter when metadata extraction is requested.
     // `head_metadata::extract_frontmatter` re-parses only the head slice (cheap).
-    if let Some(frontmatter) = crate::converter::head_metadata::extract_frontmatter(html, report, options) {
+    if let Some(frontmatter) =
+        crate::converter::head_metadata::extract_frontmatter(html, report, options)
+    {
         let mut output = String::with_capacity(frontmatter.len() + body.len());
         output.push_str(&frontmatter);
         output.push_str(&body);

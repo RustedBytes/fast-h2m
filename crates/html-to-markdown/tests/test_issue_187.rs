@@ -66,24 +66,30 @@ impl HtmlVisitor for ContentFilter {
         match tag_name {
             "div" => {
                 // Filter divs with unwanted classes
-                let classes = ctx.attributes.get("class").map_or("", std::string::String::as_str);
+                let classes = ctx
+                    .attributes
+                    .get("class")
+                    .map_or("", std::string::String::as_str);
                 if classes.contains("ad")
                     || classes.contains("advertisement")
                     || classes.contains("tracking")
                     || classes.contains("analytics")
                 {
-                    self.skipped_elements.push(("div".to_string(), classes.to_string()));
+                    self.skipped_elements
+                        .push(("div".to_string(), classes.to_string()));
                     return VisitResult::Skip;
                 }
             }
             "script" => {
                 // Always remove script tags
-                self.skipped_elements.push(("script".to_string(), String::new()));
+                self.skipped_elements
+                    .push(("script".to_string(), String::new()));
                 return VisitResult::Skip;
             }
             "style" => {
                 // Always remove style tags
-                self.skipped_elements.push(("style".to_string(), String::new()));
+                self.skipped_elements
+                    .push(("style".to_string(), String::new()));
                 return VisitResult::Skip;
             }
             _ => {}
@@ -93,10 +99,22 @@ impl HtmlVisitor for ContentFilter {
     }
 
     /// Still use specific methods for links and images
-    fn visit_image(&mut self, ctx: &NodeContext, src: &str, _alt: &str, _title: Option<&str>) -> VisitResult {
+    fn visit_image(
+        &mut self,
+        ctx: &NodeContext,
+        src: &str,
+        _alt: &str,
+        _title: Option<&str>,
+    ) -> VisitResult {
         // Remove tracking pixels (1x1 images)
-        let width = ctx.attributes.get("width").map_or("", std::string::String::as_str);
-        let height = ctx.attributes.get("height").map_or("", std::string::String::as_str);
+        let width = ctx
+            .attributes
+            .get("width")
+            .map_or("", std::string::String::as_str);
+        let height = ctx
+            .attributes
+            .get("height")
+            .map_or("", std::string::String::as_str);
 
         if width == "1" && height == "1" {
             self.skipped_elements
@@ -114,7 +132,13 @@ impl HtmlVisitor for ContentFilter {
         VisitResult::Continue
     }
 
-    fn visit_link(&mut self, _ctx: &NodeContext, href: &str, text: &str, _title: Option<&str>) -> VisitResult {
+    fn visit_link(
+        &mut self,
+        _ctx: &NodeContext,
+        href: &str,
+        text: &str,
+        _title: Option<&str>,
+    ) -> VisitResult {
         // Remove links with utm_* tracking parameters
         if href.to_lowercase().contains("utm_") {
             // Strip tracking params but keep the link
@@ -167,7 +191,11 @@ fn test_issue_187_content_filter() {
 
     println!("Converted Markdown:\n{result}");
     println!("\nSkipped Elements:");
-    for (tag, info) in &visitor.lock().expect("visitor mutex poisoned").skipped_elements {
+    for (tag, info) in &visitor
+        .lock()
+        .expect("visitor mutex poisoned")
+        .skipped_elements
+    {
         println!("- {tag}: {info}");
     }
 
@@ -176,13 +204,28 @@ fn test_issue_187_content_filter() {
         !result.contains("advertisement block that should be removed"),
         "Ad div should be removed"
     );
-    assert!(!result.contains("console.log"), "Script tag should be removed");
+    assert!(
+        !result.contains("console.log"),
+        "Script tag should be removed"
+    );
 
     // Verify that legitimate content remains
-    assert!(result.contains("Blog Post Title"), "Heading should be preserved");
-    assert!(result.contains("main content"), "Main content should be preserved");
-    assert!(result.contains("Legitimate content"), "Content div should be preserved");
-    assert!(result.contains("Article image"), "Legitimate image should be preserved");
+    assert!(
+        result.contains("Blog Post Title"),
+        "Heading should be preserved"
+    );
+    assert!(
+        result.contains("main content"),
+        "Main content should be preserved"
+    );
+    assert!(
+        result.contains("Legitimate content"),
+        "Content div should be preserved"
+    );
+    assert!(
+        result.contains("Article image"),
+        "Legitimate image should be preserved"
+    );
 
     // Verify tracking parameters were stripped from link
     assert!(
@@ -193,13 +236,19 @@ fn test_issue_187_content_filter() {
     // Verify skipped elements were tracked
     let borrowed = visitor.lock().expect("visitor mutex poisoned");
     assert!(
-        borrowed.skipped_elements.iter().any(|(tag, _)| tag == "div"),
+        borrowed
+            .skipped_elements
+            .iter()
+            .any(|(tag, _)| tag == "div"),
         "Should have skipped ad divs"
     );
     // Note: script and style tags are stripped during preprocessing before the visitor sees them,
     // so they won't appear in skipped_elements. Only the visitor can control div, img, etc.
     assert!(
-        borrowed.skipped_elements.iter().any(|(tag, _)| tag == "img"),
+        borrowed
+            .skipped_elements
+            .iter()
+            .any(|(tag, _)| tag == "img"),
         "Should have skipped tracking pixel"
     );
 }

@@ -6,7 +6,9 @@
 
 use std::collections::HashMap;
 
-use super::document::{AnnotationKind, DocumentNode, DocumentStructure, NodeContent, TextAnnotation};
+use super::document::{
+    AnnotationKind, DocumentNode, DocumentStructure, NodeContent, TextAnnotation,
+};
 use super::tables::{GridCell, TableGrid};
 
 // ── Text extraction ───────────────────────────────────────────────────────────
@@ -50,7 +52,12 @@ fn collect_text_from_tag(tag: &tl::HTMLTag, parser: &tl::Parser, buf: &mut Strin
 ///
 /// `text` is the pre-extracted full text of the enclosing block node; annotation
 /// byte offsets are computed relative to that string.
-fn collect_annotations(tag: &tl::HTMLTag, parser: &tl::Parser, text: &str, annotations: &mut Vec<TextAnnotation>) {
+fn collect_annotations(
+    tag: &tl::HTMLTag,
+    parser: &tl::Parser,
+    text: &str,
+    annotations: &mut Vec<TextAnnotation>,
+) {
     collect_annotations_from_tag(tag, parser, text, &mut 0usize, annotations);
 }
 
@@ -283,7 +290,10 @@ fn collect_definition_items(dl_tag: &tl::HTMLTag, parser: &tl::Parser) -> Vec<(S
 // ── Head metadata extraction ──────────────────────────────────────────────────
 
 /// Extract `<meta name=… content=…>` and `<title>` entries from a `<head>` element.
-fn extract_head_metadata_entries(head_tag: &tl::HTMLTag, parser: &tl::Parser) -> Vec<(String, String)> {
+fn extract_head_metadata_entries(
+    head_tag: &tl::HTMLTag,
+    parser: &tl::Parser,
+) -> Vec<(String, String)> {
     let mut entries: Vec<(String, String)> = Vec::new();
 
     let children = head_tag.children();
@@ -315,7 +325,10 @@ fn extract_head_metadata_entries(head_tag: &tl::HTMLTag, parser: &tl::Parser) ->
                     child_tag.attributes().get("property"),
                     child_tag.attributes().get("content"),
                 ) {
-                    entries.push((property.as_utf8_str().to_string(), content.as_utf8_str().to_string()));
+                    entries.push((
+                        property.as_utf8_str().to_string(),
+                        content.as_utf8_str().to_string(),
+                    ));
                 }
             }
             _ => {}
@@ -406,7 +419,12 @@ pub fn build_document_structure(dom: &tl::VDom<'_>) -> DocumentStructure {
 /// Recursive DOM walker.
 ///
 /// `parent_idx` is the flat-list index of the nearest structural parent, if any.
-fn walk(state: &mut BuilderState, handle: &tl::NodeHandle, parser: &tl::Parser, parent_idx: Option<u32>) {
+fn walk(
+    state: &mut BuilderState,
+    handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    parent_idx: Option<u32>,
+) {
     let Some(node) = handle.get(parser) else {
         return;
     };
@@ -506,7 +524,11 @@ fn process_tag(
         "ul" | "ol" => {
             let ordered = tag_name == "ol";
             let effective_parent = state.current_group().or(parent_idx);
-            let id = make_node_id("list", if ordered { "ordered" } else { "unordered" }, state.nodes.len());
+            let id = make_node_id(
+                "list",
+                if ordered { "ordered" } else { "unordered" },
+                state.nodes.len(),
+            );
             let list_idx = state.push(DocumentNode {
                 id,
                 content: NodeContent::List { ordered },
@@ -769,8 +791,8 @@ fn process_tag(
         }
 
         // ── Transparent structural containers ─────────────────────────────
-        "html" | "body" | "div" | "figure" | "figcaption" | "details" | "summary" | "address" | "hgroup" | "search"
-        | "form" | "fieldset" => {
+        "html" | "body" | "div" | "figure" | "figcaption" | "details" | "summary" | "address"
+        | "hgroup" | "search" | "form" | "fieldset" => {
             let children = tag.children();
             for child_handle in children.top().iter() {
                 walk(state, child_handle, parser, parent_idx);

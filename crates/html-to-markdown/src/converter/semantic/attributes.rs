@@ -43,7 +43,15 @@ pub fn handle_dfn(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -53,7 +61,14 @@ pub fn handle_dfn(
             output.push(options.strong_em_symbol);
             output.push_str(trimmed);
             output.push(options.strong_em_symbol);
-            append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+            append_inline_suffix(
+                output,
+                suffix,
+                !trimmed.is_empty(),
+                node_handle,
+                parser,
+                dom_ctx,
+            );
         }
     }
 }
@@ -92,7 +107,15 @@ pub fn handle_abbr(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -101,7 +124,12 @@ pub fn handle_abbr(
             output.push_str(trimmed);
 
             // Append title attribute if present
-            if let Some(title) = tag.attributes().get("title").flatten().map(|v| v.as_utf8_str()) {
+            if let Some(title) = tag
+                .attributes()
+                .get("title")
+                .flatten()
+                .map(|v| v.as_utf8_str())
+            {
                 let trimmed_title = title.trim();
                 if !trimmed_title.is_empty() {
                     output.push_str(" (");
@@ -138,7 +166,15 @@ pub fn handle_time_data(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
     }
@@ -168,7 +204,15 @@ pub fn handle_cite(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -216,7 +260,15 @@ pub fn handle_q(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -244,11 +296,56 @@ pub fn handle(
     dom_ctx: &super::DomContext,
 ) {
     match tag_name {
-        "dfn" => handle_dfn(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "abbr" => handle_abbr(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "time" | "data" => handle_time_data(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "cite" => handle_cite(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "q" => handle_q(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
+        "dfn" => handle_dfn(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "abbr" => handle_abbr(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "time" | "data" => handle_time_data(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "cite" => handle_cite(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "q" => handle_q(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
         _ => {}
     }
 }

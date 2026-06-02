@@ -37,7 +37,9 @@ pub fn handle_li(
     if ctx.list_depth > 0 {
         let indent = match options.list_indent_type {
             crate::options::ListIndentType::Tabs => "\t".repeat(ctx.list_depth),
-            crate::options::ListIndentType::Spaces => " ".repeat(ctx.list_depth * options.list_indent_width),
+            crate::options::ListIndentType::Spaces => {
+                " ".repeat(ctx.list_depth * options.list_indent_width)
+            }
         };
         output.push_str(&indent);
     }
@@ -68,10 +70,17 @@ pub fn handle_li(
     }
 
     #[allow(clippy::trivially_copy_pass_by_ref)]
-    fn find_checkbox<'a>(node_handle: &tl::NodeHandle, parser: &'a tl::Parser<'a>) -> Option<(bool, tl::NodeHandle)> {
+    fn find_checkbox<'a>(
+        node_handle: &tl::NodeHandle,
+        parser: &'a tl::Parser<'a>,
+    ) -> Option<(bool, tl::NodeHandle)> {
         if let Some(tl::Node::Tag(node_tag)) = node_handle.get(parser) {
             if tag_name_eq(node_tag.name().as_utf8_str(), "input") {
-                let input_type = node_tag.attributes().get("type").flatten().map(|v| v.as_utf8_str());
+                let input_type = node_tag
+                    .attributes()
+                    .get("type")
+                    .flatten()
+                    .map(|v| v.as_utf8_str());
 
                 if input_type.as_deref() == Some("checkbox") {
                     let checked = node_tag.attributes().get("checked").is_some();
@@ -91,12 +100,12 @@ pub fn handle_li(
         None
     }
 
-    let (is_task_list, task_checked, checkbox_node) = if let Some((checked, node)) = find_checkbox(node_handle, parser)
-    {
-        (true, checked, Some(node))
-    } else {
-        (false, false, None)
-    };
+    let (is_task_list, task_checked, checkbox_node) =
+        if let Some((checked, node)) = find_checkbox(node_handle, parser) {
+            (true, checked, Some(node))
+        } else {
+            (false, false, None)
+        };
 
     let li_ctx = Context {
         in_list_item: true,
@@ -110,7 +119,10 @@ pub fn handle_li(
         output.push_str(if task_checked { "[x]" } else { "[ ]" });
 
         #[allow(clippy::ref_option)]
-        fn is_checkbox_node(node_handle: &tl::NodeHandle, checkbox: &Option<tl::NodeHandle>) -> bool {
+        fn is_checkbox_node(
+            node_handle: &tl::NodeHandle,
+            checkbox: &Option<tl::NodeHandle>,
+        ) -> bool {
             if let Some(cb) = checkbox {
                 node_handle == cb
             } else {
@@ -160,7 +172,16 @@ pub fn handle_li(
                     let children = node_tag.children();
                     {
                         for child_handle in children.top().iter() {
-                            render_li_content(child_handle, parser, output, options, ctx, depth, checkbox, dom_ctx);
+                            render_li_content(
+                                child_handle,
+                                parser,
+                                output,
+                                options,
+                                ctx,
+                                depth,
+                                checkbox,
+                                dom_ctx,
+                            );
                         }
                     }
                 }
@@ -197,7 +218,11 @@ pub fn handle_li(
                 let _ = write!(output, "{}. ", ctx.list_counter);
             } else {
                 let bullets: Vec<char> = options.bullets.chars().collect();
-                let bullet_index = if ctx.ul_depth > 0 { ctx.ul_depth - 1 } else { 0 };
+                let bullet_index = if ctx.ul_depth > 0 {
+                    ctx.ul_depth - 1
+                } else {
+                    0
+                };
                 let bullet = if bullets.is_empty() {
                     '*'
                 } else {
@@ -214,13 +239,22 @@ pub fn handle_li(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                let is_nested_list = if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-                    let n = normalized_tag_name(child_tag.name().as_utf8_str());
-                    matches!(n.as_ref(), "ul" | "ol")
-                } else {
-                    false
-                };
-                walk_node(child_handle, parser, output, options, &li_ctx, depth + 1, dom_ctx);
+                let is_nested_list =
+                    if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
+                        let n = normalized_tag_name(child_tag.name().as_utf8_str());
+                        matches!(n.as_ref(), "ul" | "ol")
+                    } else {
+                        false
+                    };
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    &li_ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
                 if !is_nested_list {
                     text_end_pos = output.len();
                 }
@@ -274,15 +308,26 @@ pub fn handle_li(
 
             let (marker, text_content) = if is_task_list {
                 let task_marker = if task_checked { "- [x]" } else { "- [ ]" };
-                let text_start = last_line.find(task_marker).map_or(0, |pos| pos + task_marker.len());
-                (task_marker.to_string(), last_line[text_start..].trim().to_string())
+                let text_start = last_line
+                    .find(task_marker)
+                    .map_or(0, |pos| pos + task_marker.len());
+                (
+                    task_marker.to_string(),
+                    last_line[text_start..].trim().to_string(),
+                )
             } else if ctx.in_ordered_list {
                 let marker_text = format!("{}.", ctx.list_counter);
-                let text_start = last_line.find(&marker_text).map_or(0, |pos| pos + marker_text.len());
+                let text_start = last_line
+                    .find(&marker_text)
+                    .map_or(0, |pos| pos + marker_text.len());
                 (marker_text, last_line[text_start..].trim().to_string())
             } else {
                 let bullets: Vec<char> = options.bullets.chars().collect();
-                let bullet_index = if ctx.ul_depth > 0 { ctx.ul_depth - 1 } else { 0 };
+                let bullet_index = if ctx.ul_depth > 0 {
+                    ctx.ul_depth - 1
+                } else {
+                    0
+                };
                 let bullet = if bullets.is_empty() {
                     '*'
                 } else {

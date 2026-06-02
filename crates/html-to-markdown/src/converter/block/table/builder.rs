@@ -48,9 +48,9 @@ pub fn table_total_columns(
                         for row_handle in child_tag.children().top().iter() {
                             if is_tag_name(row_handle, parser, dom_ctx, "tr") {
                                 collect_table_cells(row_handle, parser, dom_ctx, &mut cells);
-                                let col_count = cells
-                                    .iter()
-                                    .fold(0usize, |acc, h| acc.saturating_add(get_colspan(h, parser)));
+                                let col_count = cells.iter().fold(0usize, |acc, h| {
+                                    acc.saturating_add(get_colspan(h, parser))
+                                });
                                 max_cols = max_cols.max(col_count);
                             }
                         }
@@ -149,7 +149,12 @@ pub fn handle_table(
 
         let table_scan = scan_table(node_handle, parser, dom_ctx);
         let row_count = table_scan.row_counts.len();
-        let mut distinct_counts: Vec<_> = table_scan.row_counts.iter().copied().filter(|c| *c > 0).collect();
+        let mut distinct_counts: Vec<_> = table_scan
+            .row_counts
+            .iter()
+            .copied()
+            .filter(|c| *c > 0)
+            .collect();
         distinct_counts.sort_unstable();
         distinct_counts.dedup();
 
@@ -157,8 +162,9 @@ pub fn handle_table(
             .attributes()
             .get("border")
             .is_some_and(|v| v.as_ref().is_some_and(|b| b.as_utf8_str() == "0"));
-        let looks_like_layout =
-            table_scan.nested_table_count > 1 || distinct_counts.len() > 1 || (table_scan.has_span && has_border_zero);
+        let looks_like_layout = table_scan.nested_table_count > 1
+            || distinct_counts.len() > 1
+            || (table_scan.has_span && has_border_zero);
         let link_count = table_scan.link_count;
         let is_blank_table = !table_scan.has_text;
 
@@ -179,14 +185,19 @@ pub fn handle_table(
                         "thead" | "tbody" | "tfoot" => {
                             for row_handle in child_tag.children().top().iter() {
                                 if let Some(tl::Node::Tag(row_tag)) = row_handle.get(parser) {
-                                    let row_tag_name = normalized_tag_name(row_tag.name().as_utf8_str());
+                                    let row_tag_name =
+                                        normalized_tag_name(row_tag.name().as_utf8_str());
                                     if matches!(row_tag_name.as_ref(), "tr" | "row") {
-                                        append_layout_row(row_handle, parser, output, options, ctx, dom_ctx);
+                                        append_layout_row(
+                                            row_handle, parser, output, options, ctx, dom_ctx,
+                                        );
                                     }
                                 }
                             }
                         }
-                        "tr" | "row" => append_layout_row(child_handle, parser, output, options, ctx, dom_ctx),
+                        "tr" | "row" => {
+                            append_layout_row(child_handle, parser, output, options, ctx, dom_ctx)
+                        }
                         "colgroup" | "col" => {}
                         _ => {
                             // Handle non-table-structure elements (like <a>, <img>, etc.) that may be
@@ -269,10 +280,16 @@ pub fn handle_table(
         {
             for child_handle in children.top().iter() {
                 if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-                    let tag_name: Cow<'_, str> = dom_ctx.tag_info(child_handle.get_inner(), parser).map_or_else(
-                        || normalized_tag_name(child_tag.name().as_utf8_str()).into_owned().into(),
-                        |info| Cow::Borrowed(info.name.as_str()),
-                    );
+                    let tag_name: Cow<'_, str> = dom_ctx
+                        .tag_info(child_handle.get_inner(), parser)
+                        .map_or_else(
+                            || {
+                                normalized_tag_name(child_tag.name().as_utf8_str())
+                                    .into_owned()
+                                    .into()
+                            },
+                            |info| Cow::Borrowed(info.name.as_str()),
+                        );
 
                     match tag_name.as_ref() {
                         "caption" => {
@@ -308,14 +325,23 @@ pub fn handle_table(
                                     if let Some(tl::Node::Tag(row_tag)) = row_handle.get(parser) {
                                         let row_tag_name = dom_ctx
                                             .tag_name_for(*row_handle, parser)
-                                            .unwrap_or_else(|| normalized_tag_name(row_tag.name().as_utf8_str()));
+                                            .unwrap_or_else(|| {
+                                                normalized_tag_name(row_tag.name().as_utf8_str())
+                                            });
                                         if matches!(row_tag_name.as_ref(), "tr" | "row") {
                                             if first_row_cols.is_none() {
-                                                collect_table_cells(row_handle, parser, dom_ctx, &mut row_cells);
-                                                let cols = row_cells
-                                                    .iter()
-                                                    .fold(0usize, |acc, h| acc.saturating_add(get_colspan(h, parser)));
-                                                first_row_cols = Some(cols.clamp(1, MAX_TABLE_COLS));
+                                                collect_table_cells(
+                                                    row_handle,
+                                                    parser,
+                                                    dom_ctx,
+                                                    &mut row_cells,
+                                                );
+                                                let cols =
+                                                    row_cells.iter().fold(0usize, |acc, h| {
+                                                        acc.saturating_add(get_colspan(h, parser))
+                                                    });
+                                                first_row_cols =
+                                                    Some(cols.clamp(1, MAX_TABLE_COLS));
                                             }
                                             convert_table_row(
                                                 row_handle,
@@ -343,9 +369,9 @@ pub fn handle_table(
                         "tr" | "row" => {
                             if first_row_cols.is_none() {
                                 collect_table_cells(child_handle, parser, dom_ctx, &mut row_cells);
-                                let cols = row_cells
-                                    .iter()
-                                    .fold(0usize, |acc, h| acc.saturating_add(get_colspan(h, parser)));
+                                let cols = row_cells.iter().fold(0usize, |acc, h| {
+                                    acc.saturating_add(get_colspan(h, parser))
+                                });
                                 first_row_cols = Some(cols.clamp(1, MAX_TABLE_COLS));
                             }
                             convert_table_row(

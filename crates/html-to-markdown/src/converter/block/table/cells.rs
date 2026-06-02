@@ -10,7 +10,9 @@ use crate::converter::utility::content::collect_tag_attributes;
 use crate::converter::utility::content::normalized_tag_name;
 use std::borrow::Cow;
 
-use super::cell::{cell_text_content, collect_table_cells, convert_table_cell, get_colspan_rowspan};
+use super::cell::{
+    cell_text_content, collect_table_cells, convert_table_cell, get_colspan_rowspan,
+};
 
 /// Maximum allowed table columns to prevent unbounded memory usage.
 const MAX_TABLE_COLS: usize = 1000;
@@ -41,10 +43,16 @@ pub fn append_layout_row(
         let row_children = row_tag.children();
         for cell_handle in row_children.top().iter() {
             if let Some(tl::Node::Tag(cell_tag)) = cell_handle.get(parser) {
-                let cell_name: Cow<'_, str> = dom_ctx.tag_info(cell_handle.get_inner(), parser).map_or_else(
-                    || normalized_tag_name(cell_tag.name().as_utf8_str()).into_owned().into(),
-                    |info| Cow::Borrowed(info.name.as_str()),
-                );
+                let cell_name: Cow<'_, str> = dom_ctx
+                    .tag_info(cell_handle.get_inner(), parser)
+                    .map_or_else(
+                        || {
+                            normalized_tag_name(cell_tag.name().as_utf8_str())
+                                .into_owned()
+                                .into()
+                        },
+                        |info| Cow::Borrowed(info.name.as_str()),
+                    );
                 if matches!(cell_name.as_ref(), "td" | "th" | "cell") {
                     let mut cell_text = String::new();
                     let cell_ctx = super::super::super::Context {
@@ -213,10 +221,20 @@ pub fn convert_table_row(
                 };
                 if let Some(tl::Node::Tag(tag)) = cell_handle.get(parser) {
                     for child_handle in tag.children().top().iter() {
-                        super::super::super::walk_node(child_handle, parser, &mut text, options, &cell_ctx, 0, dom_ctx);
+                        super::super::super::walk_node(
+                            child_handle,
+                            parser,
+                            &mut text,
+                            options,
+                            &cell_ctx,
+                            0,
+                            dom_ctx,
+                        );
                     }
                 }
-                crate::text::normalize_whitespace_cow(&text).trim().to_string()
+                crate::text::normalize_whitespace_cow(&text)
+                    .trim()
+                    .to_string()
             })
             .collect()
     } else {
@@ -294,7 +312,16 @@ pub fn convert_table_row(
 
             if let Some(cell_handle) = cell_iter.next() {
                 let col_width = col_widths.get(col_index).copied();
-                convert_table_cell(cell_handle, parser, &mut row_text, options, ctx, "", dom_ctx, col_width);
+                convert_table_cell(
+                    cell_handle,
+                    parser,
+                    &mut row_text,
+                    options,
+                    ctx,
+                    "",
+                    dom_ctx,
+                    col_width,
+                );
 
                 let (colspan, rowspan) = get_colspan_rowspan(cell_handle, parser);
 
@@ -310,7 +337,16 @@ pub fn convert_table_row(
     } else {
         for (cell_idx, cell_handle) in cells.iter().enumerate() {
             let col_width = col_widths.get(cell_idx).copied();
-            convert_table_cell(cell_handle, parser, &mut row_text, options, ctx, "", dom_ctx, col_width);
+            convert_table_cell(
+                cell_handle,
+                parser,
+                &mut row_text,
+                options,
+                ctx,
+                "",
+                dom_ctx,
+                col_width,
+            );
         }
     }
 
@@ -326,7 +362,11 @@ pub fn convert_table_row(
             if i > 0 {
                 output.push_str(" | ");
             }
-            let dash_count = col_widths.get(i).copied().unwrap_or(0).max(MIN_SEPARATOR_DASHES);
+            let dash_count = col_widths
+                .get(i)
+                .copied()
+                .unwrap_or(0)
+                .max(MIN_SEPARATOR_DASHES);
             for _ in 0..dash_count {
                 output.push('-');
             }

@@ -31,7 +31,9 @@ enum ListContext {
 }
 
 /// Tags whose content should be skipped entirely.
-const SKIP_TAGS: &[&str] = &["script", "style", "head", "template", "noscript", "svg", "math"];
+const SKIP_TAGS: &[&str] = &[
+    "script", "style", "head", "template", "noscript", "svg", "math",
+];
 
 /// Block-level tags that should be separated by blank lines.
 const BLOCK_TAGS: &[&str] = &[
@@ -97,7 +99,11 @@ impl WalkState<'_> {
 /// - Nodes matching `excluded_node_ids` (from `exclude_selectors`) are dropped entirely
 /// - When a visitor is configured, `visit_element_start`, `visit_element_end`, and
 ///   `visit_text` callbacks are fired and their results are honoured.
-pub fn extract_plain_text(dom: &tl::VDom, parser: &tl::Parser, options: &ConversionOptions) -> String {
+pub fn extract_plain_text(
+    dom: &tl::VDom,
+    parser: &tl::Parser,
+    options: &ConversionOptions,
+) -> String {
     let mut buf = String::with_capacity(1024);
     let mut list_ctx = ListContext::None;
 
@@ -191,7 +197,9 @@ fn walk_plain(
         }
         tl::Node::Tag(tag) => {
             // Drop elements matching exclude_selectors, including all their descendants.
-            if !state.excluded_node_ids.is_empty() && state.excluded_node_ids.contains(&node_handle.get_inner()) {
+            if !state.excluded_node_ids.is_empty()
+                && state.excluded_node_ids.contains(&node_handle.get_inner())
+            {
                 return;
             }
 
@@ -387,7 +395,12 @@ fn walk_children(
 }
 
 /// Walk a `<table>` element, extracting cells as tab-separated, rows as newline-separated.
-fn walk_table(table_tag: &tl::HTMLTag, parser: &tl::Parser, buf: &mut String, state: &WalkState<'_>) {
+fn walk_table(
+    table_tag: &tl::HTMLTag,
+    parser: &tl::Parser,
+    buf: &mut String,
+    state: &WalkState<'_>,
+) {
     // Collect all <tr> node handles by recursing into the table
     let mut row_handles = Vec::new();
     collect_descendant_handles(table_tag, parser, "tr", &mut row_handles);
@@ -421,7 +434,14 @@ fn walk_table(table_tag: &tl::HTMLTag, parser: &tl::Parser, buf: &mut String, st
             let mut cell_buf = String::new();
             if let Some(tl::Node::Tag(cell_tag)) = cell_handle.get(parser) {
                 let mut cell_list_ctx = ListContext::None;
-                walk_children(cell_tag, parser, &mut cell_buf, false, &mut cell_list_ctx, &cell_state);
+                walk_children(
+                    cell_tag,
+                    parser,
+                    &mut cell_buf,
+                    false,
+                    &mut cell_list_ctx,
+                    &cell_state,
+                );
             }
             buf.push_str(cell_buf.trim());
         }
@@ -439,7 +459,11 @@ fn collect_descendant_handles(
     let top = children.top();
     for child in top.iter() {
         if let Some(tl::Node::Tag(child_tag)) = child.get(parser) {
-            if child_tag.name().as_utf8_str().eq_ignore_ascii_case(target_tag) {
+            if child_tag
+                .name()
+                .as_utf8_str()
+                .eq_ignore_ascii_case(target_tag)
+            {
                 result.push(*child);
             } else {
                 collect_descendant_handles(child_tag, parser, target_tag, result);

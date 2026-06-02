@@ -19,7 +19,10 @@ fn tier1(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 fn tier2(html: &str) -> String {
@@ -28,7 +31,10 @@ fn tier2(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 /// Assert that Tier-1 output byte-equals Tier-2 output.

@@ -132,35 +132,53 @@ pub struct MetadataConfig {
 /// assert!(config.extract_headers);
 /// ```
 #[derive(Debug, Clone, Default)]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), derive(serde::Deserialize))]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), serde(deny_unknown_fields))]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    derive(serde::Deserialize)
+)]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    serde(deny_unknown_fields)
+)]
 pub struct MetadataConfigUpdate {
     /// Optional override for extracting document-level metadata.
     ///
     /// When Some(true), enables document metadata extraction; Some(false) disables it.
     /// None leaves the current setting unchanged.
-    #[cfg_attr(any(feature = "serde", feature = "metadata"), serde(alias = "extract_document"))]
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "extract_document")
+    )]
     pub extract_document: Option<bool>,
 
     /// Optional override for extracting heading elements (h1-h6).
     ///
     /// When Some(true), enables header extraction; Some(false) disables it.
     /// None leaves the current setting unchanged.
-    #[cfg_attr(any(feature = "serde", feature = "metadata"), serde(alias = "extract_headers"))]
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "extract_headers")
+    )]
     pub extract_headers: Option<bool>,
 
     /// Optional override for extracting anchor (link) elements.
     ///
     /// When Some(true), enables link extraction; Some(false) disables it.
     /// None leaves the current setting unchanged.
-    #[cfg_attr(any(feature = "serde", feature = "metadata"), serde(alias = "extract_links"))]
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "extract_links")
+    )]
     pub extract_links: Option<bool>,
 
     /// Optional override for extracting image elements.
     ///
     /// When Some(true), enables image extraction; Some(false) disables it.
     /// None leaves the current setting unchanged.
-    #[cfg_attr(any(feature = "serde", feature = "metadata"), serde(alias = "extract_images"))]
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "extract_images")
+    )]
     pub extract_images: Option<bool>,
 
     /// Optional override for extracting structured data (JSON-LD, Microdata, RDFa).
@@ -363,7 +381,10 @@ mod tests {
         assert!(config.extract_links);
         assert!(config.extract_images);
         assert!(config.extract_structured_data);
-        assert_eq!(config.max_structured_data_size, DEFAULT_MAX_STRUCTURED_DATA_SIZE);
+        assert_eq!(
+            config.max_structured_data_size,
+            DEFAULT_MAX_STRUCTURED_DATA_SIZE
+        );
     }
 
     #[test]

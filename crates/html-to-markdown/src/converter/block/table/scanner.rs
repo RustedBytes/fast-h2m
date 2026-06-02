@@ -83,10 +83,16 @@ fn scan_table_node(
                 }
             }
             tl::Node::Tag(tag) => {
-                let tag_name: Cow<'_, str> = dom_ctx.tag_info(node_handle.get_inner(), parser).map_or_else(
-                    || normalized_tag_name(tag.name().as_utf8_str()).into_owned().into(),
-                    |info| Cow::Borrowed(info.name.as_str()),
-                );
+                let tag_name: Cow<'_, str> = dom_ctx
+                    .tag_info(node_handle.get_inner(), parser)
+                    .map_or_else(
+                        || {
+                            normalized_tag_name(tag.name().as_utf8_str())
+                                .into_owned()
+                                .into()
+                        },
+                        |info| Cow::Borrowed(info.name.as_str()),
+                    );
 
                 match tag_name.as_ref() {
                     "a" => scan.link_count += 1,
@@ -94,7 +100,9 @@ fn scan_table_node(
                     "th" => scan.has_header = true,
                     "img" | "graphic" => {
                         // Images with src or alt attributes count as content
-                        if tag.attributes().get("src").is_some() || tag.attributes().get("alt").is_some() {
+                        if tag.attributes().get("src").is_some()
+                            || tag.attributes().get("alt").is_some()
+                        {
                             scan.has_text = true;
                         }
                     }
@@ -118,12 +126,16 @@ fn scan_table_node(
                                     .tag_info(child.get_inner(), parser)
                                     .map(|info| Cow::Borrowed(info.name.as_str()))
                                     .unwrap_or_else(|| {
-                                        normalized_tag_name(cell_tag.name().as_utf8_str()).into_owned().into()
+                                        normalized_tag_name(cell_tag.name().as_utf8_str())
+                                            .into_owned()
+                                            .into()
                                     });
                                 if matches!(cell_name.as_ref(), "td" | "th" | "cell") {
                                     cell_count += super::cell::get_colspan(child, parser);
                                     let attrs = cell_tag.attributes();
-                                    if attrs.get("colspan").is_some() || attrs.get("rowspan").is_some() {
+                                    if attrs.get("colspan").is_some()
+                                        || attrs.get("rowspan").is_some()
+                                    {
                                         scan.has_span = true;
                                     }
                                 }

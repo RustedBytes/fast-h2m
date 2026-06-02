@@ -31,7 +31,8 @@ const HEAD_TAG: &[u8] = b"head";
 const CDATA_START: &[u8] = b"<![CDATA[";
 const DOCTYPE: &[u8] = b"doctype";
 const EMPTY_COMMENT: &[u8] = b"<!---->";
-const SELF_CLOSING: [(&[u8], &str); 3] = [(b"<br/>", "<br>"), (b"<hr/>", "<hr>"), (b"<img/>", "<img>")];
+const SELF_CLOSING: [(&[u8], &str); 3] =
+    [(b"<br/>", "<br>"), (b"<hr/>", "<hr>"), (b"<img/>", "<img>")];
 
 /// Run the prescan over `html`, returning the cleaned buffer and signals.
 ///
@@ -158,7 +159,8 @@ pub fn run(html: &str) -> (Cow<'_, str>, PrescanReport) {
                 while cursor < len && bytes[cursor].is_ascii_whitespace() {
                     cursor += 1;
                 }
-                if cursor + DOCTYPE.len() <= len && bytes[cursor..cursor + DOCTYPE.len()].eq_ignore_ascii_case(DOCTYPE)
+                if cursor + DOCTYPE.len() <= len
+                    && bytes[cursor..cursor + DOCTYPE.len()].eq_ignore_ascii_case(DOCTYPE)
                 {
                     if let Some(end) = find_tag_end(bytes, cursor + DOCTYPE.len()) {
                         let out = output.get_or_insert_with(|| String::with_capacity(html.len()));
@@ -208,7 +210,11 @@ pub fn run(html: &str) -> (Cow<'_, str>, PrescanReport) {
                     // Find the end of the tag name.
                     let name_end = {
                         let mut e = tag_start;
-                        while e < len && (bytes[e].is_ascii_alphanumeric() || bytes[e] == b'-' || bytes[e] == b'_') {
+                        while e < len
+                            && (bytes[e].is_ascii_alphanumeric()
+                                || bytes[e] == b'-'
+                                || bytes[e] == b'_')
+                        {
                             e += 1;
                         }
                         e
@@ -230,7 +236,11 @@ pub fn run(html: &str) -> (Cow<'_, str>, PrescanReport) {
                             || bytes[idx + 2].is_ascii_alphabetic()
                             || bytes[idx + 2].is_ascii_uppercase())
                 }
-                b'/' => idx + 2 < len && (bytes[idx + 2].is_ascii_alphabetic() || bytes[idx + 2].is_ascii_uppercase()),
+                b'/' => {
+                    idx + 2 < len
+                        && (bytes[idx + 2].is_ascii_alphabetic()
+                            || bytes[idx + 2].is_ascii_uppercase())
+                }
                 b'?' => true,
                 c if c.is_ascii_alphabetic() || c.is_ascii_uppercase() => true,
                 _ => false,

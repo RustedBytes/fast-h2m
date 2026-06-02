@@ -95,8 +95,8 @@ pub(crate) mod wrapper;
 
 pub use exports::*;
 pub use types::{
-    AnnotationKind, ConversionResult, DocumentNode, DocumentStructure, GridCell, NodeContent, ProcessingWarning,
-    TableData, TableGrid, TextAnnotation, WarningKind,
+    AnnotationKind, ConversionResult, DocumentNode, DocumentStructure, GridCell, NodeContent,
+    ProcessingWarning, TableData, TableGrid, TextAnnotation, WarningKind,
 };
 #[cfg(feature = "visitor")]
 pub use visitor::{NodeContext, NodeType, VisitResult};
@@ -132,7 +132,10 @@ mod basic_tests {
     fn test_utf16_hint_recovered() {
         let html = String::from_utf8_lossy(b"\xFF\xFE<\0h\0t\0m\0l\0>\0").to_string();
         let result = convert(&html, None);
-        assert!(result.is_ok(), "UTF-16 input should be recovered instead of rejected");
+        assert!(
+            result.is_ok(),
+            "UTF-16 input should be recovered instead of rejected"
+        );
     }
 
     #[test]

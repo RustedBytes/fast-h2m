@@ -59,10 +59,19 @@ pub fn handle_graphic(
         .get("alt")
         .flatten()
         .map(|v| v.as_utf8_str())
-        .or_else(|| tag.attributes().get("filename").flatten().map(|v| v.as_utf8_str()))
+        .or_else(|| {
+            tag.attributes()
+                .get("filename")
+                .flatten()
+                .map(|v| v.as_utf8_str())
+        })
         .unwrap_or(Cow::Borrowed(""));
 
-    let title = tag.attributes().get("title").flatten().map(|v| v.as_utf8_str());
+    let title = tag
+        .attributes()
+        .get("title")
+        .flatten()
+        .map(|v| v.as_utf8_str());
 
     // Collect metadata payload if metadata feature is enabled
     #[cfg(feature = "metadata")]
@@ -75,7 +84,8 @@ pub fn handle_graphic(
         let mut height: Option<u32> = None;
         for (key, value_opt) in tag.attributes().iter() {
             let key_str = key.to_string();
-            if key_str == "url" || key_str == "href" || key_str == "xlink:href" || key_str == "src" {
+            if key_str == "url" || key_str == "href" || key_str == "xlink:href" || key_str == "src"
+            {
                 continue;
             }
             let value = value_opt.map(|v| v.to_string()).unwrap_or_default();
@@ -95,8 +105,8 @@ pub fn handle_graphic(
 
     let keep_as_markdown = ctx.in_heading && ctx.heading_allow_inline_images;
 
-    let should_use_alt_text =
-        !keep_as_markdown && (ctx.convert_as_inline || (ctx.in_heading && !ctx.heading_allow_inline_images));
+    let should_use_alt_text = !keep_as_markdown
+        && (ctx.convert_as_inline || (ctx.in_heading && !ctx.heading_allow_inline_images));
 
     // Generate graphic output with visitor integration
     #[cfg(feature = "visitor")]
@@ -181,7 +191,11 @@ pub fn handle_graphic(
                     };
                     collector.borrow_mut().add_image(
                         src.to_string(),
-                        if alt.is_empty() { None } else { Some(alt.to_string()) },
+                        if alt.is_empty() {
+                            None
+                        } else {
+                            Some(alt.to_string())
+                        },
                         title.as_deref().map(std::string::ToString::to_string),
                         dimensions,
                         attributes_map,

@@ -57,21 +57,27 @@ pub const fn calculate_list_continuation_indent(depth: usize) -> usize {
 ///   <li>Item 2</li>
 /// </ul>
 /// ```
-pub fn is_loose_list(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
+pub fn is_loose_list(
+    node_handle: tl::NodeHandle,
+    parser: &tl::Parser,
+    dom_ctx: &DomContext,
+) -> bool {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                let is_li = dom_ctx.tag_info(child_handle.get_inner(), parser).map_or_else(
-                    || {
-                        matches!(
-                            child_handle.get(parser),
-                            Some(tl::Node::Tag(child_tag))
-                                if tag_name_eq(child_tag.name().as_utf8_str(), "li")
-                        )
-                    },
-                    |info| info.name == "li",
-                );
+                let is_li = dom_ctx
+                    .tag_info(child_handle.get_inner(), parser)
+                    .map_or_else(
+                        || {
+                            matches!(
+                                child_handle.get(parser),
+                                Some(tl::Node::Tag(child_tag))
+                                    if tag_name_eq(child_tag.name().as_utf8_str(), "li")
+                            )
+                        },
+                        |info| info.name == "li",
+                    );
                 if !is_li {
                     continue;
                 }
@@ -79,16 +85,18 @@ pub fn is_loose_list(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: 
                 if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
                     let li_children = child_tag.children();
                     for li_child_handle in li_children.top().iter() {
-                        let is_p = dom_ctx.tag_info(li_child_handle.get_inner(), parser).map_or_else(
-                            || {
-                                matches!(
-                                    li_child_handle.get(parser),
-                                    Some(tl::Node::Tag(li_child_tag))
-                                        if tag_name_eq(li_child_tag.name().as_utf8_str(), "p")
-                                )
-                            },
-                            |info| info.name == "p",
-                        );
+                        let is_p = dom_ctx
+                            .tag_info(li_child_handle.get_inner(), parser)
+                            .map_or_else(
+                                || {
+                                    matches!(
+                                        li_child_handle.get(parser),
+                                        Some(tl::Node::Tag(li_child_tag))
+                                            if tag_name_eq(li_child_tag.name().as_utf8_str(), "p")
+                                    )
+                                },
+                                |info| info.name == "p",
+                            );
                         if is_p {
                             return true;
                         }
@@ -159,7 +167,10 @@ pub fn add_list_continuation_indent(
 }
 
 /// Calculate the indentation string for list continuations based on depth and options.
-pub fn continuation_indent_string(list_depth: usize, options: &ConversionOptions) -> Option<String> {
+pub fn continuation_indent_string(
+    list_depth: usize,
+    options: &ConversionOptions,
+) -> Option<String> {
     let indent_level = calculate_list_continuation_indent(list_depth);
     if indent_level == 0 {
         return None;
@@ -189,8 +200,10 @@ pub fn continuation_indent_string(list_depth: usize, options: &ConversionOptions
 /// - Inside list items: blank line before nested list
 pub fn add_list_leading_separator(output: &mut String, ctx: &Context) {
     if ctx.in_table_cell {
-        let is_table_continuation =
-            !output.is_empty() && !output.ends_with('|') && !output.ends_with(' ') && !output.ends_with("<br>");
+        let is_table_continuation = !output.is_empty()
+            && !output.ends_with('|')
+            && !output.ends_with(' ')
+            && !output.ends_with("<br>");
         if is_table_continuation {
             output.push_str("<br>");
         }
@@ -198,8 +211,10 @@ pub fn add_list_leading_separator(output: &mut String, ctx: &Context) {
     }
 
     if !output.is_empty() && !ctx.in_list {
-        let needs_newline =
-            !output.ends_with("\n\n") && !output.ends_with("* ") && !output.ends_with("- ") && !output.ends_with(". ");
+        let needs_newline = !output.ends_with("\n\n")
+            && !output.ends_with("* ")
+            && !output.ends_with("- ")
+            && !output.ends_with(". ");
         if needs_newline {
             output.push_str("\n\n");
         }
@@ -207,8 +222,10 @@ pub fn add_list_leading_separator(output: &mut String, ctx: &Context) {
     }
 
     if ctx.in_list_item && !output.is_empty() {
-        let needs_newline =
-            !output.ends_with('\n') && !output.ends_with("* ") && !output.ends_with("- ") && !output.ends_with(". ");
+        let needs_newline = !output.ends_with('\n')
+            && !output.ends_with("* ")
+            && !output.ends_with("- ")
+            && !output.ends_with(". ");
         if needs_newline {
             trim_trailing_whitespace(output);
             output.push('\n');
@@ -251,7 +268,11 @@ pub const fn calculate_list_nesting_depth(ctx: &Context) -> usize {
 }
 
 /// Check if a node is a list item element.
-pub fn is_list_item(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
+pub fn is_list_item(
+    node_handle: tl::NodeHandle,
+    parser: &tl::Parser,
+    dom_ctx: &DomContext,
+) -> bool {
     if let Some(info) = dom_ctx.tag_info(node_handle.get_inner(), parser) {
         return info.name == "li";
     }
@@ -296,14 +317,26 @@ pub fn process_list_children(
                     list_counter: if is_ordered { counter } else { 0 },
                     in_list: true,
                     list_depth: nested_depth,
-                    ul_depth: if is_ordered { ctx.ul_depth } else { ctx.ul_depth + 1 },
+                    ul_depth: if is_ordered {
+                        ctx.ul_depth
+                    } else {
+                        ctx.ul_depth + 1
+                    },
                     loose_list: is_loose,
                     prev_item_had_blocks: false,
                     ..ctx.clone()
                 };
 
                 use crate::converter::walk_node;
-                walk_node(child_handle, parser, output, options, &list_ctx, depth, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    &list_ctx,
+                    depth,
+                    dom_ctx,
+                );
 
                 if is_ordered && is_list_item(*child_handle, parser, dom_ctx) {
                     counter += 1;

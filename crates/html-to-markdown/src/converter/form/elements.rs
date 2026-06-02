@@ -112,7 +112,15 @@ pub fn handle_form(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, &mut content, options, ctx, depth, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                );
             }
         }
 
@@ -167,7 +175,15 @@ pub fn handle_fieldset(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, &mut content, options, ctx, depth, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                );
             }
         }
 
@@ -271,7 +287,15 @@ pub fn handle_label(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -385,7 +409,15 @@ pub fn handle_textarea(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -419,7 +451,15 @@ pub fn handle_select(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -450,13 +490,24 @@ pub fn handle_option(
     dom_ctx: &super::DomContext,
 ) {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-        let selected = tag.attributes().iter().any(|(name, _)| name.as_ref() == "selected");
+        let selected = tag
+            .attributes()
+            .iter()
+            .any(|(name, _)| name.as_ref() == "selected");
 
         let mut text = String::new();
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, &mut text, options, ctx, depth + 1, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut text,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -512,7 +563,15 @@ pub fn handle_optgroup(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
     }
@@ -591,7 +650,15 @@ pub fn handle_button(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -625,7 +692,15 @@ pub fn handle_progress(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -659,7 +734,15 @@ pub fn handle_meter(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -693,7 +776,15 @@ pub fn handle_output(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -727,7 +818,15 @@ pub fn handle_datalist(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -751,20 +850,146 @@ pub fn handle(
     dom_ctx: &super::DomContext,
 ) {
     match tag_name {
-        "form" => handle_form(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "fieldset" => handle_fieldset(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "legend" => handle_legend(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "label" => handle_label(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "input" => handle_input(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "textarea" => handle_textarea(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "select" => handle_select(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "option" => handle_option(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "optgroup" => handle_optgroup(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "button" => handle_button(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "progress" => handle_progress(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "meter" => handle_meter(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "output" => handle_output(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "datalist" => handle_datalist(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
+        "form" => handle_form(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "fieldset" => handle_fieldset(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "legend" => handle_legend(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "label" => handle_label(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "input" => handle_input(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "textarea" => handle_textarea(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "select" => handle_select(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "option" => handle_option(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "optgroup" => handle_optgroup(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "button" => handle_button(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "progress" => handle_progress(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "meter" => handle_meter(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "output" => handle_output(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "datalist" => handle_datalist(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
         _ => {}
     }
 }

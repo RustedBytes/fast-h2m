@@ -10,8 +10,7 @@ use html_to_markdown_rs::{ConversionOptions, convert};
 
 #[test]
 fn no_double_blank_line_after_frontmatter_or_list() {
-    let html =
-        "<head>\n  <title>Foobar</title>\n</head>\n<body>\n  <p>Baz</p><ul><li>qux</li></ul><p>Thud</p>\n</body>";
+    let html = "<head>\n  <title>Foobar</title>\n</head>\n<body>\n  <p>Baz</p><ul><li>qux</li></ul><p>Thud</p>\n</body>";
     let options = ConversionOptions {
         extract_metadata: true,
         ..Default::default()

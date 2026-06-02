@@ -34,7 +34,9 @@ pub fn handle_mark(
     #[allow(unused_imports)]
     use crate::converter::{get_text_content, serialize_node, walk_node};
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -92,7 +94,15 @@ pub fn handle_mark(
         // In inline conversion context, just pass through children
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     } else {
         use crate::options::HighlightStyle;
@@ -105,7 +115,15 @@ pub fn handle_mark(
                 }
                 let children = tag.children();
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
                 if options.output_format == OutputFormat::Djot {
                     output.push_str("=}");
@@ -117,7 +135,15 @@ pub fn handle_mark(
                 output.push_str("<mark>");
                 let children = tag.children();
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
                 output.push_str("</mark>");
             }
@@ -132,14 +158,30 @@ pub fn handle_mark(
                 };
                 let children = tag.children();
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, &bold_ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        options,
+                        &bold_ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
                 output.push_str(&symbol);
             }
             HighlightStyle::None => {
                 let children = tag.children();
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
             }
         }
@@ -163,7 +205,9 @@ pub fn handle_strikethrough(
 ) {
     use crate::converter::{append_inline_suffix, chomp_inline, walk_node};
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -174,13 +218,29 @@ pub fn handle_strikethrough(
         // Suppress strikethrough in code context, just process children
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     } else {
         let mut content = String::with_capacity(32);
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
 
         #[cfg(feature = "visitor")]
@@ -245,7 +305,14 @@ pub fn handle_strikethrough(
                 } else {
                     output.push_str("~~");
                 }
-                append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+                append_inline_suffix(
+                    output,
+                    suffix,
+                    !trimmed.is_empty(),
+                    node_handle,
+                    parser,
+                    dom_ctx,
+                );
             } else if !content.is_empty() {
                 output.push_str(prefix);
                 append_inline_suffix(output, suffix, false, node_handle, parser, dom_ctx);
@@ -268,7 +335,14 @@ pub fn handle_strikethrough(
                 } else {
                     output.push_str("~~");
                 }
-                append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+                append_inline_suffix(
+                    output,
+                    suffix,
+                    !trimmed.is_empty(),
+                    node_handle,
+                    parser,
+                    dom_ctx,
+                );
             } else if !content.is_empty() {
                 output.push_str(prefix);
                 append_inline_suffix(output, suffix, false, node_handle, parser, dom_ctx);
@@ -291,7 +365,9 @@ pub fn handle_inserted(
 ) {
     use crate::converter::{append_inline_suffix, chomp_inline, walk_node};
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -301,7 +377,15 @@ pub fn handle_inserted(
     let mut content = String::with_capacity(32);
     let children = tag.children();
     for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+        walk_node(
+            child_handle,
+            parser,
+            &mut content,
+            options,
+            ctx,
+            depth + 1,
+            dom_ctx,
+        );
     }
 
     #[cfg(feature = "visitor")]
@@ -367,7 +451,14 @@ pub fn handle_inserted(
             } else {
                 output.push_str("==");
             }
-            append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+            append_inline_suffix(
+                output,
+                suffix,
+                !trimmed.is_empty(),
+                node_handle,
+                parser,
+                dom_ctx,
+            );
         }
     }
 
@@ -387,7 +478,14 @@ pub fn handle_inserted(
             } else {
                 output.push_str("==");
             }
-            append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+            append_inline_suffix(
+                output,
+                suffix,
+                !trimmed.is_empty(),
+                node_handle,
+                parser,
+                dom_ctx,
+            );
         }
     }
 }
@@ -407,7 +505,9 @@ pub fn handle_underline(
 ) {
     use crate::converter::walk_node;
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -444,7 +544,15 @@ pub fn handle_underline(
             VisitResult::Continue => {
                 let children = tag.children();
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
             }
             VisitResult::Custom(custom) => {
@@ -461,14 +569,30 @@ pub fn handle_underline(
                 }
                 let children = tag.children();
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
             }
         }
     } else {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 
@@ -476,7 +600,15 @@ pub fn handle_underline(
     {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 }

@@ -1,4 +1,8 @@
-#![allow(clippy::cast_precision_loss, clippy::cast_sign_loss, clippy::unused_self)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss,
+    clippy::unused_self
+)]
 //! Text processing utilities for Markdown conversion.
 
 use regex::Regex;
@@ -15,8 +19,9 @@ static ESCAPE_NUMBERED_LIST_RE: LazyLock<Regex> =
 
 /// Regex for escaping ASCII punctuation (CommonMark spec example 12)
 /// Matches: `! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ \` { | } ~`
-static ESCAPE_ASCII_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"([!\x22#$%&\x27()*+,\-./:;<=>?@\[\\\]^_`{|}~])").expect("valid regex pattern"));
+static ESCAPE_ASCII_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"([!\x22#$%&\x27()*+,\-./:;<=>?@\[\\\]^_`{|}~])").expect("valid regex pattern")
+});
 
 /// Escape Markdown special characters in text.
 ///
@@ -92,7 +97,19 @@ pub fn escape(
         let needs_misc = text.as_bytes().iter().any(|b| {
             matches!(
                 b,
-                b'\\' | b'&' | b'<' | b'`' | b'[' | b']' | b'>' | b'~' | b'#' | b'=' | b'+' | b'|' | b'-'
+                b'\\'
+                    | b'&'
+                    | b'<'
+                    | b'`'
+                    | b'['
+                    | b']'
+                    | b'>'
+                    | b'~'
+                    | b'#'
+                    | b'='
+                    | b'+'
+                    | b'|'
+                    | b'-'
             )
         });
         let needs_numbered = text.as_bytes().iter().any(|b| matches!(b, b'.' | b')'));
@@ -162,7 +179,9 @@ pub fn chomp(text: &str) -> (&str, &str, &str) {
     };
 
     let trimmed = if suffix == "\n\n" {
-        text.trim_end_matches("\n\n").trim_end_matches("\r\n\r\n").trim()
+        text.trim_end_matches("\n\n")
+            .trim_end_matches("\r\n\r\n")
+            .trim()
     } else {
         text.trim()
     };
@@ -320,30 +339,51 @@ mod tests {
 
     #[test]
     fn test_escape_misc() {
-        assert_eq!(escape("foo & bar", true, false, false, false), r"foo \& bar");
-        assert_eq!(escape("foo [bar]", true, false, false, false), r"foo \[bar\]");
+        assert_eq!(
+            escape("foo & bar", true, false, false, false),
+            r"foo \& bar"
+        );
+        assert_eq!(
+            escape("foo [bar]", true, false, false, false),
+            r"foo \[bar\]"
+        );
         assert_eq!(escape("1. Item", true, false, false, false), r"1\. Item");
         assert_eq!(escape("1) Item", true, false, false, false), r"1\) Item");
     }
 
     #[test]
     fn test_escape_asterisks() {
-        assert_eq!(escape("foo * bar", false, true, false, false), r"foo \* bar");
-        assert_eq!(escape("**bold**", false, true, false, false), r"\*\*bold\*\*");
+        assert_eq!(
+            escape("foo * bar", false, true, false, false),
+            r"foo \* bar"
+        );
+        assert_eq!(
+            escape("**bold**", false, true, false, false),
+            r"\*\*bold\*\*"
+        );
     }
 
     #[test]
     fn test_escape_underscores() {
         assert_eq!(escape("foo_bar", false, false, true, false), r"foo\_bar");
-        assert_eq!(escape("__bold__", false, false, true, false), r"\_\_bold\_\_");
+        assert_eq!(
+            escape("__bold__", false, false, true, false),
+            r"\_\_bold\_\_"
+        );
     }
 
     #[test]
     fn test_escape_ascii() {
-        assert_eq!(escape(r##"!"#$%&"##, false, false, false, true), r#"\!\"\#\$\%\&"#);
+        assert_eq!(
+            escape(r##"!"#$%&"##, false, false, false, true),
+            r#"\!\"\#\$\%\&"#
+        );
         assert_eq!(escape("*+,-./", false, false, false, true), r"\*\+\,\-\.\/");
         assert_eq!(escape("<=>?@", false, false, false, true), r"\<\=\>\?\@");
-        assert_eq!(escape(r"[\]^_`", false, false, false, true), r"\[\\\]\^\_\`");
+        assert_eq!(
+            escape(r"[\]^_`", false, false, false, true),
+            r"\[\\\]\^\_\`"
+        );
         assert_eq!(escape("{|}~", false, false, false, true), r"\{\|\}\~");
     }
 

@@ -32,7 +32,9 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bo
             };
 
             // Table elements under <p>: tl misparsed an unclosed <p> in <td>.
-            if matches!(info.name.as_str(), "td" | "tr" | "th") && has_p_ancestor(dom_ctx, parser, node_id) {
+            if matches!(info.name.as_str(), "td" | "tr" | "th")
+                && has_p_ancestor(dom_ctx, parser, node_id)
+            {
                 return true;
             }
 
@@ -61,13 +63,17 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bo
             let mut current = dom_ctx.parent_of(node_id);
             while let Some(parent_id) = current {
                 if let Some(parent_info) = dom_ctx.tag_info(parent_id, parser) {
-                    if is_inline_element(&parent_info.name) && !inline_ancestor_allows_block(&parent_info.name) {
+                    if is_inline_element(&parent_info.name)
+                        && !inline_ancestor_allows_block(&parent_info.name)
+                    {
                         return true;
                     }
                 } else if let Some(parent_handle) = dom_ctx.node_handle(parent_id) {
                     if let Some(tl::Node::Tag(parent_tag)) = parent_handle.get(parser) {
                         let parent_name = normalized_tag_name(parent_tag.name().as_utf8_str());
-                        if is_inline_element(&parent_name) && !inline_ancestor_allows_block(&parent_name) {
+                        if is_inline_element(&parent_name)
+                            && !inline_ancestor_allows_block(&parent_name)
+                        {
                             return true;
                         }
                     }
@@ -112,7 +118,11 @@ fn has_p_ancestor(dom_ctx: &DomContext, parser: &tl::Parser, node_id: u32) -> bo
 /// - **Aggressive**: All of Standard, plus: drops `<footer>`, `<aside>`, `<noscript>`
 ///   unconditionally. Drops ANY element with navigation hints in class/id/role
 ///   (e.g. `<div class="sidebar">`). Drops elements with noise-related classes/roles.
-pub fn should_drop_for_preprocessing(tag_name: &str, tag: &tl::HTMLTag, options: &ConversionOptions) -> bool {
+pub fn should_drop_for_preprocessing(
+    tag_name: &str,
+    tag: &tl::HTMLTag,
+    options: &ConversionOptions,
+) -> bool {
     use crate::options::PreprocessingPreset;
 
     if !options.preprocessing.enabled {
@@ -197,5 +207,6 @@ fn element_has_noise_hint(tag: &tl::HTMLTag) -> bool {
         "newsletter-signup",
     ];
 
-    attribute_matches_any(tag, "class", NOISE_KEYWORDS) || attribute_matches_any(tag, "id", NOISE_KEYWORDS)
+    attribute_matches_any(tag, "class", NOISE_KEYWORDS)
+        || attribute_matches_any(tag, "id", NOISE_KEYWORDS)
 }

@@ -74,7 +74,10 @@ fn image_in_heading_without_match_strips_to_alt() {
         !result.contains("!["),
         "expected no markdown image syntax, got: {result:?}"
     );
-    assert!(result.contains('A'), "expected alt text in output, got: {result:?}");
+    assert!(
+        result.contains('A'),
+        "expected alt text in output, got: {result:?}"
+    );
 }
 
 // ── 4. keep_inline_images_in=["h1","h2"] — image in h1 preserved ──────────────
@@ -139,7 +142,11 @@ mod tier_parity {
     #[cfg(feature = "inline-images")]
     fn parity_empty_keep_list_paragraph_image() {
         let html = "<p><img src=\"x.png\" alt=\"A\"></p>";
-        assert_eq!(t1(html, &[]), t2(html, &[]), "empty keep list must be byte-identical");
+        assert_eq!(
+            t1(html, &[]),
+            t2(html, &[]),
+            "empty keep list must be byte-identical"
+        );
     }
 
     // 6b. Image inside matching heading ancestor

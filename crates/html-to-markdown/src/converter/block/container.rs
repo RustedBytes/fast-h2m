@@ -47,7 +47,15 @@ pub fn handle_structural_container(
 
     let children = tag.children();
     for child_handle in children.top().iter() {
-        crate::converter::main::walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+        crate::converter::main::walk_node(
+            child_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth + 1,
+            dom_ctx,
+        );
     }
 }
 
@@ -83,7 +91,15 @@ pub fn handle_passthrough(
 
     let children = tag.children();
     for child_handle in children.top().iter() {
-        crate::converter::main::walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+        crate::converter::main::walk_node(
+            child_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth + 1,
+            dom_ctx,
+        );
     }
 }
 

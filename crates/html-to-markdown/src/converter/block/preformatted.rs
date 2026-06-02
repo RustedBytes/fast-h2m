@@ -112,12 +112,23 @@ pub fn handle_pre(
                         };
 
                         let visit_result = {
-                            let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
-                            visitor.visit_code_block(&node_ctx, language.as_deref(), &processed_content)
+                            let mut visitor =
+                                visitor_handle.lock().expect("visitor mutex poisoned");
+                            visitor.visit_code_block(
+                                &node_ctx,
+                                language.as_deref(),
+                                &processed_content,
+                            )
                         };
                         match visit_result {
                             VisitResult::Continue => {
-                                format_code_block(output, options, ctx, &processed_content, language.as_deref());
+                                format_code_block(
+                                    output,
+                                    options,
+                                    ctx,
+                                    &processed_content,
+                                    language.as_deref(),
+                                );
                             }
                             VisitResult::Custom(custom) => {
                                 output.push_str(&custom);
@@ -126,7 +137,13 @@ pub fn handle_pre(
                                 // Skip code block
                             }
                             VisitResult::PreserveHtml => {
-                                format_code_block(output, options, ctx, &processed_content, language.as_deref());
+                                format_code_block(
+                                    output,
+                                    options,
+                                    ctx,
+                                    &processed_content,
+                                    language.as_deref(),
+                                );
                             }
                             VisitResult::Error(err) => {
                                 if ctx.visitor_error.borrow().is_none() {
@@ -137,13 +154,25 @@ pub fn handle_pre(
                     }
                 }
             } else {
-                format_code_block(output, options, ctx, &processed_content, language.as_deref());
+                format_code_block(
+                    output,
+                    options,
+                    ctx,
+                    &processed_content,
+                    language.as_deref(),
+                );
             }
         }
 
         #[cfg(not(feature = "visitor"))]
         {
-            format_code_block(output, options, ctx, &processed_content, language.as_deref());
+            format_code_block(
+                output,
+                options,
+                ctx,
+                &processed_content,
+                language.as_deref(),
+            );
         }
     }
 }

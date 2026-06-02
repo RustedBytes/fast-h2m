@@ -40,7 +40,10 @@ fn consistent_whitespace_three_paragraphs_issue_212() {
 <a href="/c">here</a></p>"#;
 
     let result = convert(html, None).unwrap();
-    assert_eq!(result, "click [here](/a)\n\nclick [here](/b)\n\nclick [here](/c)\n");
+    assert_eq!(
+        result,
+        "click [here](/a)\n\nclick [here](/b)\n\nclick [here](/c)\n"
+    );
 }
 
 /// Verify the fix doesn't break whitespace between text nodes without links.
@@ -64,5 +67,8 @@ fn newline_before_em_across_paragraphs_issue_212() {
 <em>emphasized</em> end</p>";
 
     let result = convert(html, None).unwrap();
-    assert_eq!(result, "some text *emphasized* end\n\nsome text *emphasized* end\n");
+    assert_eq!(
+        result,
+        "some text *emphasized* end\n\nsome text *emphasized* end\n"
+    );
 }

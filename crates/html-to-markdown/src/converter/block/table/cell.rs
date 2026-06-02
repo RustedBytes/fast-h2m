@@ -65,7 +65,11 @@ pub fn get_colspan_rowspan(node_handle: &tl::NodeHandle, parser: &tl::Parser) ->
 ///
 /// Prevents memory exhaustion by clamping colspan/rowspan values.
 fn clamp_table_span(value: usize) -> usize {
-    if value == 0 { 1 } else { value.min(MAX_TABLE_COLS) }
+    if value == 0 {
+        1
+    } else {
+        value.min(MAX_TABLE_COLS)
+    }
 }
 
 /// Collect table cells (td/th) from a row element.
@@ -133,15 +137,24 @@ pub fn cell_text_content(
 
         if has_tag_child {
             for child_handle in children.top().iter() {
-                super::super::super::walk_node(child_handle, parser, &mut text, options, &cell_ctx, 0, dom_ctx);
+                super::super::super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut text,
+                    options,
+                    &cell_ctx,
+                    0,
+                    dom_ctx,
+                );
             }
         } else {
             let raw = dom_ctx.text_content(*node_handle, parser);
-            let normalized = if options.whitespace_mode == crate::options::WhitespaceMode::Normalized {
-                crate::text::normalize_whitespace_cow(raw.as_str())
-            } else {
-                Cow::Borrowed(raw.as_str())
-            };
+            let normalized =
+                if options.whitespace_mode == crate::options::WhitespaceMode::Normalized {
+                    crate::text::normalize_whitespace_cow(raw.as_str())
+                } else {
+                    Cow::Borrowed(raw.as_str())
+                };
             let escaped = escape_cell_text(normalized.as_ref(), options);
             text = escaped;
         }
@@ -214,15 +227,24 @@ pub fn convert_table_cell(
 
         if has_tag_child {
             for child_handle in children.top().iter() {
-                super::super::super::walk_node(child_handle, parser, &mut text, options, &cell_ctx, 0, dom_ctx);
+                super::super::super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut text,
+                    options,
+                    &cell_ctx,
+                    0,
+                    dom_ctx,
+                );
             }
         } else {
             let raw = dom_ctx.text_content(*node_handle, parser);
-            let normalized = if options.whitespace_mode == crate::options::WhitespaceMode::Normalized {
-                crate::text::normalize_whitespace_cow(raw.as_str())
-            } else {
-                Cow::Borrowed(raw.as_str())
-            };
+            let normalized =
+                if options.whitespace_mode == crate::options::WhitespaceMode::Normalized {
+                    crate::text::normalize_whitespace_cow(raw.as_str())
+                } else {
+                    Cow::Borrowed(raw.as_str())
+                };
             text = escape_cell_text(normalized.as_ref(), options);
         }
     }

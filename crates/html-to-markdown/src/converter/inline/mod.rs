@@ -115,7 +115,16 @@ pub fn dispatch_inline_handler(
     match tag_name {
         // Emphasis elements: strong, b (bold) and em, i (italic)
         "strong" | "b" | "em" | "i" => {
-            emphasis::handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            emphasis::handle(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         // Link elements: a (anchor)
@@ -125,17 +134,45 @@ pub fn dispatch_inline_handler(
         }
         // Code elements: code, kbd (keyboard input), samp (sample output)
         "code" | "kbd" | "samp" => {
-            code::handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            code::handle(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         // Semantic elements: mark, del, s, ins, u, small, sub, sup, var, dfn, abbr, span
-        "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr" | "span" => {
-            semantic::handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+        "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr"
+        | "span" => {
+            semantic::handle(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         // Ruby annotation elements: ruby, rb, rt, rp, rtc
         "ruby" | "rb" | "rt" | "rp" | "rtc" => {
-            ruby::handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            ruby::handle(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         // Unknown element - not handled by inline dispatcher

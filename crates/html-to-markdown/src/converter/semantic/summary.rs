@@ -99,7 +99,15 @@ pub fn handle_details(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, &mut content, options, ctx, depth, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                );
             }
         }
 
@@ -316,9 +324,36 @@ pub fn handle(
     dom_ctx: &super::DomContext,
 ) {
     match tag_name {
-        "details" => handle_details(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "summary" => handle_summary(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "dialog" => handle_dialog(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
+        "details" => handle_details(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "summary" => handle_summary(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "dialog" => handle_dialog(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
         _ => {}
     }
 }

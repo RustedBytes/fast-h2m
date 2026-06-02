@@ -17,8 +17,14 @@ fn test_basic_table() {
     </table>";
 
     let result = convert(html, None).unwrap();
-    assert!(result.contains("| Header 1"), "header row missing: {result}");
-    assert!(result.contains("| Header 2"), "header row missing: {result}");
+    assert!(
+        result.contains("| Header 1"),
+        "header row missing: {result}"
+    );
+    assert!(
+        result.contains("| Header 2"),
+        "header row missing: {result}"
+    );
     assert!(result.contains("| Cell 1"), "cell row missing: {result}");
     assert!(result.contains("| Cell 2"), "cell row missing: {result}");
     // Separator must exist; dashes are padded to column width so just check presence.
@@ -100,7 +106,10 @@ fn test_table_colspan() {
 </table>"#;
 
     let result = convert(html, None).unwrap();
-    assert!(result.contains("| Wide Header"), "Wide Header missing: {result}");
+    assert!(
+        result.contains("| Wide Header"),
+        "Wide Header missing: {result}"
+    );
     assert!(result.contains("| Cell 1"), "Cell 1 missing: {result}");
     assert!(result.contains("| Cell 2"), "Cell 2 missing: {result}");
 }
@@ -180,8 +189,14 @@ fn test_table_with_links() {
 
     let result = convert(html, None).unwrap();
     assert!(result.contains("| Name"), "Name column missing: {result}");
-    assert!(result.contains("| Website"), "Website column missing: {result}");
-    assert!(result.contains("[Link](https://example.com)"), "link missing: {result}");
+    assert!(
+        result.contains("| Website"),
+        "Website column missing: {result}"
+    );
+    assert!(
+        result.contains("[Link](https://example.com)"),
+        "link missing: {result}"
+    );
 }
 
 #[test]
@@ -192,7 +207,10 @@ fn test_table_with_code() {
 </table>";
 
     let result = convert(html, None).unwrap();
-    assert!(result.contains("| Command"), "Command column missing: {result}");
+    assert!(
+        result.contains("| Command"),
+        "Command column missing: {result}"
+    );
     assert!(result.contains("`ls -la`"), "code cell missing: {result}");
 }
 
@@ -215,11 +233,20 @@ fn test_table_single_column() {
 </table>";
 
     let result = convert(html, None).unwrap();
-    assert!(result.contains("| Header |"), "Header row missing: {result}");
+    assert!(
+        result.contains("| Header |"),
+        "Header row missing: {result}"
+    );
     // Separator dashes are padded to column width; just verify separator exists.
     assert!(result.contains("| ---"), "separator missing: {result}");
-    assert!(result.contains("| Cell 1 |"), "Cell 1 row missing: {result}");
-    assert!(result.contains("| Cell 2 |"), "Cell 2 row missing: {result}");
+    assert!(
+        result.contains("| Cell 1 |"),
+        "Cell 1 row missing: {result}"
+    );
+    assert!(
+        result.contains("| Cell 2 |"),
+        "Cell 2 row missing: {result}"
+    );
 }
 
 #[test]
@@ -267,8 +294,7 @@ fn test_table_with_image_no_rows() {
 #[test]
 fn test_table_with_link_and_image_no_rows() {
     // Test that link-wrapped images in tables without proper rows are processed
-    let html =
-        r#"<table><a href="https://example.com"><img src="https://example.com/image.jpg" alt="test"></a></table>"#;
+    let html = r#"<table><a href="https://example.com"><img src="https://example.com/image.jpg" alt="test"></a></table>"#;
     let result = convert(html, None).unwrap();
 
     assert!(
@@ -440,9 +466,18 @@ fn test_br_in_table_cell_with_consecutive_divs() {
     let result = convert(html, Some(options)).unwrap();
 
     // All three lines should be present in the output
-    assert!(result.contains("First line"), "Should contain first line: {result}");
-    assert!(result.contains("Second line"), "Should contain second line: {result}");
-    assert!(result.contains("Third line"), "Should contain third line: {result}");
+    assert!(
+        result.contains("First line"),
+        "Should contain first line: {result}"
+    );
+    assert!(
+        result.contains("Second line"),
+        "Should contain second line: {result}"
+    );
+    assert!(
+        result.contains("Third line"),
+        "Should contain third line: {result}"
+    );
 }
 
 #[test]
@@ -462,8 +497,14 @@ fn test_br_in_table_cell_with_formatting() {
     let result = convert(html, Some(options)).unwrap();
 
     // Both formatted texts should be present
-    assert!(result.contains("**Text1**"), "Expected first formatted text: {result}");
-    assert!(result.contains("**Text2**"), "Expected second formatted text: {result}");
+    assert!(
+        result.contains("**Text1**"),
+        "Expected first formatted text: {result}"
+    );
+    assert!(
+        result.contains("**Text2**"),
+        "Expected second formatted text: {result}"
+    );
 }
 
 #[test]

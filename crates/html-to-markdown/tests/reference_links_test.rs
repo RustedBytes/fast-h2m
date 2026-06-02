@@ -46,7 +46,8 @@ fn reference_link_with_title() {
 
 #[test]
 fn url_deduplication() {
-    let html = r#"<a href="https://example.com">First</a> <a href="https://example.com">Second</a>"#;
+    let html =
+        r#"<a href="https://example.com">First</a> <a href="https://example.com">Second</a>"#;
     let result = convert(html, Some(ref_options()));
     assert!(
         result.contains("[First][1]"),
@@ -63,8 +64,7 @@ fn url_deduplication() {
 
 #[test]
 fn different_titles_different_refs() {
-    let html =
-        r#"<a href="https://example.com" title="A">First</a> <a href="https://example.com" title="B">Second</a>"#;
+    let html = r#"<a href="https://example.com" title="A">First</a> <a href="https://example.com" title="B">Second</a>"#;
     let result = convert(html, Some(ref_options()));
     assert!(
         result.contains("[First][1]"),
@@ -94,8 +94,14 @@ fn image_reference_style() {
 fn mixed_links_and_images_share_numbering() {
     let html = r#"<a href="https://a.com">Link</a><img src="https://b.com/img.png" alt="Img">"#;
     let result = convert(html, Some(ref_options()));
-    assert!(result.contains("[Link][1]"), "Expected link as ref 1, got: {result}");
-    assert!(result.contains("![Img][2]"), "Expected image as ref 2, got: {result}");
+    assert!(
+        result.contains("[Link][1]"),
+        "Expected link as ref 1, got: {result}"
+    );
+    assert!(
+        result.contains("![Img][2]"),
+        "Expected image as ref 2, got: {result}"
+    );
 }
 
 #[test]

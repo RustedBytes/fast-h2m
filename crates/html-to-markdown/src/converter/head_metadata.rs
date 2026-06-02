@@ -21,7 +21,11 @@ use crate::text;
 /// true AND the prescan captured a head range AND at least one metadata
 /// field was found.  Returns `None` otherwise — callers should prepend the
 /// returned string to the body only when `Some` is returned.
-pub fn extract_frontmatter(html: &str, report: &PrescanReport, options: &ConversionOptions) -> Option<String> {
+pub fn extract_frontmatter(
+    html: &str,
+    report: &PrescanReport,
+    options: &ConversionOptions,
+) -> Option<String> {
     if !options.extract_metadata {
         return None;
     }
@@ -130,7 +134,9 @@ fn extract_title(tag: &tl::HTMLTag, parser: &tl::Parser, metadata: &mut BTreeMap
     if let Some(first_child) = children.top().iter().next() {
         if let Some(text_node) = first_child.get(parser) {
             if let tl::Node::Raw(bytes) = text_node {
-                let title = text::normalize_whitespace(&bytes.as_utf8_str()).trim().to_string();
+                let title = text::normalize_whitespace(&bytes.as_utf8_str())
+                    .trim()
+                    .to_string();
                 if !title.is_empty() {
                     metadata.insert("title".to_string(), title);
                 }
@@ -228,7 +234,10 @@ fn format_metadata_frontmatter(metadata: &BTreeMap<String, String>) -> String {
 
     let mut lines = vec!["---".to_string()];
     for (key, value) in metadata {
-        let needs_quotes = value.contains(':') || value.contains('#') || value.contains('[') || value.contains(']');
+        let needs_quotes = value.contains(':')
+            || value.contains('#')
+            || value.contains('[')
+            || value.contains(']');
         if needs_quotes {
             let escaped = value.replace('\\', "\\\\").replace('"', "\\\"");
             lines.push(format!("{key}: \"{escaped}\""));

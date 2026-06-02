@@ -63,23 +63,68 @@ pub fn dispatch_media_handler(
             true
         }
         "video" => {
-            embedded::handle_video(node_handle, tag, parser, output, options, ctx, depth, dom_ctx);
+            embedded::handle_video(
+                node_handle,
+                tag,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         "audio" => {
-            embedded::handle_audio(node_handle, tag, parser, output, options, ctx, depth, dom_ctx);
+            embedded::handle_audio(
+                node_handle,
+                tag,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         "picture" => {
-            embedded::handle_picture(node_handle, tag, parser, output, options, ctx, depth, dom_ctx);
+            embedded::handle_picture(
+                node_handle,
+                tag,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         "svg" => {
-            svg::handle_svg(node_handle, tag, parser, output, options, ctx, depth, dom_ctx);
+            svg::handle_svg(
+                node_handle,
+                tag,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         "math" => {
-            svg::handle_math(node_handle, tag, parser, output, options, ctx, depth, dom_ctx);
+            svg::handle_math(
+                node_handle,
+                tag,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         _ => false,

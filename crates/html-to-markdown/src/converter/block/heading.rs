@@ -40,7 +40,11 @@ pub fn handle(
     // Import walk_node from parent converter module
     use crate::converter::walk_node;
 
-    let level = tag_name.chars().last().and_then(|c| c.to_digit(10)).unwrap_or(1) as usize;
+    let level = tag_name
+        .chars()
+        .last()
+        .and_then(|c| c.to_digit(10))
+        .unwrap_or(1) as usize;
 
     // Add spacing before heading if needed (similar to paragraph handling)
     let needs_leading_sep = !ctx.in_table_cell
@@ -59,7 +63,10 @@ pub fn handle(
     let heading_ctx = Context {
         in_heading: true,
         convert_as_inline: true,
-        heading_allow_inline_images: heading_allows_inline_images(tag_name, &ctx.keep_inline_images_in),
+        heading_allow_inline_images: heading_allows_inline_images(
+            tag_name,
+            &ctx.keep_inline_images_in,
+        ),
         ..ctx.clone()
     };
 
@@ -119,9 +126,13 @@ pub fn handle(
                             .get("id")
                             .flatten()
                             .map(|v| v.as_utf8_str().to_string());
-                        collector
-                            .borrow_mut()
-                            .add_header(level as u8, normalized.to_string(), id, depth, 0);
+                        collector.borrow_mut().add_header(
+                            level as u8,
+                            normalized.to_string(),
+                            id,
+                            depth,
+                            0,
+                        );
                     }
                 }
             }
@@ -139,8 +150,11 @@ pub fn handle(
                             .get("id")
                             .flatten()
                             .map(|v| v.as_utf8_str().to_string());
-                        sc.borrow_mut()
-                            .push_heading(level as u8, normalized.as_ref(), id.as_deref());
+                        sc.borrow_mut().push_heading(
+                            level as u8,
+                            normalized.as_ref(),
+                            id.as_deref(),
+                        );
                     }
                 }
             }
@@ -189,7 +203,13 @@ fn normalize_heading_text(text: &str) -> Cow<'_, str> {
 }
 
 /// Format heading output with appropriate markdown syntax.
-pub fn push_heading(output: &mut String, ctx: &Context, options: &ConversionOptions, level: usize, text: &str) {
+pub fn push_heading(
+    output: &mut String,
+    ctx: &Context,
+    options: &ConversionOptions,
+    level: usize,
+    text: &str,
+) {
     if text.is_empty() {
         return;
     }
@@ -200,8 +220,10 @@ pub fn push_heading(output: &mut String, ctx: &Context, options: &ConversionOpti
     }
 
     if ctx.in_table_cell {
-        let is_table_continuation =
-            !output.is_empty() && !output.ends_with('|') && !output.ends_with(' ') && !output.ends_with("<br>");
+        let is_table_continuation = !output.is_empty()
+            && !output.ends_with('|')
+            && !output.ends_with(' ')
+            && !output.ends_with("<br>");
         if is_table_continuation {
             output.push_str("<br>");
         }
@@ -374,7 +396,10 @@ fn visitor_heading_output(
 /// - Multiple headings are found
 /// - Non-whitespace non-heading content exists
 /// - Non-text comments exist
-pub fn find_single_heading_child(node_handle: NodeHandle, parser: &Parser) -> Option<(usize, NodeHandle)> {
+pub fn find_single_heading_child(
+    node_handle: NodeHandle,
+    parser: &Parser,
+) -> Option<(usize, NodeHandle)> {
     let node = node_handle.get(parser)?;
 
     let tl::Node::Tag(tag) = node else {
@@ -396,7 +421,9 @@ pub fn find_single_heading_child(node_handle: NodeHandle, parser: &Parser) -> Op
                 }
             }
             tl::Node::Tag(child_tag) => {
-                let name = crate::converter::utility::content::normalized_tag_name(child_tag.name().as_utf8_str());
+                let name = crate::converter::utility::content::normalized_tag_name(
+                    child_tag.name().as_utf8_str(),
+                );
                 {
                     let level = heading_level_from_name(name.as_ref())?;
                     if heading_data.is_some() {

@@ -8,7 +8,9 @@
 
 #![cfg(feature = "visitor")]
 
-use html_to_markdown_rs::visitor::{HtmlVisitor, NodeContext, NodeType, VisitResult, VisitorHandle};
+use html_to_markdown_rs::visitor::{
+    HtmlVisitor, NodeContext, NodeType, VisitResult, VisitorHandle,
+};
 use html_to_markdown_rs::{ConversionError, ConversionOptions, ConversionResult};
 use std::sync::{Arc, Mutex};
 
@@ -33,7 +35,12 @@ fn test_visitor_form_custom_overrides_preprocessing() {
     #[derive(Debug, Default)]
     struct FormVisitor;
     impl HtmlVisitor for FormVisitor {
-        fn visit_form(&mut self, _ctx: &NodeContext, action: Option<&str>, _method: Option<&str>) -> VisitResult {
+        fn visit_form(
+            &mut self,
+            _ctx: &NodeContext,
+            action: Option<&str>,
+            _method: Option<&str>,
+        ) -> VisitResult {
             VisitResult::Custom(format!("[FORM:{}]", action.unwrap_or("none")))
         }
     }
@@ -90,7 +97,8 @@ fn test_visitor_figure_start_end_both_called() {
             VisitResult::Custom(format!("{output}[/FIGURE]"))
         }
     }
-    let html = r#"<figure><img src="test.jpg" alt="test"><figcaption>Caption</figcaption></figure>"#;
+    let html =
+        r#"<figure><img src="test.jpg" alt="test"><figcaption>Caption</figcaption></figure>"#;
     let visitor: VisitorHandle = Arc::new(Mutex::new(FigureVisitor));
     let result = convert(html, None, Some(visitor))
         .expect("conversion failed")
@@ -115,15 +123,33 @@ impl HtmlVisitor for CustomizingVisitor {
         VisitResult::Custom(format!("[TEXT:{text}]"))
     }
 
-    fn visit_link(&mut self, _ctx: &NodeContext, href: &str, text: &str, _title: Option<&str>) -> VisitResult {
+    fn visit_link(
+        &mut self,
+        _ctx: &NodeContext,
+        href: &str,
+        text: &str,
+        _title: Option<&str>,
+    ) -> VisitResult {
         VisitResult::Custom(format!("[LINK:{text} -> {href}]"))
     }
 
-    fn visit_image(&mut self, _ctx: &NodeContext, src: &str, alt: &str, _title: Option<&str>) -> VisitResult {
+    fn visit_image(
+        &mut self,
+        _ctx: &NodeContext,
+        src: &str,
+        alt: &str,
+        _title: Option<&str>,
+    ) -> VisitResult {
         VisitResult::Custom(format!("[IMAGE:{alt} @ {src}]"))
     }
 
-    fn visit_heading(&mut self, _ctx: &NodeContext, level: u32, text: &str, _id: Option<&str>) -> VisitResult {
+    fn visit_heading(
+        &mut self,
+        _ctx: &NodeContext,
+        level: u32,
+        text: &str,
+        _id: Option<&str>,
+    ) -> VisitResult {
         VisitResult::Custom(format!("[H{level}: {text}]"))
     }
 }
@@ -136,7 +162,13 @@ struct SkippingVisitor {
 }
 
 impl HtmlVisitor for SkippingVisitor {
-    fn visit_link(&mut self, _ctx: &NodeContext, _href: &str, _text: &str, _title: Option<&str>) -> VisitResult {
+    fn visit_link(
+        &mut self,
+        _ctx: &NodeContext,
+        _href: &str,
+        _text: &str,
+        _title: Option<&str>,
+    ) -> VisitResult {
         if self.skip_links {
             VisitResult::Skip
         } else {
@@ -144,7 +176,13 @@ impl HtmlVisitor for SkippingVisitor {
         }
     }
 
-    fn visit_image(&mut self, _ctx: &NodeContext, _src: &str, _alt: &str, _title: Option<&str>) -> VisitResult {
+    fn visit_image(
+        &mut self,
+        _ctx: &NodeContext,
+        _src: &str,
+        _alt: &str,
+        _title: Option<&str>,
+    ) -> VisitResult {
         if self.skip_images {
             VisitResult::Skip
         } else {
@@ -160,7 +198,13 @@ struct PreservingVisitor {
 }
 
 impl HtmlVisitor for PreservingVisitor {
-    fn visit_link(&mut self, _ctx: &NodeContext, _href: &str, _text: &str, _title: Option<&str>) -> VisitResult {
+    fn visit_link(
+        &mut self,
+        _ctx: &NodeContext,
+        _href: &str,
+        _text: &str,
+        _title: Option<&str>,
+    ) -> VisitResult {
         if self.preserve_links {
             VisitResult::PreserveHtml
         } else {
@@ -176,7 +220,13 @@ struct ContextCheckingVisitor {
 }
 
 impl HtmlVisitor for ContextCheckingVisitor {
-    fn visit_heading(&mut self, ctx: &NodeContext, _level: u32, _text: &str, _id: Option<&str>) -> VisitResult {
+    fn visit_heading(
+        &mut self,
+        ctx: &NodeContext,
+        _level: u32,
+        _text: &str,
+        _id: Option<&str>,
+    ) -> VisitResult {
         assert_eq!(ctx.node_type, NodeType::Heading);
         assert_eq!(ctx.tag_name, "h1");
 
@@ -198,7 +248,10 @@ fn test_custom_visitor_transforms_text() {
         .content
         .unwrap_or_default();
 
-    assert!(result.contains("[TEXT:"), "Should contain custom text format");
+    assert!(
+        result.contains("[TEXT:"),
+        "Should contain custom text format"
+    );
 }
 
 #[test]
@@ -290,7 +343,9 @@ fn test_skipping_visitor_removes_images() {
 #[test]
 fn test_preserving_visitor_keeps_html() {
     let html = r#"<a href="https://example.com" class="special">Example</a>"#;
-    let visitor = Arc::new(Mutex::new(PreservingVisitor { preserve_links: true }));
+    let visitor = Arc::new(Mutex::new(PreservingVisitor {
+        preserve_links: true,
+    }));
 
     let result = convert(html, None, Some(visitor))
         .expect("conversion failed")
@@ -378,7 +433,13 @@ fn test_visitor_continue_result_produces_default_markdown() {
     struct ContinueVisitor;
 
     impl HtmlVisitor for ContinueVisitor {
-        fn visit_heading(&mut self, _ctx: &NodeContext, _level: u32, _text: &str, _id: Option<&str>) -> VisitResult {
+        fn visit_heading(
+            &mut self,
+            _ctx: &NodeContext,
+            _level: u32,
+            _text: &str,
+            _id: Option<&str>,
+        ) -> VisitResult {
             VisitResult::Continue
         }
     }
@@ -405,7 +466,13 @@ fn test_visitor_skip_vs_continue() {
     }
 
     impl HtmlVisitor for SelectiveSkipper {
-        fn visit_link(&mut self, _ctx: &NodeContext, _href: &str, _text: &str, _title: Option<&str>) -> VisitResult {
+        fn visit_link(
+            &mut self,
+            _ctx: &NodeContext,
+            _href: &str,
+            _text: &str,
+            _title: Option<&str>,
+        ) -> VisitResult {
             if self.skip_first_link {
                 self.skip_first_link = false;
                 VisitResult::Skip
@@ -416,7 +483,9 @@ fn test_visitor_skip_vs_continue() {
     }
 
     let html = r#"<p><a href="/first">First</a> and <a href="/second">Second</a></p>"#;
-    let visitor = Arc::new(Mutex::new(SelectiveSkipper { skip_first_link: true }));
+    let visitor = Arc::new(Mutex::new(SelectiveSkipper {
+        skip_first_link: true,
+    }));
 
     let result = convert(html, None, Some(visitor))
         .expect("conversion failed")
@@ -471,7 +540,10 @@ fn test_visitor_error_stops_conversion() {
     let visitor = Arc::new(Mutex::new(ErrorVisitor));
     let result = convert(html, None, Some(visitor));
 
-    assert!(result.is_err(), "Should return error when visitor returns Error");
+    assert!(
+        result.is_err(),
+        "Should return error when visitor returns Error"
+    );
     assert!(
         result.unwrap_err().to_string().contains("test error"),
         "Error message should contain visitor's error"
@@ -484,7 +556,12 @@ fn test_visitor_code_block() {
     struct CodeBlockVisitor;
 
     impl HtmlVisitor for CodeBlockVisitor {
-        fn visit_code_block(&mut self, _ctx: &NodeContext, language: Option<&str>, code: &str) -> VisitResult {
+        fn visit_code_block(
+            &mut self,
+            _ctx: &NodeContext,
+            language: Option<&str>,
+            code: &str,
+        ) -> VisitResult {
             let lang = language.unwrap_or("text");
             VisitResult::Custom(format!("[CODE_BLOCK:{} -> {}]", lang, code.trim()))
         }
@@ -544,11 +621,22 @@ fn test_visitor_list_callbacks() {
             ))
         }
 
-        fn visit_list_item(&mut self, _ctx: &NodeContext, _ordered: bool, _marker: &str, text: &str) -> VisitResult {
+        fn visit_list_item(
+            &mut self,
+            _ctx: &NodeContext,
+            _ordered: bool,
+            _marker: &str,
+            text: &str,
+        ) -> VisitResult {
             VisitResult::Custom(format!("[LI:{}:{}]", self.list_depth, text.trim()))
         }
 
-        fn visit_list_end(&mut self, _ctx: &NodeContext, _ordered: bool, _output: &str) -> VisitResult {
+        fn visit_list_end(
+            &mut self,
+            _ctx: &NodeContext,
+            _ordered: bool,
+            _output: &str,
+        ) -> VisitResult {
             let result = VisitResult::Custom(format!("[LIST_END:{}]", self.list_depth));
             self.list_depth = self.list_depth.saturating_sub(1);
             result
@@ -566,12 +654,18 @@ fn test_visitor_list_callbacks() {
         result.contains("[LIST_START:UL:1]"),
         "Should see list start, got: {result}"
     );
-    assert!(result.contains("[LI:1:First]"), "Should see first item, got: {result}");
+    assert!(
+        result.contains("[LI:1:First]"),
+        "Should see first item, got: {result}"
+    );
     assert!(
         result.contains("[LI:1:Second]"),
         "Should see second item, got: {result}"
     );
-    assert!(result.contains("[LIST_END:1]"), "Should see list end, got: {result}");
+    assert!(
+        result.contains("[LIST_END:1]"),
+        "Should see list end, got: {result}"
+    );
 }
 
 #[test]
@@ -587,7 +681,12 @@ fn test_visitor_table_callbacks() {
             VisitResult::Custom("[TABLE_START]".to_string())
         }
 
-        fn visit_table_row(&mut self, _ctx: &NodeContext, cells: &[String], is_header: bool) -> VisitResult {
+        fn visit_table_row(
+            &mut self,
+            _ctx: &NodeContext,
+            cells: &[String],
+            is_header: bool,
+        ) -> VisitResult {
             self.row_count += 1;
             VisitResult::Custom(format!(
                 "[ROW:{}:{}:{}]",
@@ -602,7 +701,8 @@ fn test_visitor_table_callbacks() {
         }
     }
 
-    let html = r"<table><tr><th>Name</th><th>Age</th></tr><tr><td>Alice</td><td>30</td></tr></table>";
+    let html =
+        r"<table><tr><th>Name</th><th>Age</th></tr><tr><td>Alice</td><td>30</td></tr></table>";
     let visitor = Arc::new(Mutex::new(TableVisitor::default()));
     let result = convert(html, None, Some(visitor))
         .expect("conversion failed")
@@ -621,7 +721,10 @@ fn test_visitor_table_callbacks() {
         result.contains("[ROW:DATA:2:Alice|30]"),
         "Should see data row, got: {result}"
     );
-    assert!(result.contains("[TABLE_END:2]"), "Should see table end, got: {result}");
+    assert!(
+        result.contains("[TABLE_END:2]"),
+        "Should see table end, got: {result}"
+    );
 }
 
 #[test]
@@ -630,7 +733,12 @@ fn test_visitor_blockquote() {
     struct BlockquoteVisitor;
 
     impl HtmlVisitor for BlockquoteVisitor {
-        fn visit_blockquote(&mut self, _ctx: &NodeContext, content: &str, _depth: usize) -> VisitResult {
+        fn visit_blockquote(
+            &mut self,
+            _ctx: &NodeContext,
+            content: &str,
+            _depth: usize,
+        ) -> VisitResult {
             VisitResult::Custom(format!("[QUOTE:{}]", content.trim()))
         }
     }
@@ -674,8 +782,14 @@ fn test_visitor_inline_formatting() {
         .content
         .unwrap_or_default();
 
-    assert!(result.contains("[STRONG:bold]"), "Should see strong, got: {result}");
-    assert!(result.contains("[EM:italic]"), "Should see emphasis, got: {result}");
+    assert!(
+        result.contains("[STRONG:bold]"),
+        "Should see strong, got: {result}"
+    );
+    assert!(
+        result.contains("[EM:italic]"),
+        "Should see emphasis, got: {result}"
+    );
     assert!(
         result.contains("[DEL:struck]"),
         "Should see strikethrough, got: {result}"
@@ -695,7 +809,13 @@ fn test_no_double_visit_in_links() {
             VisitResult::Continue
         }
 
-        fn visit_link(&mut self, _ctx: &NodeContext, _href: &str, _text: &str, _title: Option<&str>) -> VisitResult {
+        fn visit_link(
+            &mut self,
+            _ctx: &NodeContext,
+            _href: &str,
+            _text: &str,
+            _title: Option<&str>,
+        ) -> VisitResult {
             VisitResult::Continue
         }
     }
@@ -725,7 +845,13 @@ fn test_no_double_visit_in_headings() {
             VisitResult::Continue
         }
 
-        fn visit_heading(&mut self, _ctx: &NodeContext, _level: u32, _text: &str, _id: Option<&str>) -> VisitResult {
+        fn visit_heading(
+            &mut self,
+            _ctx: &NodeContext,
+            _level: u32,
+            _text: &str,
+            _id: Option<&str>,
+        ) -> VisitResult {
             VisitResult::Continue
         }
     }
@@ -755,7 +881,13 @@ fn test_visitor_with_skip_images() {
     }
 
     impl HtmlVisitor for SkipImageVisitor {
-        fn visit_image(&mut self, _ctx: &NodeContext, _src: &str, _alt: &str, _title: Option<&str>) -> VisitResult {
+        fn visit_image(
+            &mut self,
+            _ctx: &NodeContext,
+            _src: &str,
+            _alt: &str,
+            _title: Option<&str>,
+        ) -> VisitResult {
             self.image_visits += 1;
             VisitResult::Continue
         }
@@ -815,7 +947,13 @@ fn test_convert_accepts_visitor_parameter() {
             VisitResult::Continue
         }
 
-        fn visit_link(&mut self, _ctx: &NodeContext, _href: &str, _text: &str, _title: Option<&str>) -> VisitResult {
+        fn visit_link(
+            &mut self,
+            _ctx: &NodeContext,
+            _href: &str,
+            _text: &str,
+            _title: Option<&str>,
+        ) -> VisitResult {
             self.link_count += 1;
             VisitResult::Continue
         }
@@ -825,7 +963,8 @@ fn test_convert_accepts_visitor_parameter() {
     let visitor = Arc::new(Mutex::new(CountingVisitor::default()));
 
     // Test using the main convert() function with visitor parameter
-    let _result = convert(html, None, Some(visitor.clone())).expect("convert with visitor should work");
+    let _result =
+        convert(html, None, Some(visitor.clone())).expect("convert with visitor should work");
 
     let borrowed = visitor.lock().expect("visitor mutex poisoned");
     assert!(
@@ -854,7 +993,13 @@ fn test_convert_with_inline_images_accepts_visitor() {
     }
 
     impl HtmlVisitor for ImageTrackingVisitor {
-        fn visit_image(&mut self, _ctx: &NodeContext, src: &str, _alt: &str, _title: Option<&str>) -> VisitResult {
+        fn visit_image(
+            &mut self,
+            _ctx: &NodeContext,
+            src: &str,
+            _alt: &str,
+            _title: Option<&str>,
+        ) -> VisitResult {
             if !src.starts_with("data:") {
                 self.images_seen += 1;
             }
@@ -900,12 +1045,24 @@ fn test_visitor_and_metadata_both_work() {
     }
 
     impl HtmlVisitor for MetadataAwareVisitor {
-        fn visit_heading(&mut self, _ctx: &NodeContext, _level: u32, _text: &str, _id: Option<&str>) -> VisitResult {
+        fn visit_heading(
+            &mut self,
+            _ctx: &NodeContext,
+            _level: u32,
+            _text: &str,
+            _id: Option<&str>,
+        ) -> VisitResult {
             self.heading_count += 1;
             VisitResult::Continue
         }
 
-        fn visit_link(&mut self, _ctx: &NodeContext, _href: &str, _text: &str, _title: Option<&str>) -> VisitResult {
+        fn visit_link(
+            &mut self,
+            _ctx: &NodeContext,
+            _href: &str,
+            _text: &str,
+            _title: Option<&str>,
+        ) -> VisitResult {
             self.link_count += 1;
             VisitResult::Continue
         }
@@ -982,17 +1139,35 @@ fn test_convert_with_all_features_and_visitor() {
     }
 
     impl HtmlVisitor for ComprehensiveVisitor {
-        fn visit_heading(&mut self, _ctx: &NodeContext, _level: u32, _text: &str, _id: Option<&str>) -> VisitResult {
+        fn visit_heading(
+            &mut self,
+            _ctx: &NodeContext,
+            _level: u32,
+            _text: &str,
+            _id: Option<&str>,
+        ) -> VisitResult {
             self.headings += 1;
             VisitResult::Continue
         }
 
-        fn visit_image(&mut self, _ctx: &NodeContext, _src: &str, _alt: &str, _title: Option<&str>) -> VisitResult {
+        fn visit_image(
+            &mut self,
+            _ctx: &NodeContext,
+            _src: &str,
+            _alt: &str,
+            _title: Option<&str>,
+        ) -> VisitResult {
             self.images += 1;
             VisitResult::Continue
         }
 
-        fn visit_link(&mut self, _ctx: &NodeContext, _href: &str, _text: &str, _title: Option<&str>) -> VisitResult {
+        fn visit_link(
+            &mut self,
+            _ctx: &NodeContext,
+            _href: &str,
+            _text: &str,
+            _title: Option<&str>,
+        ) -> VisitResult {
             self.links += 1;
             VisitResult::Continue
         }
@@ -1030,7 +1205,11 @@ fn test_convert_with_all_features_and_visitor() {
         "Visitor should see 2 images, got {}",
         borrowed.images
     );
-    assert_eq!(borrowed.links, 2, "Visitor should see 2 links, got {}", borrowed.links);
+    assert_eq!(
+        borrowed.links, 2,
+        "Visitor should see 2 links, got {}",
+        borrowed.links
+    );
     drop(borrowed);
 
     // Verify markdown was produced
@@ -1050,7 +1229,13 @@ fn test_image_visitor_with_metadata_does_not_panic() {
     struct ImageVisitor;
 
     impl HtmlVisitor for ImageVisitor {
-        fn visit_image(&mut self, _ctx: &NodeContext, _src: &str, _alt: &str, _title: Option<&str>) -> VisitResult {
+        fn visit_image(
+            &mut self,
+            _ctx: &NodeContext,
+            _src: &str,
+            _alt: &str,
+            _title: Option<&str>,
+        ) -> VisitResult {
             VisitResult::Custom("![img](rewritten.png)".to_string())
         }
     }
@@ -1061,8 +1246,16 @@ fn test_image_visitor_with_metadata_does_not_panic() {
         ..Default::default()
     };
 
-    let result = convert(html, Some(options), Some(Arc::new(Mutex::new(ImageVisitor))));
-    assert!(result.is_ok(), "conversion panicked or errored: {:?}", result.err());
+    let result = convert(
+        html,
+        Some(options),
+        Some(Arc::new(Mutex::new(ImageVisitor))),
+    );
+    assert!(
+        result.is_ok(),
+        "conversion panicked or errored: {:?}",
+        result.err()
+    );
 }
 
 /// Regression test: `visit_element_end` returning Custom/Skip with metadata extraction used
@@ -1087,10 +1280,22 @@ fn test_element_end_replacement_with_metadata_preserves_subsequent_content() {
         ..Default::default()
     };
 
-    let result = convert(html, Some(options), Some(Arc::new(Mutex::new(FigureReplacingVisitor))));
-    assert!(result.is_ok(), "conversion panicked or errored: {:?}", result.err());
+    let result = convert(
+        html,
+        Some(options),
+        Some(Arc::new(Mutex::new(FigureReplacingVisitor))),
+    );
     assert!(
-        result.unwrap().content.unwrap_or_default().contains("after"),
+        result.is_ok(),
+        "conversion panicked or errored: {:?}",
+        result.err()
+    );
+    assert!(
+        result
+            .unwrap()
+            .content
+            .unwrap_or_default()
+            .contains("after"),
         "content after replaced element should not be lost"
     );
 }
@@ -1133,9 +1338,17 @@ fn test_issue_331_hyphenated_tags_xml_self_closing_visitor_events() {
 
     let visitor = Arc::new(Mutex::new(EventRecorder::default()));
     let result = convert(html, None, Some(visitor.clone()));
-    assert!(result.is_ok(), "conversion should succeed: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "conversion should succeed: {:?}",
+        result.err()
+    );
 
-    let events = visitor.lock().expect("visitor mutex poisoned").events.clone();
+    let events = visitor
+        .lock()
+        .expect("visitor mutex poisoned")
+        .events
+        .clone();
 
     // Find the indices of start/end pairs for the two ac:parameter elements.
     // With correct XML self-closing handling:

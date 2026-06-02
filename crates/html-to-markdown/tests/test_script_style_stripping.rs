@@ -20,11 +20,20 @@ fn test_strip_simple_script_tag() {
     println!("Output:\n{result}");
 
     // Should extract body content
-    assert!(result.contains("Real content"), "Should contain body content");
+    assert!(
+        result.contains("Real content"),
+        "Should contain body content"
+    );
 
     // Script content should not appear in output
-    assert!(!result.contains("var x"), "Script content should be removed");
-    assert!(!result.contains("var y"), "Script content should be removed");
+    assert!(
+        !result.contains("var x"),
+        "Script content should be removed"
+    );
+    assert!(
+        !result.contains("var y"),
+        "Script content should be removed"
+    );
 }
 
 #[test]
@@ -59,8 +68,14 @@ fn test_strip_script_with_html_like_content() {
     );
 
     // Script content should NOT appear
-    assert!(!result.contains("fake"), "Fake HTML from script should be removed");
-    assert!(!result.contains("var data"), "Script variables should not appear");
+    assert!(
+        !result.contains("fake"),
+        "Fake HTML from script should be removed"
+    );
+    assert!(
+        !result.contains("var data"),
+        "Script variables should not appear"
+    );
 }
 
 #[test]
@@ -84,11 +99,20 @@ fn test_strip_style_tag() {
     println!("Output:\n{result}");
 
     // Should have body content
-    assert!(result.contains("Paragraph content"), "Should contain paragraph");
+    assert!(
+        result.contains("Paragraph content"),
+        "Should contain paragraph"
+    );
 
     // Style content should be removed
-    assert!(!result.contains("content:"), "CSS should not appear in output");
-    assert!(!result.contains("display:"), "CSS properties should not appear");
+    assert!(
+        !result.contains("content:"),
+        "CSS should not appear in output"
+    );
+    assert!(
+        !result.contains("display:"),
+        "CSS properties should not appear"
+    );
 }
 
 #[test]
@@ -119,7 +143,10 @@ fn test_preserve_json_ld_script() {
     println!("Metadata: {:?}", metadata.document.title);
 
     // Should extract both content and metadata
-    assert!(markdown.contains("Article content"), "Should contain body content");
+    assert!(
+        markdown.contains("Article content"),
+        "Should contain body content"
+    );
 
     // Should have extracted metadata
     assert_eq!(
@@ -129,7 +156,10 @@ fn test_preserve_json_ld_script() {
     );
 
     // JSON-LD should be in structured data
-    assert!(!metadata.structured_data.is_empty(), "Should extract JSON-LD");
+    assert!(
+        !metadata.structured_data.is_empty(),
+        "Should extract JSON-LD"
+    );
     if let Some(schema) = metadata.structured_data.first() {
         assert!(
             schema.raw_json.contains("Article"),
@@ -179,8 +209,14 @@ fn test_multiple_script_tags() {
         !markdown.contains("Fake paragraph"),
         "Should not have fake HTML from script"
     );
-    assert!(!markdown.contains("console.log"), "Should not have console.log");
-    assert!(!markdown.contains("document.write"), "Should not have document.write");
+    assert!(
+        !markdown.contains("console.log"),
+        "Should not have console.log"
+    );
+    assert!(
+        !markdown.contains("document.write"),
+        "Should not have document.write"
+    );
 
     // JSON-LD should be extracted in metadata
     assert!(
@@ -240,7 +276,10 @@ fn test_reuters_like_structure() {
     );
 
     // Should have article content
-    assert!(markdown.contains("SAN FRANCISCO"), "Should contain first paragraph");
+    assert!(
+        markdown.contains("SAN FRANCISCO"),
+        "Should contain first paragraph"
+    );
     assert!(
         markdown.contains("widespread power outage"),
         "Should contain article text"
@@ -251,7 +290,10 @@ fn test_reuters_like_structure() {
     );
 
     // Should NOT have fake content from script
-    assert!(!markdown.contains("window.data"), "Should not have window.data");
+    assert!(
+        !markdown.contains("window.data"),
+        "Should not have window.data"
+    );
     assert!(
         !markdown.contains("'<div data-testid"),
         "Should not have fake HTML strings from script"
@@ -329,9 +371,18 @@ fn test_case_insensitive_script_style_tags() {
     assert!(result.contains("Content"), "Should have content");
 
     // Should not have script content regardless of case
-    assert!(!result.contains("console.log"), "Should remove SCRIPT tag content");
-    assert!(!result.contains("margin:"), "Should remove STYLE tag content");
-    assert!(!result.contains("var x"), "Should remove ScRiPt tag content");
+    assert!(
+        !result.contains("console.log"),
+        "Should remove SCRIPT tag content"
+    );
+    assert!(
+        !result.contains("margin:"),
+        "Should remove STYLE tag content"
+    );
+    assert!(
+        !result.contains("var x"),
+        "Should remove ScRiPt tag content"
+    );
 }
 
 #[test]

@@ -97,7 +97,10 @@ pub enum NodeData {
     },
 
     /// A Processing instruction.
-    ProcessingInstruction { target: StrTendril, contents: StrTendril },
+    ProcessingInstruction {
+        target: StrTendril,
+        contents: StrTendril,
+    },
 }
 
 /// A DOM node.
@@ -128,7 +131,8 @@ impl Drop for Node {
             let children = mem::take(&mut *node.children.borrow_mut());
             nodes.extend(children);
             if let NodeData::Element {
-                ref template_contents, ..
+                ref template_contents,
+                ..
             } = node.data
             {
                 if let Some(template_contents) = template_contents.borrow_mut().take() {
@@ -235,7 +239,8 @@ impl TreeSink for RcDom {
 
     fn get_template_contents(&self, target: &Handle) -> Handle {
         if let NodeData::Element {
-            ref template_contents, ..
+            ref template_contents,
+            ..
         } = target.data
         {
             template_contents
@@ -281,7 +286,10 @@ impl TreeSink for RcDom {
     }
 
     fn create_pi(&self, target: StrTendril, data: StrTendril) -> Handle {
-        Node::new(NodeData::ProcessingInstruction { target, contents: data })
+        Node::new(NodeData::ProcessingInstruction {
+            target,
+            contents: data,
+        })
     }
 
     fn append(&self, parent: &Handle, child: NodeOrText<Handle>) {
@@ -306,7 +314,8 @@ impl TreeSink for RcDom {
     }
 
     fn append_before_sibling(&self, sibling: &Handle, child: NodeOrText<Handle>) {
-        let (parent, i) = get_parent_and_index(sibling).expect("append_before_sibling called on node without parent");
+        let (parent, i) = get_parent_and_index(sibling)
+            .expect("append_before_sibling called on node without parent");
 
         let child = match (child, i) {
             // No previous node.
@@ -356,7 +365,12 @@ impl TreeSink for RcDom {
         }
     }
 
-    fn append_doctype_to_document(&self, name: StrTendril, public_id: StrTendril, system_id: StrTendril) {
+    fn append_doctype_to_document(
+        &self,
+        name: StrTendril,
+        public_id: StrTendril,
+        system_id: StrTendril,
+    ) {
         append(
             &self.document,
             Node::new(NodeData::Doctype {
@@ -374,8 +388,15 @@ impl TreeSink for RcDom {
             panic!("not an element")
         };
 
-        let existing_names = existing.iter().map(|e| e.name.clone()).collect::<HashSet<_>>();
-        existing.extend(attrs.into_iter().filter(|attr| !existing_names.contains(&attr.name)));
+        let existing_names = existing
+            .iter()
+            .map(|e| e.name.clone())
+            .collect::<HashSet<_>>();
+        existing.extend(
+            attrs
+                .into_iter()
+                .filter(|attr| !existing_names.contains(&attr.name)),
+        );
     }
 
     fn remove_from_parent(&self, target: &Handle) {
@@ -442,17 +463,27 @@ impl Serialize for SerializableHandle {
         let mut ops = VecDeque::new();
         match traversal_scope {
             IncludeNode => ops.push_back(SerializeOp::Open(self.0.clone())),
-            ChildrenOnly(_) => ops.extend(self.0.children.borrow().iter().map(|h| SerializeOp::Open(h.clone()))),
+            ChildrenOnly(_) => ops.extend(
+                self.0
+                    .children
+                    .borrow()
+                    .iter()
+                    .map(|h| SerializeOp::Open(h.clone())),
+            ),
         }
 
         while let Some(op) = ops.pop_front() {
             match op {
                 SerializeOp::Open(handle) => match handle.data {
                     NodeData::Element {
-                        ref name, ref attrs, ..
+                        ref name,
+                        ref attrs,
+                        ..
                     } => {
-                        serializer
-                            .start_elem(name.clone(), attrs.borrow().iter().map(|at| (&at.name, &at.value[..])))?;
+                        serializer.start_elem(
+                            name.clone(),
+                            attrs.borrow().iter().map(|at| (&at.name, &at.value[..])),
+                        )?;
 
                         ops.reserve(1 + handle.children.borrow().len());
                         ops.push_front(SerializeOp::Close(name.clone()));

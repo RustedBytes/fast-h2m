@@ -58,7 +58,9 @@ pub fn handle(
     // Import helper functions from parent converter module
     use crate::converter::{normalized_tag_name, walk_node};
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -94,7 +96,9 @@ pub fn handle(
             let has_rtc = tag_sequence.iter().any(|tag| tag == "rtc");
 
             // Detect interleaved mode: rb followed immediately by rt
-            let is_interleaved = tag_sequence.windows(2).any(|w| w[0] == "rb" && w[1] == "rt");
+            let is_interleaved = tag_sequence
+                .windows(2)
+                .any(|w| w[0] == "rb" && w[1] == "rt");
 
             if is_interleaved && !has_rtc {
                 // Interleaved rendering: process rb/rt pairs inline
@@ -105,7 +109,8 @@ pub fn handle(
                         if let Some(node) = child_handle.get(parser) {
                             match node {
                                 tl::Node::Tag(child_tag) => {
-                                    let tag_name = normalized_tag_name(child_tag.name().as_utf8_str());
+                                    let tag_name =
+                                        normalized_tag_name(child_tag.name().as_utf8_str());
                                     if tag_name == "rt" {
                                         // Process rt (ruby text/annotation)
                                         let mut annotation = String::new();
@@ -186,7 +191,8 @@ pub fn handle(
                         if let Some(node) = child_handle.get(parser) {
                             match node {
                                 tl::Node::Tag(child_tag) => {
-                                    let tag_name = normalized_tag_name(child_tag.name().as_utf8_str());
+                                    let tag_name =
+                                        normalized_tag_name(child_tag.name().as_utf8_str());
                                     if tag_name == "rt" {
                                         // Collect rt annotations
                                         let mut annotation = String::new();
@@ -226,7 +232,15 @@ pub fn handle(
                                 }
                                 tl::Node::Raw(_) => {
                                     // Collect raw text into base
-                                    walk_node(child_handle, parser, &mut base_text, options, &ruby_ctx, depth, dom_ctx);
+                                    walk_node(
+                                        child_handle,
+                                        parser,
+                                        &mut base_text,
+                                        options,
+                                        &ruby_ctx,
+                                        depth,
+                                        dom_ctx,
+                                    );
                                 }
                                 _ => {}
                             }
@@ -240,7 +254,11 @@ pub fn handle(
 
                 // Output rt annotations in parentheses if present
                 if !rt_annotations.is_empty() {
-                    let rt_text = rt_annotations.iter().map(|s| s.trim()).collect::<Vec<_>>().join("");
+                    let rt_text = rt_annotations
+                        .iter()
+                        .map(|s| s.trim())
+                        .collect::<Vec<_>>()
+                        .join("");
                     if !rt_text.is_empty() {
                         // Wrap in parentheses only if we have rtc content and multiple annotations
                         if has_rtc && !rtc_content.trim().is_empty() && rt_annotations.len() > 1 {
@@ -267,7 +285,15 @@ pub fn handle(
             let children = tag.children();
             {
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, &mut text, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        &mut text,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
             }
             output.push_str(text.trim());
@@ -280,7 +306,15 @@ pub fn handle(
             let children = tag.children();
             {
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, &mut text, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        &mut text,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
             }
             let trimmed = text.trim();
@@ -303,7 +337,15 @@ pub fn handle(
             let children = tag.children();
             {
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        &mut content,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
             }
             let trimmed = content.trim();
@@ -329,7 +371,15 @@ pub fn handle(
             let children = tag.children();
             {
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
             }
         }

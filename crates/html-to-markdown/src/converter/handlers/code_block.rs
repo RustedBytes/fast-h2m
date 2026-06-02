@@ -51,7 +51,15 @@ pub fn handle_code(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, &code_ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    &code_ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
     } else {
@@ -226,7 +234,8 @@ pub fn handle_pre(
         let core = content.trim_matches('\n');
         let is_whitespace_only = core.trim().is_empty();
 
-        let processed_content = if options.whitespace_mode == crate::options::WhitespaceMode::Strict {
+        let processed_content = if options.whitespace_mode == crate::options::WhitespaceMode::Strict
+        {
             content
         } else {
             // Always dedent code blocks to remove common leading whitespace
@@ -294,16 +303,29 @@ pub fn handle_pre(
         if let Some(custom_output) = code_block_output {
             output.push_str(&custom_output);
         } else {
-            format_code_block(&processed_content, language.as_deref(), output, options, ctx);
+            format_code_block(
+                &processed_content,
+                language.as_deref(),
+                output,
+                options,
+                ctx,
+            );
         }
 
         #[cfg(not(feature = "visitor"))]
         {
-            format_code_block(&processed_content, language.as_deref(), output, options, ctx);
+            format_code_block(
+                &processed_content,
+                language.as_deref(),
+                output,
+                options,
+                ctx,
+            );
         }
 
         if let Some(ref sc) = ctx.structure_collector {
-            sc.borrow_mut().push_code(&processed_content, language.as_deref());
+            sc.borrow_mut()
+                .push_code(&processed_content, language.as_deref());
         }
     }
 }

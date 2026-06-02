@@ -96,8 +96,8 @@ pub fn scan(html: &str, options: &ConversionOptions) -> Result<String, BailReaso
                         // `</>` or similar — bail
                         return Err(BailReason::LiteralLt { offset: pos });
                     }
-                    let close_bracket =
-                        parse::find_tag_close(bytes, name_end).ok_or(BailReason::LiteralLt { offset: pos })?;
+                    let close_bracket = parse::find_tag_close(bytes, name_end)
+                        .ok_or(BailReason::LiteralLt { offset: pos })?;
 
                     let tag_name_bytes = &bytes[name_start..name_end];
                     emit_close(&mut state, tag_name_bytes)?;
@@ -130,10 +130,11 @@ pub fn scan(html: &str, options: &ConversionOptions) -> Result<String, BailReaso
                 }
 
                 // Unknown tag → bail
-                let spec = tier1::lookup(name_lower).ok_or_else(|| BailReason::UnknownCustomElement {
-                    name: bytes_to_string(tag_name_bytes).into(),
-                    offset: pos,
-                })?;
+                let spec =
+                    tier1::lookup(name_lower).ok_or_else(|| BailReason::UnknownCustomElement {
+                        name: bytes_to_string(tag_name_bytes).into(),
+                        offset: pos,
+                    })?;
 
                 // Bail on unsupported tag kinds for M3c
                 bail_unsupported(spec, pos)?;
@@ -149,12 +150,17 @@ pub fn scan(html: &str, options: &ConversionOptions) -> Result<String, BailReaso
 
                 // Bail on nested lists: Tier-2 cycles bullet characters by depth
                 // (-, *, +) but Tier-1 always uses "-". Nesting requires Tier-2.
-                if matches!(spec.kind, TagKind::List(ListKind::Unordered | ListKind::Ordered)) && state.list_depth > 0 {
+                if matches!(
+                    spec.kind,
+                    TagKind::List(ListKind::Unordered | ListKind::Ordered)
+                ) && state.list_depth > 0
+                {
                     return Err(BailReason::Classifier);
                 }
 
                 // Find end of tag (handles quoted attribute values)
-                let close = parse::find_tag_close(bytes, name_end).ok_or(BailReason::LiteralLt { offset: pos })?;
+                let close = parse::find_tag_close(bytes, name_end)
+                    .ok_or(BailReason::LiteralLt { offset: pos })?;
 
                 // Collect attributes (from after name_end to before `>` / `/>`)
                 let attrs_end = if close.1 {
@@ -168,9 +174,10 @@ pub fn scan(html: &str, options: &ConversionOptions) -> Result<String, BailReaso
                 // common case; only collect for the kinds whose emit paths
                 // actually consult attributes.
                 let attrs: Vec<(&[u8], Option<&[u8]>)> = match spec.kind {
-                    TagKind::Link | TagKind::Image | TagKind::List(ListKind::Ordered) | TagKind::TableCell { .. } => {
-                        parse::collect_attrs(bytes, name_end, attrs_end)
-                    }
+                    TagKind::Link
+                    | TagKind::Image
+                    | TagKind::List(ListKind::Ordered)
+                    | TagKind::TableCell { .. } => parse::collect_attrs(bytes, name_end, attrs_end),
                     _ => Vec::new(),
                 };
 
@@ -603,7 +610,11 @@ fn emit_void(
 /// Ancestor matching is ASCII-case-insensitive so callers may supply "H1" or
 /// "h1" interchangeably.
 #[inline]
-fn should_keep_image_as_markdown(html: &str, stack: &[OpenTag], options: &ConversionOptions) -> bool {
+fn should_keep_image_as_markdown(
+    html: &str,
+    stack: &[OpenTag],
+    options: &ConversionOptions,
+) -> bool {
     #[cfg(feature = "inline-images")]
     {
         keep_inline_image_for_ancestors(html.as_bytes(), stack, &options.keep_inline_images_in)
@@ -690,11 +701,12 @@ fn emit_close(state: &mut Tier1State, tag_name_bytes: &[u8]) -> Result<(), BailR
     // Pop the matching frame from the open-tag stack.
     // Tier-2 is lenient about mismatched tags; for M3c we bail.
     let actual_depth = state.stack.len() as u8;
-    let frame = pop_matching_frame(&mut state.stack, spec).ok_or_else(|| BailReason::DepthMismatch {
-        tag: bytes_to_string(name_lower),
-        expected: 1,
-        actual: actual_depth,
-    })?;
+    let frame =
+        pop_matching_frame(&mut state.stack, spec).ok_or_else(|| BailReason::DepthMismatch {
+            tag: bytes_to_string(name_lower),
+            expected: 1,
+            actual: actual_depth,
+        })?;
 
     // Restore escape context
     state.escape_ctx = frame.prev_escape_ctx;
@@ -733,7 +745,10 @@ fn emit_close(state: &mut Tier1State, tag_name_bytes: &[u8]) -> Result<(), BailR
         // Void-only kinds that never have open frames:
         TagKind::LineBreak | TagKind::Image => {}
         // Explicitly no-op: all remaining known kinds not listed above.
-        TagKind::DefinitionTerm | TagKind::DefinitionDescription | TagKind::RawText(_) | TagKind::Ignored => {}
+        TagKind::DefinitionTerm
+        | TagKind::DefinitionDescription
+        | TagKind::RawText(_)
+        | TagKind::Ignored => {}
     }
 
     Ok(())
@@ -810,7 +825,12 @@ fn close_paragraph(state: &mut Tier1State) {
 /// When `is_implicit` is true the empty-heading guard is skipped: implicitly
 /// closed headings have already had their content flushed through the normal
 /// path, so we just prepend the prefix unconditionally.
-fn close_heading(state: &mut Tier1State, frame: &OpenTag, n: u8, is_implicit: bool) -> Result<(), BailReason> {
+fn close_heading(
+    state: &mut Tier1State,
+    frame: &OpenTag,
+    n: u8,
+    is_implicit: bool,
+) -> Result<(), BailReason> {
     trim_trailing_inline_whitespace(state);
 
     if !is_implicit {
@@ -943,7 +963,11 @@ fn close_table(state: &mut Tier1State) -> Result<(), BailReason> {
         let link_heavy = row_count <= 2 && ts.link_count >= 3;
 
         // Blank table → Tier-2 emits nothing (not a bail case).
-        let is_blank = ts.rows.is_empty() || ts.rows.iter().all(|r| r.iter().all(|c| c.trim().is_empty()));
+        let is_blank = ts.rows.is_empty()
+            || ts
+                .rows
+                .iter()
+                .all(|r| r.iter().all(|c| c.trim().is_empty()));
 
         if inconsistent_cols || link_heavy || is_blank {
             // Tier-2 would not emit a GFM table here.
@@ -1229,7 +1253,9 @@ fn find_attr<'a>(attrs: &[(&'a [u8], Option<&'a [u8]>)], key: &[u8]) -> Option<&
 }
 
 /// Extract `href` and `title` from the attribute list for a link.
-fn extract_link_attrs(attrs: &[(&[u8], Option<&[u8]>)]) -> Result<(Option<String>, Option<String>), BailReason> {
+fn extract_link_attrs(
+    attrs: &[(&[u8], Option<&[u8]>)],
+) -> Result<(Option<String>, Option<String>), BailReason> {
     let href = find_attr(attrs, b"href").map(decode_attr).transpose()?;
     let title = find_attr(attrs, b"title").map(decode_attr).transpose()?;
     Ok((href, title))
@@ -1292,7 +1318,9 @@ fn kinds_match(a: &TagKind, b: &TagKind) -> bool {
     match (a, b) {
         (TagKind::List(la), TagKind::List(lb)) => la == lb,
         (TagKind::Heading(_), TagKind::Heading(_)) => true,
-        (TagKind::TableCell { is_header: a_h }, TagKind::TableCell { is_header: b_h }) => a_h == b_h,
+        (TagKind::TableCell { is_header: a_h }, TagKind::TableCell { is_header: b_h }) => {
+            a_h == b_h
+        }
         _ => std::mem::discriminant(a) == std::mem::discriminant(b),
     }
 }
@@ -1482,7 +1510,11 @@ fn emit_gfm_table(state: &mut Tier1State, ts: crate::converter::tier1::state::Ta
                 if i > 0 {
                     state.output.push_str(" | ");
                 }
-                let dash_count = col_widths.get(i).copied().unwrap_or(0).max(MIN_SEPARATOR_DASHES);
+                let dash_count = col_widths
+                    .get(i)
+                    .copied()
+                    .unwrap_or(0)
+                    .max(MIN_SEPARATOR_DASHES);
                 for _ in 0..dash_count {
                     state.output.push('-');
                 }

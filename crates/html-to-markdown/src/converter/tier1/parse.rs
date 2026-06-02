@@ -75,7 +75,10 @@ pub fn find_tag_close(bytes: &[u8], start: usize) -> Option<(usize, bool)> {
 /// `value_range` is `None` for boolean attributes.
 ///
 /// Returns `None` if no attribute could be parsed (e.g. at `>` or `/>` or EOF).
-pub fn scan_attribute(bytes: &[u8], pos: usize) -> Option<(Range<usize>, Option<Range<usize>>, usize)> {
+pub fn scan_attribute(
+    bytes: &[u8],
+    pos: usize,
+) -> Option<(Range<usize>, Option<Range<usize>>, usize)> {
     let pos = skip_ws(bytes, pos);
     if pos >= bytes.len() {
         return None;
@@ -124,7 +127,9 @@ pub fn scan_attribute(bytes: &[u8], pos: usize) -> Option<(Range<usize>, Option<
         // Unquoted value: ends at whitespace or `>`
         let val_start = after_eq;
         let mut val_end = val_start;
-        while val_end < bytes.len() && !matches!(bytes[val_end], b' ' | b'\t' | b'\n' | b'\r' | b'>' | b'/') {
+        while val_end < bytes.len()
+            && !matches!(bytes[val_end], b' ' | b'\t' | b'\n' | b'\r' | b'>' | b'/')
+        {
             val_end += 1;
         }
         (val_start..val_end, val_end)

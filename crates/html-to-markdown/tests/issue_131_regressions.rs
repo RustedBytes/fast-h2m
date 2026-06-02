@@ -23,7 +23,10 @@ fn link_flattens_block_children_issue_131() {
     };
 
     let result = convert(html, Some(options)).unwrap();
-    assert_eq!(result, "[MWD08 - الابيض 70.00 SAR$18.66USD](https://www.google.com)\n");
+    assert_eq!(
+        result,
+        "[MWD08 - الابيض 70.00 SAR$18.66USD](https://www.google.com)\n"
+    );
 }
 
 #[test]

@@ -33,12 +33,20 @@ pub fn chomp_inline(text: &str) -> (&str, &str, &str) {
         return ("", "", "");
     }
 
-    let prefix = if text.starts_with(&[' ', '\t'][..]) { " " } else { "" };
+    let prefix = if text.starts_with(&[' ', '\t'][..]) {
+        " "
+    } else {
+        ""
+    };
 
     let has_trailing_linebreak = text.ends_with("  \n") || text.ends_with("\\\n");
 
     let suffix = if has_trailing_linebreak {
-        if text.ends_with("  \n") { "  \n" } else { "\\\n" }
+        if text.ends_with("  \n") {
+            "  \n"
+        } else {
+            "\\\n"
+        }
     } else if text.ends_with(&[' ', '\t'][..]) {
         " "
     } else {
@@ -47,7 +55,10 @@ pub fn chomp_inline(text: &str) -> (&str, &str, &str) {
 
     let trimmed = if has_trailing_linebreak {
         text.strip_suffix("  \n").map_or_else(
-            || text.strip_suffix("\\\n").map_or_else(|| text.trim(), |s| s.trim()),
+            || {
+                text.strip_suffix("\\\n")
+                    .map_or_else(|| text.trim(), |s| s.trim())
+            },
             |s| s.trim(),
         )
     } else {
@@ -59,7 +70,11 @@ pub fn chomp_inline(text: &str) -> (&str, &str, &str) {
 
 /// Get the text content of a node and its children.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub fn get_text_content(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> String {
+pub fn get_text_content(
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    dom_ctx: &DomContext,
+) -> String {
     dom_ctx.text_content(*node_handle, parser)
 }
 
@@ -158,7 +173,10 @@ pub fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
 
 /// Check if an element is block-level (not inline).
 pub fn is_block_level_element(tag_name: &str) -> bool {
-    is_block_level_name(tag_name, crate::converter::main_helpers::is_inline_element(tag_name))
+    is_block_level_name(
+        tag_name,
+        crate::converter::main_helpers::is_inline_element(tag_name),
+    )
 }
 
 /// Returns the largest valid char boundary index at or before `index`.

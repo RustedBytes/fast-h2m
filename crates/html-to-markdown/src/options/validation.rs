@@ -286,8 +286,8 @@ pub(crate) fn normalize_token(value: &str) -> String {
 #[cfg(any(feature = "serde", feature = "metadata"))]
 mod serde_impls {
     use super::{
-        CodeBlockStyle, HeadingStyle, HighlightStyle, LinkStyle, ListIndentType, NewlineStyle, OutputFormat,
-        UrlEscapeStyle, WhitespaceMode,
+        CodeBlockStyle, HeadingStyle, HighlightStyle, LinkStyle, ListIndentType, NewlineStyle,
+        OutputFormat, UrlEscapeStyle, WhitespaceMode,
     };
     use serde::{Deserialize, Serialize, Serializer};
 

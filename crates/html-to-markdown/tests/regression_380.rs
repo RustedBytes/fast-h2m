@@ -28,7 +28,11 @@ fn pre_paragraph_multibyte_span_does_not_panic() {
                 <p>Plain follow-up item</p>";
 
     let result = html_to_markdown_rs::convert(html, Some(options_with_structure()));
-    assert!(result.is_ok(), "conversion must not panic or error: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "conversion must not panic or error: {:?}",
+        result.err()
+    );
     let content = result.unwrap().content.unwrap_or_default();
     assert!(
         content.contains("■Example request"),
@@ -49,7 +53,11 @@ fn heading_paragraph_multibyte_span_does_not_panic() {
                 <p>Plain follow-up item</p>";
 
     let result = html_to_markdown_rs::convert(html, Some(options_with_structure()));
-    assert!(result.is_ok(), "conversion must not panic or error: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "conversion must not panic or error: {:?}",
+        result.err()
+    );
     let content = result.unwrap().content.unwrap_or_default();
     assert!(
         content.contains("■Example request"),
@@ -64,7 +72,11 @@ fn div_paragraph_multibyte_span_does_not_panic() {
                 <p><span>■multibyte</span></p>";
 
     let result = html_to_markdown_rs::convert(html, Some(options_with_structure()));
-    assert!(result.is_ok(), "conversion must not panic or error: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "conversion must not panic or error: {:?}",
+        result.err()
+    );
 }
 
 /// Plain-text paragraph before — exercises the separator `\n\n` path.
@@ -74,7 +86,11 @@ fn paragraph_paragraph_multibyte_span_does_not_panic() {
                 <p><span style=\"letter-spacing: 0.0px;\">■Example request</span></p>";
 
     let result = html_to_markdown_rs::convert(html, Some(options_with_structure()));
-    assert!(result.is_ok(), "conversion must not panic or error: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "conversion must not panic or error: {:?}",
+        result.err()
+    );
     let content = result.unwrap().content.unwrap_or_default();
     assert!(
         content.contains("■Example request"),
@@ -95,7 +111,11 @@ fn figure_multibyte_caption_does_not_panic() {
                 </figure>";
 
     let result = html_to_markdown_rs::convert(html, Some(options_with_structure()));
-    assert!(result.is_ok(), "conversion must not panic or error: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "conversion must not panic or error: {:?}",
+        result.err()
+    );
 }
 
 /// Attempt to land `content_start_pos` exactly at byte 23 (mid-■ if not clamped).
@@ -113,7 +133,11 @@ fn crafted_23_byte_boundary_does_not_panic() {
                 <p><span>■X</span></p>";
 
     let result = html_to_markdown_rs::convert(html, Some(options_with_structure()));
-    assert!(result.is_ok(), "conversion must not panic or error: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "conversion must not panic or error: {:?}",
+        result.err()
+    );
 }
 
 /// Wide variety of multibyte characters to exercise the boundary check.

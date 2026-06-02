@@ -42,7 +42,10 @@ fn tier2(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 /// `convert()` with `Tier1` — bails silently and falls back to Tier-2.
@@ -52,7 +55,10 @@ fn force_tier1(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 // ── UnknownEntity tripwire tests ──────────────────────────────────────────────
@@ -103,7 +109,10 @@ fn does_not_bail_on_numeric_hex_reference() {
     let html = "<p>emoji &#x1F600; end</p>";
     let result = tier1_raw(html);
     let md = result.expect("numeric hex reference should decode without bailing");
-    assert!(md.contains('\u{1F600}'), "expected emoji in output, got: {md:?}");
+    assert!(
+        md.contains('\u{1F600}'),
+        "expected emoji in output, got: {md:?}"
+    );
 }
 
 /// `&amp;` and `&lt;` are in the decode table and must not bail.
@@ -128,7 +137,10 @@ fn convert_auto_falls_back_on_unknown_entity_and_succeeds() {
         ..ConversionOptions::default()
     };
     let result = convert(html, Some(opts));
-    let output = result.expect("convert must not return Err").content.unwrap_or_default();
+    let output = result
+        .expect("convert must not return Err")
+        .content
+        .unwrap_or_default();
     // Tier-2 decodes &eacute; → U+00E9 (é).
     assert!(
         output.contains('\u{00E9}'),

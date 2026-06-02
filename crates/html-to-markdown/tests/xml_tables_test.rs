@@ -85,8 +85,14 @@ fn test_graphic_element_with_xlink_href() {
 
     let result = convert(html, None).unwrap();
     assert!(result.contains("| Image"), "Image column missing: {result}");
-    assert!(result.contains("| Description"), "Description column missing: {result}");
-    assert!(result.contains("A test image"), "test image text missing: {result}");
+    assert!(
+        result.contains("| Description"),
+        "Description column missing: {result}"
+    );
+    assert!(
+        result.contains("A test image"),
+        "test image text missing: {result}"
+    );
     // graphic element handling may vary based on implementation
 }
 
@@ -102,7 +108,10 @@ fn test_graphic_in_table_cells() {
     </table>"#;
 
     let result = convert(html, None).unwrap();
-    assert!(result.contains("| Figure"), "Figure column missing: {result}");
+    assert!(
+        result.contains("| Figure"),
+        "Figure column missing: {result}"
+    );
 }
 
 #[test]
@@ -127,10 +136,19 @@ fn test_nested_content_in_cells() {
 
     let result = convert(html, None).unwrap();
     assert!(result.contains("| Text"), "Text column missing: {result}");
-    assert!(result.contains("| Formatted"), "Formatted column missing: {result}");
-    assert!(result.contains("| Plain text"), "plain text missing: {result}");
+    assert!(
+        result.contains("| Formatted"),
+        "Formatted column missing: {result}"
+    );
+    assert!(
+        result.contains("| Plain text"),
+        "plain text missing: {result}"
+    );
     assert!(result.contains("**Bold**"), "bold missing: {result}");
-    assert!(result.contains("[Link](http://example.com)"), "link missing: {result}");
+    assert!(
+        result.contains("[Link](http://example.com)"),
+        "link missing: {result}"
+    );
 }
 
 #[test]
@@ -159,7 +177,10 @@ fn test_cell_without_role_attribute_defaults_to_data() {
 
     let result = convert(html, None).unwrap();
     assert!(result.contains("| Header"), "Header missing: {result}");
-    assert!(result.contains("| Data Cell"), "Data Cell missing: {result}");
+    assert!(
+        result.contains("| Data Cell"),
+        "Data Cell missing: {result}"
+    );
 }
 
 #[test]
@@ -180,7 +201,10 @@ fn test_xml_table_with_multiline_content() {
     };
     let result = convert(html, Some(options)).unwrap();
 
-    assert!(result.contains("| Content"), "Content column missing: {result}");
+    assert!(
+        result.contains("| Content"),
+        "Content column missing: {result}"
+    );
     assert!(result.contains("Line 1"), "Line 1 missing: {result}");
     assert!(result.contains("Line 2"), "Line 2 missing: {result}");
 }
@@ -229,7 +253,10 @@ fn test_cell_with_code_blocks() {
 
     let result = convert(html, None).unwrap();
     assert!(result.contains("| Code"), "Code column missing: {result}");
-    assert!(result.contains("`function()`"), "code block missing: {result}");
+    assert!(
+        result.contains("`function()`"),
+        "code block missing: {result}"
+    );
 }
 
 #[test]
@@ -274,7 +301,10 @@ fn test_xml_table_with_multiple_headers() {
 
     let result = convert(html, None).unwrap();
     assert!(result.contains("| First"), "First column missing: {result}");
-    assert!(result.contains("| Second"), "Second column missing: {result}");
+    assert!(
+        result.contains("| Second"),
+        "Second column missing: {result}"
+    );
     assert!(result.contains("| Third"), "Third column missing: {result}");
     assert!(result.contains("| ---"), "separator row missing: {result}");
     assert!(result.contains("| A"), "A missing: {result}");
@@ -299,10 +329,19 @@ fn test_cell_role_variations() {
     </table>"#;
 
     let result = convert(html, None).unwrap();
-    assert!(result.contains("| Header Cell"), "Header Cell missing: {result}");
-    assert!(result.contains("| Data Cell"), "Data Cell missing: {result}");
+    assert!(
+        result.contains("| Header Cell"),
+        "Header Cell missing: {result}"
+    );
+    assert!(
+        result.contains("| Data Cell"),
+        "Data Cell missing: {result}"
+    );
     assert!(result.contains("| Label"), "Label missing: {result}");
-    assert!(result.contains("| Another Header"), "Another Header missing: {result}");
+    assert!(
+        result.contains("| Another Header"),
+        "Another Header missing: {result}"
+    );
 }
 
 #[test]
@@ -323,7 +362,10 @@ fn test_deeply_nested_xml_content() {
     </table>"#;
 
     let result = convert(html, None).unwrap();
-    assert!(result.contains("| Complex"), "Complex column missing: {result}");
+    assert!(
+        result.contains("| Complex"),
+        "Complex column missing: {result}"
+    );
     assert!(result.contains("Nested"), "Nested text missing: {result}");
 }
 

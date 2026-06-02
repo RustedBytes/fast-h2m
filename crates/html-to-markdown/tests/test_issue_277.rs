@@ -65,7 +65,10 @@ fn test_preprocess_unmatched_script_preserves_remaining_content() {
 </body></html>";
 
     let result = convert(html);
-    assert!(result.contains("Before"), "Content before scripts should be present");
+    assert!(
+        result.contains("Before"),
+        "Content before scripts should be present"
+    );
     assert!(
         result.contains("After first script"),
         "Content after first script should be present. Got:\n{result}"

@@ -47,7 +47,10 @@ use crate::{HtmlMetadata, MetadataConfig};
 /// # Errors
 ///
 /// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
-pub fn convert(html: &str, options: impl Into<Option<ConversionOptions>>) -> Result<ConversionResult> {
+pub fn convert(
+    html: &str,
+    options: impl Into<Option<ConversionOptions>>,
+) -> Result<ConversionResult> {
     // Thin generic wrapper. Delegates to the non-generic `convert_inner` so the
     // ~250-line body monomorphises exactly once instead of once per `Into` impl
     // the caller picks. See kreuzberg-dev/html-to-markdown#398.
@@ -171,9 +174,9 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     // Build optional collectors based on requested features.
     #[cfg(feature = "metadata")]
     let metadata_collector = if wants_metadata {
-        Some(Rc::new(RefCell::new(crate::metadata::MetadataCollector::new(
-            MetadataConfig::default(),
-        ))))
+        Some(Rc::new(RefCell::new(
+            crate::metadata::MetadataCollector::new(MetadataConfig::default()),
+        )))
     } else {
         None
     };
@@ -181,22 +184,23 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     #[cfg(feature = "inline-images")]
     let image_collector = if wants_images {
         use crate::inline_images::{DEFAULT_INLINE_IMAGE_LIMIT, InlineImageConfig as IIC};
-        Some(Rc::new(RefCell::new(crate::inline_images::InlineImageCollector::new(
-            IIC::new(DEFAULT_INLINE_IMAGE_LIMIT),
-        )?)))
+        Some(Rc::new(RefCell::new(
+            crate::inline_images::InlineImageCollector::new(IIC::new(DEFAULT_INLINE_IMAGE_LIMIT))?,
+        )))
     } else {
         None
     };
 
     // Build optional structure collector when requested.
-    let structure_collector: Option<std::rc::Rc<std::cell::RefCell<crate::types::StructureCollector>>> =
-        if options.include_document_structure {
-            Some(std::rc::Rc::new(std::cell::RefCell::new(
-                crate::types::StructureCollector::new(),
-            )))
-        } else {
-            None
-        };
+    let structure_collector: Option<
+        std::rc::Rc<std::cell::RefCell<crate::types::StructureCollector>>,
+    > = if options.include_document_structure {
+        Some(std::rc::Rc::new(std::cell::RefCell::new(
+            crate::types::StructureCollector::new(),
+        )))
+    } else {
+        None
+    };
 
     #[cfg(not(feature = "visitor"))]
     let visitor: Option<()> = None;
@@ -272,7 +276,9 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     #[cfg(feature = "inline-images")]
     let (images, image_warnings) = if let Some(collector) = image_collector {
         let c = Rc::try_unwrap(collector)
-            .map_err(|_| ConversionError::Other("failed to recover inline image state".to_string()))?
+            .map_err(|_| {
+                ConversionError::Other("failed to recover inline image state".to_string())
+            })?
             .into_inner();
         c.finish()
     } else {
@@ -349,7 +355,8 @@ fn fix_xhtml_self_closing(html: Cow<'_, str>) -> Cow<'_, str> {
     // contain letters, digits, hyphens, underscores, colons (namespaces), and
     // periods. The replacement inserts a single space before the `/`.
     let re = RE.get_or_init(|| {
-        regex::Regex::new(r"<([a-zA-Z][a-zA-Z0-9_:.\-]*)/>").expect("XHTML self-closing regex is well-formed")
+        regex::Regex::new(r"<([a-zA-Z][a-zA-Z0-9_:.\-]*)/>")
+            .expect("XHTML self-closing regex is well-formed")
     });
     if !html.contains("/>") {
         return html;
@@ -453,7 +460,11 @@ fn fast_text_only(html: &str, options: &ConversionOptions) -> Option<String> {
 
     let escaped = if options.output_format == crate::options::OutputFormat::Plain {
         normalized.into_owned()
-    } else if options.escape_misc || options.escape_asterisks || options.escape_underscores || options.escape_ascii {
+    } else if options.escape_misc
+        || options.escape_asterisks
+        || options.escape_underscores
+        || options.escape_ascii
+    {
         text::escape(
             normalized.as_ref(),
             options.escape_misc,

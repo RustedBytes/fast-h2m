@@ -47,10 +47,14 @@ pub fn handle_img(
     depth: usize,
     dom_ctx: &DomContext,
 ) {
-    let src = tag.attributes().get("src").flatten().map_or(Cow::Borrowed(""), |v| {
-        let s = v.as_utf8_str();
-        Cow::Owned(sanitize_markdown_url(&s).into_owned())
-    });
+    let src = tag
+        .attributes()
+        .get("src")
+        .flatten()
+        .map_or(Cow::Borrowed(""), |v| {
+            let s = v.as_utf8_str();
+            Cow::Owned(sanitize_markdown_url(&s).into_owned())
+        });
 
     let alt = tag
         .attributes()
@@ -58,7 +62,11 @@ pub fn handle_img(
         .flatten()
         .map_or(Cow::Borrowed(""), |v| v.as_utf8_str());
 
-    let title = tag.attributes().get("title").flatten().map(|v| v.as_utf8_str());
+    let title = tag
+        .attributes()
+        .get("title")
+        .flatten()
+        .map(|v| v.as_utf8_str());
 
     // Collect metadata payload if metadata feature is enabled
     #[cfg(feature = "metadata")]
@@ -118,8 +126,8 @@ pub fn handle_img(
 
     let keep_as_markdown = ctx.in_heading && ctx.heading_allow_inline_images;
 
-    let should_use_alt_text =
-        !keep_as_markdown && (ctx.convert_as_inline || (ctx.in_heading && !ctx.heading_allow_inline_images));
+    let should_use_alt_text = !keep_as_markdown
+        && (ctx.convert_as_inline || (ctx.in_heading && !ctx.heading_allow_inline_images));
 
     // Generate image output with visitor integration
     #[cfg(feature = "visitor")]
@@ -208,7 +216,11 @@ pub fn handle_img(
                     };
                     collector.borrow_mut().add_image(
                         src.to_string(),
-                        if alt.is_empty() { None } else { Some(alt.to_string()) },
+                        if alt.is_empty() {
+                            None
+                        } else {
+                            Some(alt.to_string())
+                        },
                         title.as_deref().map(std::string::ToString::to_string),
                         dimensions,
                         attributes_map,
@@ -219,8 +231,16 @@ pub fn handle_img(
     }
 
     if let Some(ref sc) = ctx.structure_collector {
-        let src_opt = if src.is_empty() { None } else { Some(src.as_ref()) };
-        let alt_opt = if alt.is_empty() { None } else { Some(alt.as_ref()) };
+        let src_opt = if src.is_empty() {
+            None
+        } else {
+            Some(src.as_ref())
+        };
+        let alt_opt = if alt.is_empty() {
+            None
+        } else {
+            Some(alt.as_ref())
+        };
         sc.borrow_mut().push_image(src_opt, alt_opt);
     }
 }

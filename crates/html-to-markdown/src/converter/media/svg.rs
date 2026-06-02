@@ -182,7 +182,9 @@ pub fn handle_svg(
     for child_handle in children.top().iter() {
         if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
             if tag_name_eq(child_tag.name().as_utf8_str(), "title") {
-                title = get_text_content(child_handle, parser, dom_ctx).trim().to_string();
+                title = get_text_content(child_handle, parser, dom_ctx)
+                    .trim()
+                    .to_string();
                 break;
             }
         }
@@ -208,7 +210,13 @@ pub fn handle_svg(
                 attributes_map.insert(key_str, value);
             }
         }
-        handle_inline_svg(collector_ref, node_handle, parser, title_opt, attributes_map);
+        handle_inline_svg(
+            collector_ref,
+            node_handle,
+            parser,
+            title_opt,
+            attributes_map,
+        );
     }
 
     if options.skip_images {
@@ -248,7 +256,9 @@ pub fn handle_math(
     use crate::converter::utility::content::get_text_content;
     use crate::text;
 
-    let text_content = get_text_content(node_handle, parser, dom_ctx).trim().to_string();
+    let text_content = get_text_content(node_handle, parser, dom_ctx)
+        .trim()
+        .to_string();
 
     if text_content.is_empty() {
         return;

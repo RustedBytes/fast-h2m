@@ -29,7 +29,10 @@ pub fn tag_has_main_semantics(tag: &tl::HTMLTag) -> bool {
             "post-content",
             "document-body",
         ];
-        if MAIN_CLASS_HINTS.iter().any(|hint| class_value.contains(hint)) {
+        if MAIN_CLASS_HINTS
+            .iter()
+            .any(|hint| class_value.contains(hint))
+        {
             return true;
         }
     }
@@ -39,7 +42,11 @@ pub fn tag_has_main_semantics(tag: &tl::HTMLTag) -> bool {
 
 /// Check if an element has navigation-related hints in its attributes.
 pub fn element_has_navigation_hint(tag: &tl::HTMLTag) -> bool {
-    if attribute_matches_any(tag, "role", &["navigation", "menubar", "tablist", "toolbar"]) {
+    if attribute_matches_any(
+        tag,
+        "role",
+        &["navigation", "menubar", "tablist", "toolbar"],
+    ) {
         return true;
     }
 
@@ -84,7 +91,8 @@ pub fn element_has_navigation_hint(tag: &tl::HTMLTag) -> bool {
         "vector-footer",
     ];
 
-    attribute_matches_any(tag, "class", NAV_KEYWORDS) || attribute_matches_any(tag, "id", NAV_KEYWORDS)
+    attribute_matches_any(tag, "class", NAV_KEYWORDS)
+        || attribute_matches_any(tag, "id", NAV_KEYWORDS)
 }
 
 /// Check if an attribute value matches any of the given keywords (space or custom-separator aware).
@@ -126,7 +134,11 @@ pub fn attribute_contains_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&str]) 
 
 /// Check if a node has a semantic content ancestor (main, article, section).
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub fn has_semantic_content_ancestor(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
+pub fn has_semantic_content_ancestor(
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    dom_ctx: &DomContext,
+) -> bool {
     let mut current_id = node_handle.get_inner();
     while let Some(parent_id) = dom_ctx.parent_of(current_id) {
         if let Some(parent_info) = dom_ctx.tag_info(parent_id, parser) {

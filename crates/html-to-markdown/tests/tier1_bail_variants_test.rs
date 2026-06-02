@@ -38,7 +38,10 @@ fn tier2(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 fn force_tier1(html: &str) -> String {
@@ -47,7 +50,10 @@ fn force_tier1(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 // ── TableRowspanColspan ───────────────────────────────────────────────────────
@@ -74,7 +80,11 @@ fn should_bail_on_table_colspan_greater_than_one() {
         matches!(err, BailReason::TableRowspanColspan),
         "expected TableRowspanColspan, got {err:?}"
     );
-    assert_eq!(force_tier1(html), tier2(html), "fallback output must match Tier-2");
+    assert_eq!(
+        force_tier1(html),
+        tier2(html),
+        "fallback output must match Tier-2"
+    );
 }
 
 #[test]
@@ -85,7 +95,10 @@ fn should_not_bail_when_rowspan_and_colspan_are_one() {
 <tbody><tr><td>1</td><td>2</td></tr></tbody>
 </table>"#;
     let result = tier1_run(html);
-    assert!(result.is_ok(), "rowspan=1/colspan=1 must not bail; got {result:?}");
+    assert!(
+        result.is_ok(),
+        "rowspan=1/colspan=1 must not bail; got {result:?}"
+    );
 }
 
 // ── TableBlockChildInCell ─────────────────────────────────────────────────────
@@ -98,7 +111,11 @@ fn should_bail_when_paragraph_is_child_of_table_cell() {
         matches!(err, BailReason::TableBlockChildInCell),
         "expected TableBlockChildInCell, got {err:?}"
     );
-    assert_eq!(force_tier1(html), tier2(html), "fallback output must match Tier-2");
+    assert_eq!(
+        force_tier1(html),
+        tier2(html),
+        "fallback output must match Tier-2"
+    );
 }
 
 #[test]
@@ -109,7 +126,11 @@ fn should_bail_when_div_is_child_of_table_cell() {
         matches!(err, BailReason::TableBlockChildInCell),
         "expected TableBlockChildInCell, got {err:?}"
     );
-    assert_eq!(force_tier1(html), tier2(html), "fallback output must match Tier-2");
+    assert_eq!(
+        force_tier1(html),
+        tier2(html),
+        "fallback output must match Tier-2"
+    );
 }
 
 #[test]
@@ -122,7 +143,11 @@ fn should_bail_when_br_is_child_of_table_cell() {
         matches!(err, BailReason::TableBlockChildInCell),
         "expected TableBlockChildInCell for <br> in cell, got {err:?}"
     );
-    assert_eq!(force_tier1(html), tier2(html), "fallback output must match Tier-2");
+    assert_eq!(
+        force_tier1(html),
+        tier2(html),
+        "fallback output must match Tier-2"
+    );
 }
 
 // ── TableNestedTable ──────────────────────────────────────────────────────────
@@ -135,7 +160,11 @@ fn should_bail_on_nested_table_inside_cell() {
         matches!(err, BailReason::TableNestedTable),
         "expected TableNestedTable, got {err:?}"
     );
-    assert_eq!(force_tier1(html), tier2(html), "fallback output must match Tier-2");
+    assert_eq!(
+        force_tier1(html),
+        tier2(html),
+        "fallback output must match Tier-2"
+    );
 }
 
 // ── TableCaption ──────────────────────────────────────────────────────────────
@@ -148,7 +177,11 @@ fn should_bail_on_table_caption_element() {
         matches!(err, BailReason::TableCaption),
         "expected TableCaption, got {err:?}"
     );
-    assert_eq!(force_tier1(html), tier2(html), "fallback output must match Tier-2");
+    assert_eq!(
+        force_tier1(html),
+        tier2(html),
+        "fallback output must match Tier-2"
+    );
 }
 
 // ── TableSectionOrder ─────────────────────────────────────────────────────────
@@ -156,25 +189,35 @@ fn should_bail_on_table_caption_element() {
 #[test]
 fn should_bail_when_thead_appears_after_tbody_close() {
     // <thead> opening after a <tbody> has already been closed is unsupported.
-    let html = "<table><tbody><tr><td>a</td></tr></tbody><thead><tr><th>h</th></tr></thead></table>";
+    let html =
+        "<table><tbody><tr><td>a</td></tr></tbody><thead><tr><th>h</th></tr></thead></table>";
     let err = tier1_run(html).unwrap_err();
     assert!(
         matches!(err, BailReason::TableSectionOrder),
         "expected TableSectionOrder, got {err:?}"
     );
-    assert_eq!(force_tier1(html), tier2(html), "fallback output must match Tier-2");
+    assert_eq!(
+        force_tier1(html),
+        tier2(html),
+        "fallback output must match Tier-2"
+    );
 }
 
 #[test]
 fn should_bail_when_tbody_appears_after_tfoot() {
     // <tbody> opening after a <tfoot> open is unsupported.
-    let html = "<table><tfoot><tr><td>f</td></tr></tfoot><tbody><tr><td>b</td></tr></tbody></table>";
+    let html =
+        "<table><tfoot><tr><td>f</td></tr></tfoot><tbody><tr><td>b</td></tr></tbody></table>";
     let err = tier1_run(html).unwrap_err();
     assert!(
         matches!(err, BailReason::TableSectionOrder),
         "expected TableSectionOrder for tbody-after-tfoot, got {err:?}"
     );
-    assert_eq!(force_tier1(html), tier2(html), "fallback output must match Tier-2");
+    assert_eq!(
+        force_tier1(html),
+        tier2(html),
+        "fallback output must match Tier-2"
+    );
 }
 
 // ── BailReason::TableRowspanColspan display ───────────────────────────────────
@@ -190,6 +233,9 @@ fn table_bail_reason_display_strings_are_non_empty() {
     ];
     for reason in &reasons {
         let s = reason.to_string();
-        assert!(!s.is_empty(), "Display for {reason:?} produced empty string");
+        assert!(
+            !s.is_empty(),
+            "Display for {reason:?} produced empty string"
+        );
     }
 }

@@ -24,7 +24,10 @@ fn convert(html: &str) -> String {
 fn test_content_after_triple_dash_comment_not_dropped() {
     let html = "<h1>One</h1>\n<!-- /// --->\n<p>Two</p>";
     let result = convert(html);
-    assert!(result.contains("One"), "Heading 'One' must be present. Got:\n{result}");
+    assert!(
+        result.contains("One"),
+        "Heading 'One' must be present. Got:\n{result}"
+    );
     assert!(
         result.contains("Two"),
         "Paragraph 'Two' must NOT be dropped after `<!-- /// --->`. Got:\n{result}"
@@ -37,7 +40,10 @@ fn test_normal_comment_does_not_affect_output() {
     let html = "<h1>One</h1>\n<!-- comment -->\n<p>Two</p>";
     let result = convert(html);
     assert!(result.contains("One"), "Heading must be present");
-    assert!(result.contains("Two"), "Paragraph must be present after normal comment");
+    assert!(
+        result.contains("Two"),
+        "Paragraph must be present after normal comment"
+    );
 }
 
 /// Comment with exactly three dashes: `--->`.

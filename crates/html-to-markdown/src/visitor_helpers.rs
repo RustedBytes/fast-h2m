@@ -144,7 +144,10 @@ pub fn build_node_context(
 /// # Errors
 ///
 /// Returns an error if visitor dispatch fails.
-pub fn dispatch_visitor<F>(visitor: &Option<Arc<Mutex<dyn HtmlVisitor + Send>>>, callback: F) -> Result<VisitorDispatch>
+pub fn dispatch_visitor<F>(
+    visitor: &Option<Arc<Mutex<dyn HtmlVisitor + Send>>>,
+    callback: F,
+) -> Result<VisitorDispatch>
 where
     F: FnOnce(&mut dyn HtmlVisitor) -> VisitResult,
 {
@@ -470,7 +473,9 @@ mod tests {
 
     #[test]
     fn test_dispatch_visitor_custom() {
-        let visitor: Arc<Mutex<dyn HtmlVisitor + Send>> = Arc::new(Mutex::new(TestVisitor { mode: TestMode::Custom }));
+        let visitor: Arc<Mutex<dyn HtmlVisitor + Send>> = Arc::new(Mutex::new(TestVisitor {
+            mode: TestMode::Custom,
+        }));
         let visitor_opt = Some(visitor);
 
         let ctx = NodeContext {
@@ -491,7 +496,9 @@ mod tests {
 
     #[test]
     fn test_dispatch_visitor_skip() {
-        let visitor: Arc<Mutex<dyn HtmlVisitor + Send>> = Arc::new(Mutex::new(TestVisitor { mode: TestMode::Skip }));
+        let visitor: Arc<Mutex<dyn HtmlVisitor + Send>> = Arc::new(Mutex::new(TestVisitor {
+            mode: TestMode::Skip,
+        }));
         let visitor_opt = Some(visitor);
 
         let ctx = NodeContext {
@@ -533,7 +540,9 @@ mod tests {
 
     #[test]
     fn test_dispatch_visitor_error() {
-        let visitor: Arc<Mutex<dyn HtmlVisitor + Send>> = Arc::new(Mutex::new(TestVisitor { mode: TestMode::Error }));
+        let visitor: Arc<Mutex<dyn HtmlVisitor + Send>> = Arc::new(Mutex::new(TestVisitor {
+            mode: TestMode::Error,
+        }));
         let visitor_opt = Some(visitor);
 
         let ctx = NodeContext {

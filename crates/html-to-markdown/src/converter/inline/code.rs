@@ -52,7 +52,16 @@ pub fn handle(
             handle_code(node_handle, parser, output, options, ctx, depth, dom_ctx);
         }
         "kbd" | "samp" => {
-            handle_kbd_samp(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            handle_kbd_samp(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
         }
         _ => {}
     }
@@ -80,7 +89,9 @@ fn handle_code(
     #[allow(unused_imports)]
     use crate::converter::{serialize_node, walk_node};
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -96,7 +107,15 @@ fn handle_code(
     if ctx.in_code {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, &code_ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                &code_ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     } else {
         let mut content = String::with_capacity(32);
@@ -191,7 +210,9 @@ fn handle_kbd_samp(
 ) {
     use crate::converter::{append_inline_suffix, chomp_inline, walk_node};
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let _tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -228,7 +249,14 @@ fn handle_kbd_samp(
         output.push('`');
         output.push_str(trimmed);
         output.push('`');
-        append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+        append_inline_suffix(
+            output,
+            suffix,
+            !trimmed.is_empty(),
+            node_handle,
+            parser,
+            dom_ctx,
+        );
     } else if !content.is_empty() {
         output.push_str(prefix);
         append_inline_suffix(output, suffix, false, node_handle, parser, dom_ctx);

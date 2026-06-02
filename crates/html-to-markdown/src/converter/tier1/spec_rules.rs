@@ -32,7 +32,10 @@ pub fn should_close_for_new_tag(open: &TagSpec, new: &TagSpec) -> bool {
 
         // `<dt>`/`<dd>` close any open `<dt>`/`<dd>`.
         Some(OptionalCloseRule::CloseSiblingDtDd) => {
-            matches!(new.kind, TagKind::DefinitionTerm | TagKind::DefinitionDescription)
+            matches!(
+                new.kind,
+                TagKind::DefinitionTerm | TagKind::DefinitionDescription
+            )
         }
 
         // `<tr>` closes any open `<tr>`.
@@ -43,7 +46,9 @@ pub fn should_close_for_new_tag(open: &TagSpec, new: &TagSpec) -> bool {
 
         // `<option>` closes on another `<option>` or `<optgroup>`.
         // (Forms bail in M3c so this path is unreachable in practice.)
-        Some(OptionalCloseRule::CloseOption) => std::mem::discriminant(&open.kind) == std::mem::discriminant(&new.kind),
+        Some(OptionalCloseRule::CloseOption) => {
+            std::mem::discriminant(&open.kind) == std::mem::discriminant(&new.kind)
+        }
 
         // `ImplicitTbody` is not a close rule — the scanner handles it
         // separately by synthesising an implicit open.

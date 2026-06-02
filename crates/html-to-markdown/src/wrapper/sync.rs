@@ -1,8 +1,8 @@
 //! Synchronous text wrapping for Markdown output.
 
 use super::utils::{
-    is_heading, is_list_like, is_numbered_list, parse_blockquote_line, parse_list_item, wrap_blockquote_paragraph,
-    wrap_line, wrap_list_item,
+    is_heading, is_list_like, is_numbered_list, parse_blockquote_line, parse_list_item,
+    wrap_blockquote_paragraph, wrap_line, wrap_list_item,
 };
 use crate::options::ConversionOptions;
 
@@ -128,12 +128,19 @@ pub fn wrap_markdown(markdown: &str, options: &ConversionOptions) -> String {
                 in_paragraph = false;
             }
 
-            result.push_str(&wrap_list_item(&indent, &marker, &content, options.wrap_width));
+            result.push_str(&wrap_list_item(
+                &indent,
+                &marker,
+                &content,
+                options.wrap_width,
+            ));
             continue;
         }
 
-        let is_structural =
-            is_heading(trimmed) || trimmed.starts_with('>') || trimmed.starts_with('|') || trimmed.starts_with('=');
+        let is_structural = is_heading(trimmed)
+            || trimmed.starts_with('>')
+            || trimmed.starts_with('|')
+            || trimmed.starts_with('=');
 
         if is_structural {
             if in_paragraph && !paragraph_buffer.is_empty() {
@@ -201,14 +208,19 @@ mod tests {
 
     #[test]
     fn test_wrap_markdown_paragraph() {
-        let markdown = "This is a very long line that would normally be wrapped at 40 characters\n\n";
+        let markdown =
+            "This is a very long line that would normally be wrapped at 40 characters\n\n";
         let options = ConversionOptions {
             wrap: true,
             wrap_width: 40,
             ..Default::default()
         };
         let result = wrap_markdown(markdown, &options);
-        assert!(result.lines().all(|line| line.len() <= 40 || line.trim().is_empty()));
+        assert!(
+            result
+                .lines()
+                .all(|line| line.len() <= 40 || line.trim().is_empty())
+        );
     }
 
     #[test]
@@ -221,7 +233,9 @@ mod tests {
         };
         let result = wrap_markdown(markdown, &options);
         assert!(
-            result.lines().all(|line| line.len() <= 30 || line.trim().is_empty()),
+            result
+                .lines()
+                .all(|line| line.len() <= 30 || line.trim().is_empty()),
             "Some lines exceed wrap width. Got: {}",
             result
         );
@@ -239,14 +253,17 @@ mod tests {
 
     #[test]
     fn test_wrap_markdown_preserves_code() {
-        let markdown = "```\nThis is a very long line in a code block that should not be wrapped\n```\n";
+        let markdown =
+            "```\nThis is a very long line in a code block that should not be wrapped\n```\n";
         let options = ConversionOptions {
             wrap: true,
             wrap_width: 40,
             ..Default::default()
         };
         let result = wrap_markdown(markdown, &options);
-        assert!(result.contains("This is a very long line in a code block that should not be wrapped"));
+        assert!(
+            result.contains("This is a very long line in a code block that should not be wrapped")
+        );
     }
 
     #[test]
@@ -258,9 +275,9 @@ mod tests {
             ..Default::default()
         };
         let result = wrap_markdown(markdown, &options);
-        assert!(
-            result.contains("# This is a very long heading that should not be wrapped even if it exceeds the width")
-        );
+        assert!(result.contains(
+            "# This is a very long heading that should not be wrapped even if it exceeds the width"
+        ));
     }
 
     #[test]
@@ -298,11 +315,17 @@ mod tests {
         let result = wrap_markdown(markdown, &options);
 
         assert!(
-            result.lines().all(|line| line.len() <= 60 || line.trim().is_empty()),
+            result
+                .lines()
+                .all(|line| line.len() <= 60 || line.trim().is_empty()),
             "Some lines exceed wrap width. Got: {}",
             result
         );
-        assert!(result.contains("1."), "Lost ordered list marker. Got: {}", result);
+        assert!(
+            result.contains("1."),
+            "Lost ordered list marker. Got: {}",
+            result
+        );
         assert!(
             result.contains("2."),
             "Lost second ordered list marker. Got: {}",
@@ -321,14 +344,20 @@ mod tests {
 
         let result = wrap_markdown(markdown, &options);
 
-        assert!(result.contains("- Item"), "Lost top-level list marker. Got: {}", result);
+        assert!(
+            result.contains("- Item"),
+            "Lost top-level list marker. Got: {}",
+            result
+        );
         assert!(
             result.contains("  - Nested"),
             "Lost nested list structure. Got: {}",
             result
         );
         assert!(
-            result.lines().all(|line| line.len() <= 50 || line.trim().is_empty()),
+            result
+                .lines()
+                .all(|line| line.len() <= 50 || line.trim().is_empty()),
             "Some lines exceed wrap width. Got: {}",
             result
         );
@@ -345,9 +374,21 @@ mod tests {
 
         let result = wrap_markdown(markdown, &options);
 
-        assert!(result.contains("[A](#a)"), "Lost link in list. Got: {}", result);
-        assert!(result.contains("[B](#b)"), "Lost nested link. Got: {}", result);
-        assert!(result.contains("[C](#c)"), "Lost short nested link. Got: {}", result);
+        assert!(
+            result.contains("[A](#a)"),
+            "Lost link in list. Got: {}",
+            result
+        );
+        assert!(
+            result.contains("[B](#b)"),
+            "Lost nested link. Got: {}",
+            result
+        );
+        assert!(
+            result.contains("[C](#c)"),
+            "Lost short nested link. Got: {}",
+            result
+        );
         assert!(
             result.contains("- [A](#a)"),
             "Lost list structure with link. Got: {}",
@@ -372,7 +413,11 @@ mod tests {
         let result = wrap_markdown(markdown, &options);
 
         assert!(result.contains("- "), "Lost list markers. Got: {}", result);
-        assert!(result.contains("Item with text"), "Lost item text. Got: {}", result);
+        assert!(
+            result.contains("Item with text"),
+            "Lost item text. Got: {}",
+            result
+        );
     }
 
     #[test]
@@ -386,9 +431,21 @@ mod tests {
 
         let result = wrap_markdown(markdown, &options);
 
-        assert!(result.contains("- [A](#a)"), "Lost top-level link. Got: {}", result);
-        assert!(result.contains("  - [B](#b)"), "Lost nested link B. Got: {}", result);
-        assert!(result.contains("  - [C](#c)"), "Lost nested link C. Got: {}", result);
+        assert!(
+            result.contains("- [A](#a)"),
+            "Lost top-level link. Got: {}",
+            result
+        );
+        assert!(
+            result.contains("  - [B](#b)"),
+            "Lost nested link B. Got: {}",
+            result
+        );
+        assert!(
+            result.contains("  - [C](#c)"),
+            "Lost nested link C. Got: {}",
+            result
+        );
         assert!(
             result.lines().all(|line| line.len() <= 50),
             "Some lines exceed wrap width:\n{}",
@@ -407,7 +464,11 @@ mod tests {
 
         let result = wrap_markdown(markdown, &options);
 
-        assert!(result.contains("- [A very long link label that would exceed wrap width](#a-very-long-link-label)"));
-        assert!(result.contains("  - [Nested very long link label that would also exceed](#nested)"));
+        assert!(result.contains(
+            "- [A very long link label that would exceed wrap width](#a-very-long-link-label)"
+        ));
+        assert!(
+            result.contains("  - [Nested very long link label that would also exceed](#nested)")
+        );
     }
 }

@@ -52,8 +52,10 @@ impl DomContext {
             self.sibling_index_map.resize_with(new_len, || None);
             self.node_map.resize(new_len, None);
             self.tag_info_map.resize_with(new_len, OnceCell::new);
-            self.prev_inline_like_map.resize_with(new_len, OnceCell::new);
-            self.next_inline_like_map.resize_with(new_len, OnceCell::new);
+            self.prev_inline_like_map
+                .resize_with(new_len, OnceCell::new);
+            self.next_inline_like_map
+                .resize_with(new_len, OnceCell::new);
             self.next_tag_map.resize_with(new_len, OnceCell::new);
             self.next_whitespace_map.resize_with(new_len, OnceCell::new);
         }
@@ -64,7 +66,9 @@ impl DomContext {
     }
 
     pub(crate) fn node_handle(&self, id: u32) -> Option<&tl::NodeHandle> {
-        self.node_map.get(id as usize).and_then(|node| node.as_ref())
+        self.node_map
+            .get(id as usize)
+            .and_then(|node| node.as_ref())
     }
 
     pub(crate) fn children_of(&self, id: u32) -> Option<&Vec<tl::NodeHandle>> {
@@ -78,9 +82,10 @@ impl DomContext {
     }
 
     pub(crate) fn tag_info(&self, id: u32, parser: &tl::Parser) -> Option<&TagInfo> {
-        self.tag_info_map
-            .get(id as usize)
-            .and_then(|cell| cell.get_or_init(|| self.build_tag_info(id, parser)).as_ref())
+        self.tag_info_map.get(id as usize).and_then(|cell| {
+            cell.get_or_init(|| self.build_tag_info(id, parser))
+                .as_ref()
+        })
     }
 
     pub(crate) fn tag_name_for<'a>(
@@ -97,124 +102,147 @@ impl DomContext {
         None
     }
 
-    pub(crate) fn next_tag_name<'a>(&'a self, node_handle: tl::NodeHandle, parser: &'a tl::Parser) -> Option<&'a str> {
+    pub(crate) fn next_tag_name<'a>(
+        &'a self,
+        node_handle: tl::NodeHandle,
+        parser: &'a tl::Parser,
+    ) -> Option<&'a str> {
         let next_id = self.next_tag_id(node_handle.get_inner(), parser)?;
-        self.tag_info(next_id, parser).map(|info| info.name.as_str())
+        self.tag_info(next_id, parser)
+            .map(|info| info.name.as_str())
     }
 
-    pub(crate) fn previous_inline_like(&self, node_handle: tl::NodeHandle, parser: &tl::Parser) -> bool {
+    pub(crate) fn previous_inline_like(
+        &self,
+        node_handle: tl::NodeHandle,
+        parser: &tl::Parser,
+    ) -> bool {
         let id = node_handle.get_inner();
-        self.prev_inline_like_map.get(id as usize).is_some_and(|cell| {
-            *cell.get_or_init(|| {
-                let parent = self.parent_of(id);
-                let siblings = if let Some(parent_id) = parent {
-                    if let Some(children) = self.children_of(parent_id) {
-                        children
-                    } else {
-                        return false;
-                    }
-                } else {
-                    &self.root_children
-                };
-
-                let Some(position) = self
-                    .sibling_index(id)
-                    .or_else(|| siblings.iter().position(|handle| handle.get_inner() == id))
-                else {
-                    return false;
-                };
-
-                for sibling in siblings.iter().take(position).rev() {
-                    if let Some(info) = self.tag_info(sibling.get_inner(), parser) {
-                        return info.is_inline_like;
-                    }
-                    if let Some(tl::Node::Raw(raw)) = sibling.get(parser) {
-                        if raw.as_utf8_str().trim().is_empty() {
-                            continue;
+        self.prev_inline_like_map
+            .get(id as usize)
+            .is_some_and(|cell| {
+                *cell.get_or_init(|| {
+                    let parent = self.parent_of(id);
+                    let siblings = if let Some(parent_id) = parent {
+                        if let Some(children) = self.children_of(parent_id) {
+                            children
+                        } else {
+                            return false;
                         }
-                        return false;
-                    }
-                }
+                    } else {
+                        &self.root_children
+                    };
 
-                false
+                    let Some(position) = self
+                        .sibling_index(id)
+                        .or_else(|| siblings.iter().position(|handle| handle.get_inner() == id))
+                    else {
+                        return false;
+                    };
+
+                    for sibling in siblings.iter().take(position).rev() {
+                        if let Some(info) = self.tag_info(sibling.get_inner(), parser) {
+                            return info.is_inline_like;
+                        }
+                        if let Some(tl::Node::Raw(raw)) = sibling.get(parser) {
+                            if raw.as_utf8_str().trim().is_empty() {
+                                continue;
+                            }
+                            return false;
+                        }
+                    }
+
+                    false
+                })
             })
-        })
     }
 
-    pub(crate) fn next_inline_like(&self, node_handle: tl::NodeHandle, parser: &tl::Parser) -> bool {
+    pub(crate) fn next_inline_like(
+        &self,
+        node_handle: tl::NodeHandle,
+        parser: &tl::Parser,
+    ) -> bool {
         let id = node_handle.get_inner();
-        self.next_inline_like_map.get(id as usize).is_some_and(|cell| {
-            *cell.get_or_init(|| {
-                let parent = self.parent_of(id);
-                let siblings = if let Some(parent_id) = parent {
-                    if let Some(children) = self.children_of(parent_id) {
-                        children
-                    } else {
-                        return false;
-                    }
-                } else {
-                    &self.root_children
-                };
-
-                let Some(position) = self
-                    .sibling_index(id)
-                    .or_else(|| siblings.iter().position(|handle| handle.get_inner() == id))
-                else {
-                    return false;
-                };
-
-                for sibling in siblings.iter().skip(position + 1) {
-                    if let Some(info) = self.tag_info(sibling.get_inner(), parser) {
-                        return info.is_inline_like;
-                    }
-                    if let Some(tl::Node::Raw(raw)) = sibling.get(parser) {
-                        if raw.as_utf8_str().trim().is_empty() {
-                            continue;
+        self.next_inline_like_map
+            .get(id as usize)
+            .is_some_and(|cell| {
+                *cell.get_or_init(|| {
+                    let parent = self.parent_of(id);
+                    let siblings = if let Some(parent_id) = parent {
+                        if let Some(children) = self.children_of(parent_id) {
+                            children
+                        } else {
+                            return false;
                         }
-                        return false;
-                    }
-                }
+                    } else {
+                        &self.root_children
+                    };
 
-                false
+                    let Some(position) = self
+                        .sibling_index(id)
+                        .or_else(|| siblings.iter().position(|handle| handle.get_inner() == id))
+                    else {
+                        return false;
+                    };
+
+                    for sibling in siblings.iter().skip(position + 1) {
+                        if let Some(info) = self.tag_info(sibling.get_inner(), parser) {
+                            return info.is_inline_like;
+                        }
+                        if let Some(tl::Node::Raw(raw)) = sibling.get(parser) {
+                            if raw.as_utf8_str().trim().is_empty() {
+                                continue;
+                            }
+                            return false;
+                        }
+                    }
+
+                    false
+                })
             })
-        })
     }
 
-    pub(crate) fn next_whitespace_text(&self, node_handle: tl::NodeHandle, parser: &tl::Parser) -> bool {
+    pub(crate) fn next_whitespace_text(
+        &self,
+        node_handle: tl::NodeHandle,
+        parser: &tl::Parser,
+    ) -> bool {
         let id = node_handle.get_inner();
-        self.next_whitespace_map.get(id as usize).is_some_and(|cell| {
-            *cell.get_or_init(|| {
-                let parent = self.parent_of(id);
-                let siblings = if let Some(parent_id) = parent {
-                    if let Some(children) = self.children_of(parent_id) {
-                        children
+        self.next_whitespace_map
+            .get(id as usize)
+            .is_some_and(|cell| {
+                *cell.get_or_init(|| {
+                    let parent = self.parent_of(id);
+                    let siblings = if let Some(parent_id) = parent {
+                        if let Some(children) = self.children_of(parent_id) {
+                            children
+                        } else {
+                            return false;
+                        }
                     } else {
+                        &self.root_children
+                    };
+
+                    let Some(position) = self
+                        .sibling_index(id)
+                        .or_else(|| siblings.iter().position(|handle| handle.get_inner() == id))
+                    else {
                         return false;
-                    }
-                } else {
-                    &self.root_children
-                };
+                    };
 
-                let Some(position) = self
-                    .sibling_index(id)
-                    .or_else(|| siblings.iter().position(|handle| handle.get_inner() == id))
-                else {
-                    return false;
-                };
-
-                for sibling in siblings.iter().skip(position + 1) {
-                    if let Some(node) = sibling.get(parser) {
-                        match node {
-                            tl::Node::Raw(raw) => return raw.as_utf8_str().trim().is_empty(),
-                            tl::Node::Tag(_) => return false,
-                            tl::Node::Comment(_) => {}
+                    for sibling in siblings.iter().skip(position + 1) {
+                        if let Some(node) = sibling.get(parser) {
+                            match node {
+                                tl::Node::Raw(raw) => return raw.as_utf8_str().trim().is_empty(),
+                                tl::Node::Tag(_) => return false,
+                                tl::Node::Comment(_) => {}
+                            }
                         }
                     }
-                }
 
-                false
+                    false
+                })
             })
-        })
     }
 
     pub(crate) fn next_tag_id(&self, id: u32, parser: &tl::Parser) -> Option<u32> {
@@ -284,7 +312,11 @@ impl DomContext {
         value
     }
 
-    pub(crate) fn text_content_uncached(&self, node_handle: tl::NodeHandle, parser: &tl::Parser) -> String {
+    pub(crate) fn text_content_uncached(
+        &self,
+        node_handle: tl::NodeHandle,
+        parser: &tl::Parser,
+    ) -> String {
         let mut text = String::with_capacity(64);
         if let Some(node) = node_handle.get(parser) {
             match node {

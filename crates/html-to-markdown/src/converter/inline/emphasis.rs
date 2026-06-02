@@ -66,9 +66,13 @@ fn handle_strong(
     dom_ctx: &DomContext,
 ) {
     #[allow(unused_imports)]
-    use crate::converter::{append_inline_suffix, chomp_inline, get_text_content, serialize_node, walk_node};
+    use crate::converter::{
+        append_inline_suffix, chomp_inline, get_text_content, serialize_node, walk_node,
+    };
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -79,7 +83,15 @@ fn handle_strong(
         // Suppress formatting in code context, just process children
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     } else {
         let mut content = String::with_capacity(64);
@@ -165,7 +177,14 @@ fn handle_strong(
                     output.push(options.strong_em_symbol);
                     output.push(options.strong_em_symbol);
                 }
-                append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+                append_inline_suffix(
+                    output,
+                    suffix,
+                    !trimmed.is_empty(),
+                    node_handle,
+                    parser,
+                    dom_ctx,
+                );
             } else if !content.is_empty() {
                 output.push_str(prefix);
                 append_inline_suffix(output, suffix, false, node_handle, parser, dom_ctx);
@@ -191,7 +210,14 @@ fn handle_strong(
                     output.push(options.strong_em_symbol);
                     output.push(options.strong_em_symbol);
                 }
-                append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+                append_inline_suffix(
+                    output,
+                    suffix,
+                    !trimmed.is_empty(),
+                    node_handle,
+                    parser,
+                    dom_ctx,
+                );
             } else if !content.is_empty() {
                 output.push_str(prefix);
                 append_inline_suffix(output, suffix, false, node_handle, parser, dom_ctx);
@@ -211,9 +237,13 @@ fn handle_emphasis(
     dom_ctx: &DomContext,
 ) {
     #[allow(unused_imports)]
-    use crate::converter::{append_inline_suffix, chomp_inline, get_text_content, serialize_node, walk_node};
+    use crate::converter::{
+        append_inline_suffix, chomp_inline, get_text_content, serialize_node, walk_node,
+    };
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -224,7 +254,15 @@ fn handle_emphasis(
         // Suppress formatting in code context, just process children
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     } else {
         let mut content = String::with_capacity(64);
@@ -235,7 +273,15 @@ fn handle_emphasis(
                 ..ctx.clone()
             };
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, &mut content, options, &em_ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    &em_ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -297,7 +343,14 @@ fn handle_emphasis(
                     output.push_str(trimmed);
                     output.push(options.strong_em_symbol);
                 }
-                append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+                append_inline_suffix(
+                    output,
+                    suffix,
+                    !trimmed.is_empty(),
+                    node_handle,
+                    parser,
+                    dom_ctx,
+                );
             } else if !content.is_empty() {
                 output.push_str(prefix);
                 append_inline_suffix(output, suffix, false, node_handle, parser, dom_ctx);
@@ -327,7 +380,14 @@ fn handle_emphasis(
                     output.push_str(trimmed);
                     output.push(options.strong_em_symbol);
                 }
-                append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+                append_inline_suffix(
+                    output,
+                    suffix,
+                    !trimmed.is_empty(),
+                    node_handle,
+                    parser,
+                    dom_ctx,
+                );
             } else if !content.is_empty() {
                 output.push_str(prefix);
                 append_inline_suffix(output, suffix, false, node_handle, parser, dom_ctx);

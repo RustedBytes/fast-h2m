@@ -41,7 +41,11 @@ pub fn parse_blockquote_line(line: &str) -> Option<(String, String)> {
 /// - `width`: The maximum line width
 pub fn wrap_blockquote_paragraph(prefix: &str, content: &str, width: usize) -> String {
     let prefix_len = prefix.len();
-    let inner_width = if width > prefix_len { width - prefix_len } else { 1 };
+    let inner_width = if width > prefix_len {
+        width - prefix_len
+    } else {
+        1
+    };
 
     let wrapped = wrap_line(content, inner_width);
     let mut out = String::new();
@@ -92,17 +96,29 @@ pub fn parse_list_item(line: &str) -> Option<(String, String, String)> {
 
     if let Some(rest) = trimmed.strip_prefix('-') {
         if rest.starts_with(' ') || rest.is_empty() {
-            return Some((indent.to_string(), "- ".to_string(), rest.trim_start().to_string()));
+            return Some((
+                indent.to_string(),
+                "- ".to_string(),
+                rest.trim_start().to_string(),
+            ));
         }
     }
     if let Some(rest) = trimmed.strip_prefix('*') {
         if rest.starts_with(' ') || rest.is_empty() {
-            return Some((indent.to_string(), "* ".to_string(), rest.trim_start().to_string()));
+            return Some((
+                indent.to_string(),
+                "* ".to_string(),
+                rest.trim_start().to_string(),
+            ));
         }
     }
     if let Some(rest) = trimmed.strip_prefix('+') {
         if rest.starts_with(' ') || rest.is_empty() {
-            return Some((indent.to_string(), "+ ".to_string(), rest.trim_start().to_string()));
+            return Some((
+                indent.to_string(),
+                "+ ".to_string(),
+                rest.trim_start().to_string(),
+            ));
         }
     }
 
@@ -231,7 +247,8 @@ pub fn wrap_list_item(indent: &str, marker: &str, content: &str, width: usize) -
         let word_len = word.len();
         let space_needed = usize::from(!current_line.is_empty());
 
-        if !current_line.is_empty() && current_line.len() + space_needed + word_len > current_width {
+        if !current_line.is_empty() && current_line.len() + space_needed + word_len > current_width
+        {
             if is_first_line {
                 result.push_str(&full_marker);
                 is_first_line = false;

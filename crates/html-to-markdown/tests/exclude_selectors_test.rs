@@ -2,7 +2,10 @@
 
 use html_to_markdown_rs::ConversionOptions;
 
-fn convert(html: &str, opts: Option<ConversionOptions>) -> html_to_markdown_rs::error::Result<String> {
+fn convert(
+    html: &str,
+    opts: Option<ConversionOptions>,
+) -> html_to_markdown_rs::error::Result<String> {
     html_to_markdown_rs::convert(html, opts).map(|r| r.content.unwrap_or_default())
 }
 
@@ -22,8 +25,14 @@ fn test_exclude_selectors_drops_matching_elements() {
     let result = convert(html, Some(options)).unwrap();
 
     assert!(result.contains("Main content"), "Should keep main content");
-    assert!(!result.contains("cookie"), "Should drop .cookie-banner element");
-    assert!(!result.contains("Buy stuff"), "Should drop #ad-container element");
+    assert!(
+        !result.contains("cookie"),
+        "Should drop .cookie-banner element"
+    );
+    assert!(
+        !result.contains("Buy stuff"),
+        "Should drop #ad-container element"
+    );
 }
 
 #[test]
@@ -43,7 +52,10 @@ fn test_exclude_selectors_drops_nested_content() {
 
     let result = convert(html, Some(options)).unwrap();
 
-    assert!(result.contains("Primary content"), "Should keep main content");
+    assert!(
+        result.contains("Primary content"),
+        "Should keep main content"
+    );
     assert!(
         !result.contains("Related articles"),
         "Should drop heading inside excluded element"
@@ -99,7 +111,10 @@ fn test_exclude_selectors_attribute_selector() {
 
     let result = convert(html, Some(options)).unwrap();
 
-    assert!(result.contains("Main text"), "Should keep non-excluded content");
+    assert!(
+        result.contains("Main text"),
+        "Should keep non-excluded content"
+    );
     assert!(
         !result.contains("Sidebar"),
         "Should drop element matching attribute selector"

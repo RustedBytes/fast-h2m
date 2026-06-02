@@ -188,10 +188,14 @@ pub fn find_closing_tag_bytes(bytes: &[u8], start: usize, tag: &[u8]) -> Option<
         // Check for </ pattern
         if idx + 2 < len && bytes[idx + 1] == b'/' {
             // Check if tag name matches
-            if idx + 2 + tag_len <= len && eq_ascii_insensitive(&bytes[idx + 2..idx + 2 + tag_len], tag) {
+            if idx + 2 + tag_len <= len
+                && eq_ascii_insensitive(&bytes[idx + 2..idx + 2 + tag_len], tag)
+            {
                 // Ensure it's followed by > or whitespace
                 let after_tag = idx + 2 + tag_len;
-                if after_tag < len && (bytes[after_tag] == b'>' || bytes[after_tag].is_ascii_whitespace()) {
+                if after_tag < len
+                    && (bytes[after_tag] == b'>' || bytes[after_tag].is_ascii_whitespace())
+                {
                     // Find the >
                     let mut close_idx = after_tag;
                     while close_idx < len && bytes[close_idx] != b'>' {
@@ -216,7 +220,9 @@ pub fn eq_ascii_insensitive(a: &[u8], b: &[u8]) -> bool {
     if a.len() != b.len() {
         return false;
     }
-    a.iter().zip(b.iter()).all(|(x, y)| x.eq_ignore_ascii_case(y))
+    a.iter()
+        .zip(b.iter())
+        .all(|(x, y)| x.eq_ignore_ascii_case(y))
 }
 
 /// Normalize HTML comment endings that would confuse the `tl` parser.
@@ -258,7 +264,11 @@ pub fn normalize_bogus_comment_endings(input: &str) -> Cow<'_, str> {
 
     while idx + 3 < len {
         // Find the next comment opening.
-        if !(bytes[idx] == b'<' && bytes[idx + 1] == b'!' && bytes[idx + 2] == b'-' && bytes[idx + 3] == b'-') {
+        if !(bytes[idx] == b'<'
+            && bytes[idx + 1] == b'!'
+            && bytes[idx + 2] == b'-'
+            && bytes[idx + 3] == b'-')
+        {
             idx += 1;
             continue;
         }
@@ -362,7 +372,8 @@ pub fn normalize_split_closing_tags(input: &str) -> Cow<'_, str> {
         // Scan tag name: ASCII letters, digits, hyphens (HTML5 allows hyphens in custom elements)
         let name_start = idx + 2;
         let mut name_end = name_start;
-        while name_end < len && (bytes[name_end].is_ascii_alphanumeric() || bytes[name_end] == b'-') {
+        while name_end < len && (bytes[name_end].is_ascii_alphanumeric() || bytes[name_end] == b'-')
+        {
             name_end += 1;
         }
 
@@ -415,7 +426,8 @@ pub fn normalize_split_closing_tags(input: &str) -> Cow<'_, str> {
 
 /// Preprocess HTML to normalize tags and fix common issues.
 pub fn preprocess_html(input: &str) -> Cow<'_, str> {
-    const SELF_CLOSING: [(&[u8], &str); 3] = [(b"<br/>", "<br>"), (b"<hr/>", "<hr>"), (b"<img/>", "<img>")];
+    const SELF_CLOSING: [(&[u8], &str); 3] =
+        [(b"<br/>", "<br>"), (b"<hr/>", "<hr>"), (b"<img/>", "<img>")];
     const TAGS: [&[u8]; 2] = [b"script", b"style"];
     const SVG: &[u8] = b"svg";
     const DOCTYPE: &[u8] = b"doctype";
@@ -480,11 +492,14 @@ pub fn preprocess_html(input: &str) -> Cow<'_, str> {
                 for tag in TAGS {
                     if matches_tag_start(bytes, idx + 1, tag) {
                         if let Some(open_end) = find_tag_end(bytes, idx + 1 + tag.len()) {
-                            if tag == b"script" && is_json_ld_script_open_tag(&input[idx..open_end]) {
+                            if tag == b"script" && is_json_ld_script_open_tag(&input[idx..open_end])
+                            {
                                 continue;
                             }
-                            let remove_end = find_closing_tag(bytes, open_end, tag).unwrap_or(open_end);
-                            let out = output.get_or_insert_with(|| String::with_capacity(input.len()));
+                            let remove_end =
+                                find_closing_tag(bytes, open_end, tag).unwrap_or(open_end);
+                            let out =
+                                output.get_or_insert_with(|| String::with_capacity(input.len()));
                             out.push_str(&input[last..idx]);
                             out.push_str(&input[idx..open_end]);
                             out.push_str("</");
@@ -520,7 +535,8 @@ pub fn preprocess_html(input: &str) -> Cow<'_, str> {
                         && bytes[cursor..cursor + DOCTYPE.len()].eq_ignore_ascii_case(DOCTYPE)
                     {
                         if let Some(end) = find_tag_end(bytes, cursor + DOCTYPE.len()) {
-                            let out = output.get_or_insert_with(|| String::with_capacity(input.len()));
+                            let out =
+                                output.get_or_insert_with(|| String::with_capacity(input.len()));
                             out.push_str(&input[last..idx]);
                             last = end;
                             idx = end;
@@ -539,7 +555,9 @@ pub fn preprocess_html(input: &str) -> Cow<'_, str> {
                                 || bytes[idx + 2].is_ascii_uppercase())
                     }
                     b'/' => {
-                        idx + 2 < len && (bytes[idx + 2].is_ascii_alphabetic() || bytes[idx + 2].is_ascii_uppercase())
+                        idx + 2 < len
+                            && (bytes[idx + 2].is_ascii_alphabetic()
+                                || bytes[idx + 2].is_ascii_uppercase())
                     }
                     b'?' => true,
                     c if c.is_ascii_alphabetic() || c.is_ascii_uppercase() => true,
@@ -619,7 +637,10 @@ pub fn is_json_ld_script_open_tag(tag: &str) -> bool {
                 _ => {
                     let start = i;
                     let mut end = start;
-                    while end < bytes.len() && !bytes[end].is_ascii_whitespace() && bytes[end] != b'>' {
+                    while end < bytes.len()
+                        && !bytes[end].is_ascii_whitespace()
+                        && bytes[end] != b'>'
+                    {
                         end += 1;
                     }
                     (start, end)
@@ -768,7 +789,9 @@ pub fn normalize_unclosed_list_items(input: &str) -> Cow<'_, str> {
     let len = bytes.len();
     if len < 4
         || (!bytes.windows(3).any(|w| {
-            w.eq_ignore_ascii_case(b"<li") || w.eq_ignore_ascii_case(b"<dt") || w.eq_ignore_ascii_case(b"<dd")
+            w.eq_ignore_ascii_case(b"<li")
+                || w.eq_ignore_ascii_case(b"<dt")
+                || w.eq_ignore_ascii_case(b"<dd")
         }))
     {
         return Cow::Borrowed(input);
@@ -822,7 +845,12 @@ pub fn normalize_unclosed_list_items(input: &str) -> Cow<'_, str> {
             continue;
         }
 
-        if b == b'<' && idx + 3 < len && bytes[idx + 1] == b'!' && bytes[idx + 2] == b'-' && bytes[idx + 3] == b'-' {
+        if b == b'<'
+            && idx + 3 < len
+            && bytes[idx + 1] == b'!'
+            && bytes[idx + 2] == b'-'
+            && bytes[idx + 3] == b'-'
+        {
             in_comment = true;
             idx += 4;
             continue;
@@ -1117,7 +1145,8 @@ fn tag_has_hidden_attribute(tag: &str) -> bool {
 
     let mut i = 0;
     // Skip past the tag name
-    while i < len && bytes[i] != b' ' && bytes[i] != b'\t' && bytes[i] != b'\n' && bytes[i] != b'>' {
+    while i < len && bytes[i] != b' ' && bytes[i] != b'\t' && bytes[i] != b'\n' && bytes[i] != b'>'
+    {
         i += 1;
     }
 
@@ -1127,7 +1156,10 @@ fn tag_has_hidden_attribute(tag: &str) -> bool {
             let before_ok = i == 0 || bytes[i - 1].is_ascii_whitespace();
             // Check that the character after is whitespace, '>', '=', or '/'
             let after = bytes.get(i + nlen).copied();
-            let after_ok = matches!(after, None | Some(b' ' | b'\t' | b'\n' | b'\r' | b'>' | b'=' | b'/'));
+            let after_ok = matches!(
+                after,
+                None | Some(b' ' | b'\t' | b'\n' | b'\r' | b'>' | b'=' | b'/')
+            );
             if before_ok && after_ok {
                 return true;
             }
@@ -1140,8 +1172,8 @@ fn tag_has_hidden_attribute(tag: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::{
-        normalize_bogus_comment_endings, normalize_split_closing_tags, normalize_unclosed_list_items,
-        sanitize_markdown_url,
+        normalize_bogus_comment_endings, normalize_split_closing_tags,
+        normalize_unclosed_list_items, sanitize_markdown_url,
     };
 
     // ── normalize_bogus_comment_endings ───────────────────────────────────────
@@ -1179,7 +1211,10 @@ mod tests {
     fn normalize_bogus_comment_endings_handles_multiple_bogus_comments() {
         let input = "<p>A</p><!-- x ---><p>B</p><!-- y ----><p>C</p>";
         let result = normalize_bogus_comment_endings(input);
-        assert_eq!(result.as_ref(), "<p>A</p><!-- x --><p>B</p><!-- y --><p>C</p>");
+        assert_eq!(
+            result.as_ref(),
+            "<p>A</p><!-- x --><p>B</p><!-- y --><p>C</p>"
+        );
     }
 
     #[test]
@@ -1222,7 +1257,10 @@ mod tests {
     fn normalize_split_closing_tags_handles_multiple_split_closing_tags() {
         let input = "<li><a href=\"#a\">A</a\n  >\n<a href=\"#b\">B</a\n>";
         let result = normalize_split_closing_tags(input);
-        assert_eq!(result.as_ref(), "<li><a href=\"#a\">A</a>\n<a href=\"#b\">B</a>");
+        assert_eq!(
+            result.as_ref(),
+            "<li><a href=\"#a\">A</a>\n<a href=\"#b\">B</a>"
+        );
     }
 
     #[test]
@@ -1331,7 +1369,10 @@ mod tests {
     fn normalize_unclosed_list_items_skips_html_comments() {
         let input = "<ul><li>A<!-- <li>comment --><li>B</ul>";
         let result = normalize_unclosed_list_items(input);
-        assert_eq!(result.as_ref(), "<ul><li>A<!-- <li>comment --></li><li>B</li></ul>");
+        assert_eq!(
+            result.as_ref(),
+            "<ul><li>A<!-- <li>comment --></li><li>B</li></ul>"
+        );
     }
 
     #[test]

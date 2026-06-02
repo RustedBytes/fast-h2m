@@ -79,7 +79,9 @@ pub fn handle(
             .rsplit('\n')
             .find(|line| !line.trim().is_empty())
             .is_some_and(|line| line.trim_start().starts_with('>'));
-        let needs_blank_line = !ctx.in_paragraph && !matches!(prev_tag, Some("blockquote")) && !last_line_is_blockquote;
+        let needs_blank_line = !ctx.in_paragraph
+            && !matches!(prev_tag, Some("blockquote"))
+            && !last_line_is_blockquote;
 
         // If previous element was a blockquote, it added \n\n; reduce to \n
         if matches!(prev_tag, Some("blockquote")) && output.ends_with("\n\n") {

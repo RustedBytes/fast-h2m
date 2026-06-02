@@ -88,7 +88,11 @@ impl fmt::Display for BailReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Classifier => write!(f, "classifier forced tier-2"),
-            Self::DepthMismatch { tag, expected, actual } => {
+            Self::DepthMismatch {
+                tag,
+                expected,
+                actual,
+            } => {
                 write!(
                     f,
                     "depth mismatch for </{tag}>: expected {expected} open(s), got {actual}"

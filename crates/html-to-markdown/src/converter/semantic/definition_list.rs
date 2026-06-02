@@ -80,7 +80,15 @@ pub fn handle_dl(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, &mut content, options, ctx, depth, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                );
             }
         }
 
@@ -120,7 +128,15 @@ pub fn handle_dt(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -160,7 +176,15 @@ pub fn handle_dd(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -219,7 +243,15 @@ pub fn handle_menu(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, &menu_options, &list_ctx, depth, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    &menu_options,
+                    &list_ctx,
+                    depth,
+                    dom_ctx,
+                );
             }
         }
 
@@ -256,11 +288,56 @@ pub fn handle(
     dom_ctx: &super::DomContext,
 ) {
     match tag_name {
-        "hgroup" => handle_hgroup(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "dl" => handle_dl(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "dt" => handle_dt(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "dd" => handle_dd(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "menu" => handle_menu(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
+        "hgroup" => handle_hgroup(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "dl" => handle_dl(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "dt" => handle_dt(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "dd" => handle_dd(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "menu" => handle_menu(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
         _ => {}
     }
 }

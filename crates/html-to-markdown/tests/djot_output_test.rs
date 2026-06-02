@@ -19,21 +19,30 @@ fn djot_options() -> ConversionOptions {
 fn test_djot_emphasis() {
     let html = "<p>Text with <em>emphasis</em> word</p>";
     let result = convert(html, Some(djot_options())).unwrap();
-    assert!(result.contains("_emphasis_"), "Expected _emphasis_, got: {result}");
+    assert!(
+        result.contains("_emphasis_"),
+        "Expected _emphasis_, got: {result}"
+    );
 }
 
 #[test]
 fn test_djot_italic() {
     let html = "<p>Text with <i>italic</i> word</p>";
     let result = convert(html, Some(djot_options())).unwrap();
-    assert!(result.contains("_italic_"), "Expected _italic_, got: {result}");
+    assert!(
+        result.contains("_italic_"),
+        "Expected _italic_, got: {result}"
+    );
 }
 
 #[test]
 fn test_djot_strong() {
     let html = "<p>Text with <strong>strong</strong> word</p>";
     let result = convert(html, Some(djot_options())).unwrap();
-    assert!(result.contains("*strong*"), "Expected *strong*, got: {result}");
+    assert!(
+        result.contains("*strong*"),
+        "Expected *strong*, got: {result}"
+    );
     // Should NOT have double asterisks
     assert!(
         !result.contains("**strong**"),
@@ -65,7 +74,10 @@ fn test_djot_options_debug() {
 fn test_djot_strikethrough() {
     let html = "<p>Text with <del>deleted</del> word</p>";
     let result = convert(html, Some(djot_options())).unwrap();
-    assert!(result.contains("{-deleted-}"), "Expected {{-deleted-}}, got: {result}");
+    assert!(
+        result.contains("{-deleted-}"),
+        "Expected {{-deleted-}}, got: {result}"
+    );
 }
 
 #[test]
@@ -117,8 +129,14 @@ fn test_djot_combined_formatting() {
     let html = "<p><strong>Bold</strong> and <em>italic</em> and <del>deleted</del></p>";
     let result = convert(html, Some(djot_options())).unwrap();
     assert!(result.contains("*Bold*"), "Expected *Bold*, got: {result}");
-    assert!(result.contains("_italic_"), "Expected _italic_, got: {result}");
-    assert!(result.contains("{-deleted-}"), "Expected {{-deleted-}}, got: {result}");
+    assert!(
+        result.contains("_italic_"),
+        "Expected _italic_, got: {result}"
+    );
+    assert!(
+        result.contains("{-deleted-}"),
+        "Expected {{-deleted-}}, got: {result}"
+    );
 }
 
 #[test]

@@ -13,9 +13,13 @@ use std::path::PathBuf;
 use html_to_markdown_rs::ConversionOptions;
 
 fn fixture_path(name: &str) -> PathBuf {
-    [env!("CARGO_MANIFEST_DIR"), "../../test_documents/html/issues", name]
-        .iter()
-        .collect()
+    [
+        env!("CARGO_MANIFEST_DIR"),
+        "../../test_documents/html/issues",
+        name,
+    ]
+    .iter()
+    .collect()
 }
 
 fn default_options() -> ConversionOptions {
@@ -28,7 +32,8 @@ fn default_options() -> ConversionOptions {
 
 #[test]
 fn test_custom_elements() {
-    let html = fs::read_to_string(fixture_path("test-with-custom-elements.html")).expect("read html");
+    let html =
+        fs::read_to_string(fixture_path("test-with-custom-elements.html")).expect("read html");
 
     eprintln!("HTML: {html}");
 

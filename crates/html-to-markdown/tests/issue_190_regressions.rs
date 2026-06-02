@@ -97,9 +97,12 @@ fn converts_all_issue_190_fixtures_except_known_utf16_binary() {
 
     for name in fixtures {
         let html = read_fixture_lossy(name);
-        let markdown =
-            convert(&html, None).unwrap_or_else(|err| panic!("fixture {name} should convert cleanly: {err}"));
-        assert!(!markdown.trim().is_empty(), "fixture {name} produced empty markdown");
+        let markdown = convert(&html, None)
+            .unwrap_or_else(|err| panic!("fixture {name} should convert cleanly: {err}"));
+        assert!(
+            !markdown.trim().is_empty(),
+            "fixture {name} produced empty markdown"
+        );
     }
 }
 
@@ -108,7 +111,8 @@ fn converts_sjsu_fixture_when_lossy_utf8_is_auto_decoded() {
     let bytes = fs::read(fixture_path("sjsu.html")).expect("read sjsu fixture bytes");
     let raw_html = String::from_utf8_lossy(&bytes).into_owned();
 
-    let markdown = convert(&raw_html, None).expect("lossy UTF-16 HTML should be recovered and converted");
+    let markdown =
+        convert(&raw_html, None).expect("lossy UTF-16 HTML should be recovered and converted");
     assert!(
         markdown.contains("pipeline") || markdown.contains("Pipeline"),
         "auto-decoded sjsu fixture should contain expected content"

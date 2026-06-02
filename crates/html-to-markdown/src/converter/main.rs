@@ -15,21 +15,26 @@ use std::collections::{BTreeMap, HashSet};
 
 use crate::converter::dom_context::DomContext;
 use crate::converter::main_helpers::{
-    collapse_excess_blank_lines, extract_head_metadata, format_metadata_frontmatter, has_custom_element_tags,
-    repair_with_html5ever, trim_line_end_whitespace, trim_trailing_whitespace,
+    collapse_excess_blank_lines, extract_head_metadata, format_metadata_frontmatter,
+    has_custom_element_tags, repair_with_html5ever, trim_line_end_whitespace,
+    trim_trailing_whitespace,
 };
 use crate::converter::plain_text::extract_plain_text;
-use crate::converter::preprocessing_helpers::{has_inline_block_misnest, should_drop_for_preprocessing};
+use crate::converter::preprocessing_helpers::{
+    has_inline_block_misnest, should_drop_for_preprocessing,
+};
 use crate::converter::utility::caching::build_dom_context;
 use crate::converter::utility::content::normalized_tag_name;
 use crate::converter::utility::preprocessing::{
-    normalize_bogus_comment_endings, normalize_split_closing_tags, normalize_unclosed_list_items, preprocess_html,
-    strip_hidden_elements, strip_script_and_style_tags,
+    normalize_bogus_comment_endings, normalize_split_closing_tags, normalize_unclosed_list_items,
+    preprocess_html, strip_hidden_elements, strip_script_and_style_tags,
 };
 use crate::converter::utility::serialization::serialize_tag_to_html;
 use crate::options::OutputFormat;
 
-use crate::converter::handlers::{handle_blockquote, handle_code, handle_graphic, handle_img, handle_link, handle_pre};
+use crate::converter::handlers::{
+    handle_blockquote, handle_code, handle_graphic, handle_img, handle_link, handle_pre,
+};
 use crate::error::Result;
 use crate::options::ConversionOptions;
 
@@ -41,7 +46,11 @@ use crate::types::structure_collector::StructureCollectorHandle;
 /// Returns `(markdown, Option<DocumentStructure>)`.  The structure is populated when
 /// `options.include_document_structure == true` and a `structure_collector` handle is provided.
 #[cfg_attr(
-    any(not(feature = "inline-images"), not(feature = "metadata"), not(feature = "visitor")),
+    any(
+        not(feature = "inline-images"),
+        not(feature = "metadata"),
+        not(feature = "visitor")
+    ),
     allow(unused_variables)
 )]
 #[allow(clippy::too_many_lines)]
@@ -49,7 +58,9 @@ pub fn convert_html_impl(
     html: &str,
     options: &ConversionOptions,
     inline_collector: Option<InlineCollectorHandle>,
-    #[cfg(feature = "metadata")] metadata_collector: Option<crate::metadata::MetadataCollectorHandle>,
+    #[cfg(feature = "metadata")] metadata_collector: Option<
+        crate::metadata::MetadataCollectorHandle,
+    >,
     #[cfg(not(feature = "metadata"))] _metadata_collector: Option<()>,
     #[cfg(feature = "visitor")] visitor: Option<crate::visitor::VisitorHandle>,
     #[cfg(not(feature = "visitor"))] _visitor: Option<()>,
@@ -126,8 +137,11 @@ pub fn convert_html_impl(
             preprocessed = preprocess_html(&stripped).into_owned();
             preprocessed_len = preprocessed.len();
             // Re-parse with repaired HTML
-            dom = tl::parse(&preprocessed, parser_options)
-                .map_err(|_| crate::error::ConversionError::ParseError("Failed to parse repaired HTML".to_string()))?;
+            dom = tl::parse(&preprocessed, parser_options).map_err(|_| {
+                crate::error::ConversionError::ParseError(
+                    "Failed to parse repaired HTML".to_string(),
+                )
+            })?;
             parser = dom.parser();
             dom_ctx = build_dom_context(&dom, parser, preprocessed_len);
             output = String::with_capacity(preprocessed_len.saturating_add(preprocessed_len / 4));
@@ -268,7 +282,15 @@ pub fn convert_html_impl(
     }
 
     for child_handle in dom.children() {
-        walk_node(child_handle, parser, &mut output, options, &ctx, 0, &dom_ctx);
+        walk_node(
+            child_handle,
+            parser,
+            &mut output,
+            options,
+            &ctx,
+            0,
+            &dom_ctx,
+        );
     }
 
     #[cfg(feature = "visitor")]
@@ -310,7 +332,10 @@ pub fn convert_html_impl(
 /// [`TableData`] entries.  Returns `(None, vec![])` when no collector was provided.
 fn finish_structure_collector(
     sc: Option<StructureCollectorHandle>,
-) -> (Option<crate::types::DocumentStructure>, Vec<crate::types::TableData>) {
+) -> (
+    Option<crate::types::DocumentStructure>,
+    Vec<crate::types::TableData>,
+) {
     match sc.and_then(|rc| std::rc::Rc::try_unwrap(rc).ok()) {
         Some(cell) => {
             let (doc, tables) = cell.into_inner().finish();
@@ -336,7 +361,9 @@ pub fn walk_node(
     depth: usize,
     dom_ctx: &DomContext,
 ) {
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     if let Some(max) = options.max_depth {
         if depth >= max {
@@ -394,13 +421,16 @@ pub fn walk_node(
             #[cfg(not(feature = "visitor"))]
             let visitor_is_active = false;
 
-            if !visitor_is_active && should_drop_for_preprocessing(tag_name.as_ref(), tag, options) {
+            if !visitor_is_active && should_drop_for_preprocessing(tag_name.as_ref(), tag, options)
+            {
                 trim_trailing_whitespace(output);
                 return;
             }
 
             // Drop elements matching exclude_selectors, including all their descendants.
-            if !ctx.excluded_node_ids.is_empty() && ctx.excluded_node_ids.contains(&node_handle.get_inner()) {
+            if !ctx.excluded_node_ids.is_empty()
+                && ctx.excluded_node_ids.contains(&node_handle.get_inner())
+            {
                 trim_trailing_whitespace(output);
                 return;
             }
@@ -409,7 +439,15 @@ pub fn walk_node(
                 let children = tag.children();
                 {
                     for child_handle in children.top().iter() {
-                        walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                        walk_node(
+                            child_handle,
+                            parser,
+                            output,
+                            options,
+                            ctx,
+                            depth + 1,
+                            dom_ctx,
+                        );
                     }
                 }
                 return;
@@ -422,7 +460,8 @@ pub fn walk_node(
             }
 
             #[cfg(feature = "metadata")]
-            if matches!(tag_name.as_ref(), "html" | "head" | "body") && ctx.metadata_wants_document {
+            if matches!(tag_name.as_ref(), "html" | "head" | "body") && ctx.metadata_wants_document
+            {
                 if let Some(ref collector) = ctx.metadata_collector {
                     let mut c = collector.borrow_mut();
 
@@ -466,8 +505,9 @@ pub fn walk_node(
                 }
 
                 // All inline elements routed to inline dispatcher
-                "strong" | "b" | "em" | "i" | "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "kbd"
-                | "samp" | "var" | "dfn" | "abbr" | "ruby" | "rb" | "rt" | "rp" | "rtc" | "span" => {
+                "strong" | "b" | "em" | "i" | "mark" | "del" | "s" | "ins" | "u" | "small"
+                | "sub" | "sup" | "kbd" | "samp" | "var" | "dfn" | "abbr" | "ruby" | "rb"
+                | "rt" | "rp" | "rtc" | "span" => {
                     crate::converter::inline::dispatch_inline_handler(
                         &tag_name,
                         node_handle,
@@ -480,12 +520,66 @@ pub fn walk_node(
                     );
                 }
 
-                "a" => handle_link(node_handle, tag, parser, output, options, ctx, depth, dom_ctx),
-                "img" => handle_img(node_handle, tag, parser, output, options, ctx, depth, dom_ctx),
-                "graphic" => handle_graphic(node_handle, tag, parser, output, options, ctx, depth, dom_ctx),
-                "code" => handle_code(node_handle, tag, parser, output, options, ctx, depth, dom_ctx),
-                "pre" => handle_pre(node_handle, tag, parser, output, options, ctx, depth, dom_ctx),
-                "blockquote" => handle_blockquote(node_handle, tag, parser, output, options, ctx, depth, dom_ctx),
+                "a" => handle_link(
+                    node_handle,
+                    tag,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                ),
+                "img" => handle_img(
+                    node_handle,
+                    tag,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                ),
+                "graphic" => handle_graphic(
+                    node_handle,
+                    tag,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                ),
+                "code" => handle_code(
+                    node_handle,
+                    tag,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                ),
+                "pre" => handle_pre(
+                    node_handle,
+                    tag,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                ),
+                "blockquote" => handle_blockquote(
+                    node_handle,
+                    tag,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                ),
 
                 "time" | "data" => {
                     crate::converter::block::container::handle_passthrough(
@@ -531,7 +625,15 @@ pub fn walk_node(
                     dom_ctx,
                 ),
                 "div" => {
-                    crate::converter::block::div::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+                    crate::converter::block::div::handle(
+                        node_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth,
+                        dom_ctx,
+                    );
                 }
                 "caption" => crate::converter::block::table::handle_caption(
                     node_handle,
@@ -638,8 +740,9 @@ pub fn walk_node(
                 }
 
                 // Form elements routed to form dispatcher
-                "form" | "fieldset" | "legend" | "label" | "input" | "textarea" | "select" | "option" | "optgroup"
-                | "button" | "progress" | "meter" | "output" | "datalist" => {
+                "form" | "fieldset" | "legend" | "label" | "input" | "textarea" | "select"
+                | "option" | "optgroup" | "button" | "progress" | "meter" | "output"
+                | "datalist" => {
                     crate::converter::form::dispatch_form_handler(
                         &tag_name,
                         node_handle,
@@ -679,7 +782,15 @@ pub fn walk_node(
                 }
 
                 _ => {
-                    crate::converter::block::unknown::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+                    crate::converter::block::unknown::handle(
+                        node_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth,
+                        dom_ctx,
+                    );
                 }
             }
 

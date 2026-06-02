@@ -25,9 +25,15 @@ struct CodeVisitor {
 }
 
 impl HtmlVisitor for CodeVisitor {
-    fn visit_code_block(&mut self, _ctx: &NodeContext, lang: Option<&str>, code: &str) -> VisitResult {
+    fn visit_code_block(
+        &mut self,
+        _ctx: &NodeContext,
+        lang: Option<&str>,
+        code: &str,
+    ) -> VisitResult {
         let lang_str = lang.unwrap_or("unknown").to_string();
-        self.code_blocks.push(format!("[{}] {}", lang_str, code.trim()));
+        self.code_blocks
+            .push(format!("[{}] {}", lang_str, code.trim()));
         VisitResult::Custom(format!("```{}\n{}\n```", lang.unwrap_or(""), code))
     }
 
@@ -75,7 +81,12 @@ fn test_code_block_skip() {
     struct SkipCodeVisitor;
 
     impl HtmlVisitor for SkipCodeVisitor {
-        fn visit_code_block(&mut self, _ctx: &NodeContext, _lang: Option<&str>, _code: &str) -> VisitResult {
+        fn visit_code_block(
+            &mut self,
+            _ctx: &NodeContext,
+            _lang: Option<&str>,
+            _code: &str,
+        ) -> VisitResult {
             VisitResult::Skip
         }
     }

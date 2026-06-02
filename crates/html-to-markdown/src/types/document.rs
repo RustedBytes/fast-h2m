@@ -32,10 +32,16 @@ pub struct DocumentNode {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub parent: Option<u32>,
     /// Indices of child nodes in reading order.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(skip_serializing_if = "Vec::is_empty", default)
+    )]
     pub children: Vec<u32>,
     /// Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(skip_serializing_if = "Vec::is_empty", default)
+    )]
     pub annotations: Vec<TextAnnotation>,
     /// Format-specific attributes preserved from the source HTML element.
     ///
@@ -172,7 +178,10 @@ pub struct TextAnnotation {
 /// Uses internally tagged representation (`"annotation_type": "bold"`) for JSON serialization.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(tag = "annotation_type", rename_all = "snake_case"))]
+#[cfg_attr(
+    feature = "serde",
+    serde(tag = "annotation_type", rename_all = "snake_case")
+)]
 pub enum AnnotationKind {
     /// Bold / strong emphasis.
     #[default]

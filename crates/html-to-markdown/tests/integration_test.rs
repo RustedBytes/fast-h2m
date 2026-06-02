@@ -20,7 +20,10 @@ fn test_multiple_paragraphs() {
 fn test_atx_headings() {
     let html = "<h1>H1</h1><h2>H2</h2><h3>H3</h3><h4>H4</h4><h5>H5</h5><h6>H6</h6>";
     let result = convert(html, None).unwrap();
-    assert_eq!(result, "# H1\n\n## H2\n\n### H3\n\n#### H4\n\n##### H5\n\n###### H6\n");
+    assert_eq!(
+        result,
+        "# H1\n\n## H2\n\n### H3\n\n#### H4\n\n##### H5\n\n###### H6\n"
+    );
 }
 
 #[test]
@@ -55,7 +58,10 @@ fn test_inline_code() {
 fn test_code_block() {
     let html = "<pre><code>fn main() {\n    println!(\"Hello\");\n}</code></pre>";
     let result = convert(html, None).unwrap();
-    assert_eq!(result, "```\nfn main() {\n    println!(\"Hello\");\n}\n```\n");
+    assert_eq!(
+        result,
+        "```\nfn main() {\n    println!(\"Hello\");\n}\n```\n"
+    );
 }
 
 #[test]
@@ -141,8 +147,14 @@ fn test_nested_lists() {
     let html = "<ul><li>Item 1<ul><li>Nested 1</li><li>Nested 2</li></ul></li><li>Item 2</li></ul>";
     let result = convert(html, None).unwrap();
     assert!(result.contains("- Item 1"));
-    assert!(result.contains("Nested 1"), "Expected 'Nested 1' in result: {result:?}");
-    assert!(result.contains("Nested 2"), "Expected 'Nested 2' in result: {result:?}");
+    assert!(
+        result.contains("Nested 1"),
+        "Expected 'Nested 1' in result: {result:?}"
+    );
+    assert!(
+        result.contains("Nested 2"),
+        "Expected 'Nested 2' in result: {result:?}"
+    );
 }
 
 #[test]
@@ -198,7 +210,10 @@ fn test_strikethrough() {
 fn test_simple_table() {
     let html = "<table><tr><th>Header</th></tr><tr><td>Cell</td></tr></table>";
     let result = convert(html, None).unwrap();
-    assert!(result.contains("| Header |"), "header row missing: {result}");
+    assert!(
+        result.contains("| Header |"),
+        "header row missing: {result}"
+    );
     // Separator uses at least as many dashes as the widest cell ("Header" = 6).
     assert!(
         result.lines().any(|l| l.starts_with("| ----")),
@@ -271,7 +286,10 @@ fn test_nested_formatting() {
 fn test_link_inside_paragraph() {
     let html = "<p>Check out <a href=\"https://example.com\">this link</a> for more info.</p>";
     let result = convert(html, None).unwrap();
-    assert_eq!(result, "Check out [this link](https://example.com) for more info.\n");
+    assert_eq!(
+        result,
+        "Check out [this link](https://example.com) for more info.\n"
+    );
 }
 
 #[test]
@@ -555,7 +573,8 @@ fn test_heading_wrapped_in_link_issue_115() {
 
 #[test]
 fn test_link_text_escaping_issue_114() {
-    let html = r#"<a href="https://domain.local">Hi :]</a><br><a href="https://domain.local">1<2</a>"#;
+    let html =
+        r#"<a href="https://domain.local">Hi :]</a><br><a href="https://domain.local">1<2</a>"#;
     let result = convert(html, None).unwrap();
     assert_eq!(
         result,
@@ -596,7 +615,10 @@ fn hidden_elements_stripped() {
 fn q_element_produces_quotes() {
     let html = "<p>He said <q>hello</q> to me</p>";
     let result = convert(html, None).unwrap();
-    assert!(result.contains(r#""hello""#), "q element should add quotes: {result}");
+    assert!(
+        result.contains(r#""hello""#),
+        "q element should add quotes: {result}"
+    );
 }
 
 #[test]
@@ -620,7 +642,10 @@ fn test_regular_caret_link_not_affected() {
     // Regular links with ^ text but no # href should keep the ^
     let html = r#"<a href="https://example.com">^</a>"#;
     let result = convert(html, None).unwrap();
-    assert!(result.contains("[^]"), "Non-anchor caret links should keep ^: {result}");
+    assert!(
+        result.contains("[^]"),
+        "Non-anchor caret links should keep ^: {result}"
+    );
 }
 
 fn convert(

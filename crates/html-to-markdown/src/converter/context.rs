@@ -125,13 +125,19 @@ impl Context {
     /// Create a new conversion context from options and optional collectors.
     #[allow(clippy::too_many_arguments)]
     #[cfg_attr(
-        any(not(feature = "inline-images"), not(feature = "metadata"), not(feature = "visitor")),
+        any(
+            not(feature = "inline-images"),
+            not(feature = "metadata"),
+            not(feature = "visitor")
+        ),
         allow(unused_variables)
     )]
     pub fn new(
         options: &crate::options::ConversionOptions,
         inline_collector: Option<InlineCollectorHandle>,
-        #[cfg(feature = "metadata")] metadata_collector: Option<crate::metadata::MetadataCollectorHandle>,
+        #[cfg(feature = "metadata")] metadata_collector: Option<
+            crate::metadata::MetadataCollectorHandle,
+        >,
         #[cfg(not(feature = "metadata"))] _metadata_collector: Option<()>,
         #[cfg(feature = "visitor")] visitor: Option<crate::visitor::VisitorHandle>,
         #[cfg(not(feature = "visitor"))] _visitor: Option<()>,

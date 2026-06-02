@@ -85,8 +85,10 @@ pub fn handle_figure(
                     output.push_str(&custom);
                     // Still call visit_figure_end with the custom content.
                     // Clamp to a valid char boundary in case a pop landed mid-codepoint (#380).
-                    let safe_start =
-                        crate::converter::utility::content::floor_char_boundary(output, start_pos.min(output.len()));
+                    let safe_start = crate::converter::utility::content::floor_char_boundary(
+                        output,
+                        start_pos.min(output.len()),
+                    );
                     let figure_output = output[safe_start..].to_owned();
                     let end_result = {
                         let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
@@ -146,7 +148,15 @@ pub fn handle_figure(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, &mut figure_content, options, ctx, depth, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut figure_content,
+                    options,
+                    ctx,
+                    depth,
+                    dom_ctx,
+                );
             }
         }
 
@@ -186,8 +196,10 @@ pub fn handle_figure(
                 is_inline: false,
             };
             // Clamp to a valid char boundary in case a pop landed mid-codepoint (#380).
-            let safe_start =
-                crate::converter::utility::content::floor_char_boundary(output, figure_start.min(output.len()));
+            let safe_start = crate::converter::utility::content::floor_char_boundary(
+                output,
+                figure_start.min(output.len()),
+            );
             let figure_output = output[safe_start..].to_owned();
             let visit_result = {
                 let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
@@ -251,7 +263,15 @@ pub fn handle_figcaption(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, &mut text, options, ctx, depth + 1, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut text,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
 
@@ -359,8 +379,26 @@ pub fn handle(
     dom_ctx: &super::DomContext,
 ) {
     match tag_name {
-        "figure" => handle_figure(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "figcaption" => handle_figcaption(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
+        "figure" => handle_figure(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
+        "figcaption" => handle_figcaption(
+            tag_name,
+            node_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth,
+            dom_ctx,
+        ),
         _ => {}
     }
 }
@@ -385,7 +423,10 @@ mod tests {
         // Image and caption should not be on the same line
         let lines: Vec<&str> = content.lines().filter(|l| !l.trim().is_empty()).collect();
         let img_line = lines.iter().position(|l| l.contains("![")).unwrap_or(999);
-        let cap_line = lines.iter().position(|l| l.contains("A nice photo")).unwrap_or(999);
+        let cap_line = lines
+            .iter()
+            .position(|l| l.contains("A nice photo"))
+            .unwrap_or(999);
         assert!(
             cap_line > img_line,
             "caption should be on a separate line after image, lines: {:?}",

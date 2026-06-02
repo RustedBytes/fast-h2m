@@ -30,7 +30,15 @@ pub fn handle_caption(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::super::super::walk_node(child_handle, parser, &mut text, options, ctx, depth + 1, dom_ctx);
+                super::super::super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut text,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
         let text = text.trim();

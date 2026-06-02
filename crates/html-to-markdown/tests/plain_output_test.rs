@@ -148,7 +148,10 @@ fn test_plain_hr_becomes_blank_line() {
     assert!(result.contains("Above"));
     assert!(result.contains("Below"));
     // Should have blank line between
-    assert!(result.contains("\n\n"), "Expected blank line from <hr>, got: {result}");
+    assert!(
+        result.contains("\n\n"),
+        "Expected blank line from <hr>, got: {result}"
+    );
 }
 
 #[test]

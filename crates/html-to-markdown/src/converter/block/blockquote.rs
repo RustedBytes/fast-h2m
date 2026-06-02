@@ -38,7 +38,15 @@ pub fn handle(
             if let tl::Node::Tag(tag) = node {
                 let children = tag.children();
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth + 1,
+                        dom_ctx,
+                    );
                 }
             }
         }
@@ -107,7 +115,11 @@ pub fn handle(
                     };
 
                     let mut visitor_ref = visitor.lock().expect("visitor mutex poisoned");
-                    match visitor_ref.visit_blockquote(&node_ctx, trimmed_content, ctx.blockquote_depth) {
+                    match visitor_ref.visit_blockquote(
+                        &node_ctx,
+                        trimmed_content,
+                        ctx.blockquote_depth,
+                    ) {
                         VisitResult::Continue => {}
                         VisitResult::Custom(custom) => {
                             output.push_str(&custom);

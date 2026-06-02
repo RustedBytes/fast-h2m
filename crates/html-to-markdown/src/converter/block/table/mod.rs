@@ -92,14 +92,23 @@ pub fn handle_table_with_context(
     depth: usize,
 ) {
     let mut table_output = String::new();
-    builder::handle_table(node_handle, parser, &mut table_output, options, ctx, dom_ctx, depth);
+    builder::handle_table(
+        node_handle,
+        parser,
+        &mut table_output,
+        options,
+        ctx,
+        dom_ctx,
+        depth,
+    );
 
     // Feed the table into the structure collector when document structure extraction is enabled.
     // Use push_table_data so that ConversionResult.tables is populated with both the grid and
     // the markdown rendering that was just generated above.
     if let Some(ref sc) = ctx.structure_collector {
         if let Some(grid) = collect_table_grid(node_handle, parser, options, ctx, dom_ctx) {
-            sc.borrow_mut().push_table_data(grid, table_output.trim().to_string());
+            sc.borrow_mut()
+                .push_table_data(grid, table_output.trim().to_string());
         }
     }
 
@@ -241,10 +250,20 @@ fn collect_grid_row(
         };
         if let Some(tl::Node::Tag(cell_tag)) = cell_handle.get(parser) {
             for child_handle in cell_tag.children().top().iter() {
-                super::super::walk_node(child_handle, parser, &mut text, options, &cell_ctx, 0, dom_ctx);
+                super::super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut text,
+                    options,
+                    &cell_ctx,
+                    0,
+                    dom_ctx,
+                );
             }
         }
-        let content = crate::text::normalize_whitespace_cow(&text).trim().to_string();
+        let content = crate::text::normalize_whitespace_cow(&text)
+            .trim()
+            .to_string();
 
         let (colspan, rowspan) = get_colspan_rowspan(cell_handle, parser);
 

@@ -20,7 +20,10 @@ use html_to_markdown_rs::{ConversionOptions, TierStrategy, convert};
 
 // ── Fixture paths (mirrors groups.toml) ──────────────────────────────────────
 
-const FIXTURES_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../tools/benchmark-harness/fixtures");
+const FIXTURES_ROOT: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../tools/benchmark-harness/fixtures"
+);
 
 /// All fixture relative paths from groups.toml.
 const FIXTURE_PATHS: &[&str] = &[
@@ -211,5 +214,9 @@ fn first_diff(expected: &str, actual: &str) -> String {
             return format!("line {}: expected {:?} actual {:?}", i + 1, e, a);
         }
     }
-    format!("line count differs: expected {} actual {}", exp.len(), act.len())
+    format!(
+        "line count differs: expected {} actual {}",
+        exp.len(),
+        act.len()
+    )
 }

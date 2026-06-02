@@ -18,14 +18,15 @@ fn convert_accepts_none() {
 
 #[test]
 fn convert_accepts_bare_default_options() {
-    let result =
-        convert(HTML, ConversionOptions::default()).expect("convert(html, ConversionOptions::default()) must succeed");
+    let result = convert(HTML, ConversionOptions::default())
+        .expect("convert(html, ConversionOptions::default()) must succeed");
     assert!(result.content.as_deref().unwrap_or("").contains("Hello"));
 }
 
 #[test]
 fn convert_accepts_some_default_options() {
-    let result = convert(HTML, Some(ConversionOptions::default())).expect("convert(html, Some(default)) must succeed");
+    let result = convert(HTML, Some(ConversionOptions::default()))
+        .expect("convert(html, Some(default)) must succeed");
     assert!(result.content.as_deref().unwrap_or("").contains("Hello"));
 }
 

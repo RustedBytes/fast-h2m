@@ -52,7 +52,16 @@ pub fn handle(
             marks::handle_mark(node_handle, parser, output, options, ctx, depth, dom_ctx);
         }
         "del" | "s" => {
-            marks::handle_strikethrough(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            marks::handle_strikethrough(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
         }
         "ins" => {
             marks::handle_inserted(node_handle, parser, output, options, ctx, depth, dom_ctx);
@@ -67,16 +76,40 @@ pub fn handle(
             typography::handle_subscript(node_handle, parser, output, options, ctx, depth, dom_ctx);
         }
         "sup" => {
-            typography::handle_superscript(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            typography::handle_superscript(
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
         }
         "var" => {
             typography::handle_variable(node_handle, parser, output, options, ctx, depth, dom_ctx);
         }
         "dfn" => {
-            typography::handle_definition(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            typography::handle_definition(
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
         }
         "abbr" => {
-            typography::handle_abbreviation(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            typography::handle_abbreviation(
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
         }
         "span" => {
             typography::handle_span(node_handle, parser, output, options, ctx, depth, dom_ctx);

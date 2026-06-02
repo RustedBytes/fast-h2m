@@ -11,14 +11,18 @@ use std::fs;
 use std::path::PathBuf;
 
 use html_to_markdown_rs::{
-    CodeBlockStyle, ConversionOptions, HeadingStyle, HighlightStyle, ListIndentType, PreprocessingOptions,
-    PreprocessingPreset, WhitespaceMode,
+    CodeBlockStyle, ConversionOptions, HeadingStyle, HighlightStyle, ListIndentType,
+    PreprocessingOptions, PreprocessingPreset, WhitespaceMode,
 };
 
 fn fixture_path(name: &str) -> PathBuf {
-    [env!("CARGO_MANIFEST_DIR"), "../../test_documents/html/issues", name]
-        .iter()
-        .collect()
+    [
+        env!("CARGO_MANIFEST_DIR"),
+        "../../test_documents/html/issues",
+        name,
+    ]
+    .iter()
+    .collect()
 }
 
 fn issue_127_options() -> ConversionOptions {
@@ -48,9 +52,13 @@ fn issue_127_options() -> ConversionOptions {
 fn converts_multilingual_fixture_without_utf8_boundary_panic() {
     let html = fs::read_to_string(fixture_path("gh-127-issue.html")).expect("read issue fixture");
 
-    let markdown = convert(&html, Some(issue_127_options())).expect("convert should not panic on utf-8 boundaries");
+    let markdown = convert(&html, Some(issue_127_options()))
+        .expect("convert should not panic on utf-8 boundaries");
 
-    assert!(!markdown.is_empty(), "converted output should contain content");
+    assert!(
+        !markdown.is_empty(),
+        "converted output should contain content"
+    );
     assert!(
         markdown.contains("MW841") && markdown.contains("كريب"),
         "converted output should preserve multilingual product content"

@@ -44,7 +44,15 @@ pub fn handle_dl(
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            crate::converter::walk_node(child_handle, parser, &mut content, options, ctx, depth, dom_ctx);
+            crate::converter::walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
         }
     }
 
@@ -80,7 +88,15 @@ pub fn handle_dt(
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            crate::converter::walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+            crate::converter::walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
     let trimmed = content.trim().to_owned();
@@ -164,7 +180,15 @@ pub fn handle_dd(
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            crate::converter::walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+            crate::converter::walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 

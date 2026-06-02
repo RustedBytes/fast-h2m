@@ -72,9 +72,18 @@ pub fn dispatch_form_handler(
 ) -> bool {
     match tag_name {
         // Form containers and metadata
-        "form" | "fieldset" | "legend" | "label" | "input" | "textarea" | "select" | "option" | "optgroup"
-        | "button" | "progress" | "meter" | "output" | "datalist" => {
-            handle_form_elements(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+        "form" | "fieldset" | "legend" | "label" | "input" | "textarea" | "select" | "option"
+        | "optgroup" | "button" | "progress" | "meter" | "output" | "datalist" => {
+            handle_form_elements(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         _ => false,

@@ -37,7 +37,10 @@ fn tier2_output(html: &str) -> String {
         extract_metadata: false,
         ..ConversionOptions::default()
     };
-    convert(html, Some(opts)).unwrap().content.unwrap_or_default()
+    convert(html, Some(opts))
+        .unwrap()
+        .content
+        .unwrap_or_default()
 }
 
 /// The core invariant: if Tier-1 succeeds, its output must equal Tier-2.

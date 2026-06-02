@@ -66,7 +66,9 @@ fn handle_head(
 ) {
     use crate::converter::walk_node;
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -90,15 +92,23 @@ fn handle_head(
         if let Some(ref collector) = ctx.metadata_collector {
             for child_handle in children.top().iter() {
                 if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-                    let child_name = dom_ctx
-                        .tag_name_for(*child_handle, parser)
-                        .unwrap_or_else(|| crate::converter::normalized_tag_name(child_tag.name().as_utf8_str()));
+                    let child_name =
+                        dom_ctx
+                            .tag_name_for(*child_handle, parser)
+                            .unwrap_or_else(|| {
+                                crate::converter::normalized_tag_name(
+                                    child_tag.name().as_utf8_str(),
+                                )
+                            });
                     if child_name.as_ref() == "script" {
                         if let Some(type_attr) = child_tag.attributes().get("type").flatten() {
                             let type_value = type_attr.as_utf8_str();
                             let type_value = type_value.as_ref();
                             let type_value = type_value.split(';').next().unwrap_or(type_value);
-                            if type_value.trim().eq_ignore_ascii_case("application/ld+json") {
+                            if type_value
+                                .trim()
+                                .eq_ignore_ascii_case("application/ld+json")
+                            {
                                 let json = child_tag.inner_text(parser);
                                 let json = json.trim();
                                 if !json.is_empty() {
@@ -118,7 +128,15 @@ fn handle_head(
     // If head contains body-like elements (malformed HTML), process them
     if has_body_like {
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 }
@@ -135,7 +153,9 @@ fn handle_script(
     _options: &ConversionOptions,
     ctx: &Context,
 ) {
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -147,7 +167,11 @@ fn handle_script(
         let type_value = type_attr.as_utf8_str();
         let type_value = type_value.as_ref();
         let type_value = type_value.split(';').next().unwrap_or(type_value);
-        if type_value.trim().eq_ignore_ascii_case("application/ld+json") && ctx.metadata_wants_structured_data {
+        if type_value
+            .trim()
+            .eq_ignore_ascii_case("application/ld+json")
+            && ctx.metadata_wants_structured_data
+        {
             if let Some(ref collector) = ctx.metadata_collector {
                 let json = tag.inner_text(parser);
                 let json = json.trim();
@@ -192,7 +216,9 @@ fn handle_math(
         options.escape_ascii,
     );
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,

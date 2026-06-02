@@ -84,27 +84,72 @@ pub fn dispatch_semantic_handler(
     match tag_name {
         // Sectioning elements
         "article" | "section" | "nav" | "aside" | "header" | "footer" | "main" => {
-            handle_sectioning(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            handle_sectioning(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         // Figure elements
         "figure" | "figcaption" => {
-            handle_figure(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            handle_figure(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         // Summary and interactive elements
         "details" | "summary" | "dialog" => {
-            handle_summary(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            handle_summary(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         // Definition list and related elements
         "hgroup" | "dl" | "dt" | "dd" | "menu" => {
-            handle_definition_list(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            handle_definition_list(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         // Semantic inline attributes
         "cite" | "q" | "abbr" | "dfn" | "time" | "data" => {
-            handle_attributes(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            handle_attributes(
+                tag_name,
+                node_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         _ => false,

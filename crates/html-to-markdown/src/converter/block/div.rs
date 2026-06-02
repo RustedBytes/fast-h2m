@@ -36,7 +36,9 @@ pub fn handle(
 ) {
     use crate::converter::walk_node;
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -48,7 +50,15 @@ pub fn handle(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
         return;
@@ -56,8 +66,10 @@ pub fn handle(
 
     let content_start_pos = output.len();
 
-    let is_table_continuation =
-        ctx.in_table_cell && !output.is_empty() && !output.ends_with('|') && !output.ends_with("<br>");
+    let is_table_continuation = ctx.in_table_cell
+        && !output.is_empty()
+        && !output.ends_with('|')
+        && !output.ends_with("<br>");
 
     let is_list_continuation = ctx.in_list_item
         && !output.is_empty()
@@ -94,7 +106,15 @@ pub fn handle(
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 

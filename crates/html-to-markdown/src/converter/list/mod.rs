@@ -50,7 +50,16 @@ pub fn dispatch_list_handler(
             true
         }
         "li" => {
-            item::handle_li(node_handle, tag, parser, output, options, ctx, depth, dom_ctx);
+            item::handle_li(
+                node_handle,
+                tag,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
             true
         }
         "dl" => {

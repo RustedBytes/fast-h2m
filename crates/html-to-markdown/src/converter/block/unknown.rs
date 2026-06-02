@@ -44,7 +44,9 @@ pub fn handle(
 ) {
     use crate::converter::walk_node;
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -102,7 +104,15 @@ pub fn handle(
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 
@@ -124,8 +134,9 @@ pub fn handle(
         let added_content = output[start_idx..].to_string();
 
         // Detect code blocks by markdown formatting
-        let is_code_block =
-            added_content.starts_with("    ") || added_content.starts_with("```") || added_content.starts_with("~~~");
+        let is_code_block = added_content.starts_with("    ")
+            || added_content.starts_with("```")
+            || added_content.starts_with("~~~");
 
         // Remove empty content while preserving code blocks
         if added_content.trim().is_empty() && !is_code_block {

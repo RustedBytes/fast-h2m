@@ -52,7 +52,10 @@ fn test_multibyte_utf8_with_tabs_and_visitor() {
 
     for html in &cases {
         let result = convert(html, None, Some(make_visitor()));
-        assert!(result.is_ok(), "Should not panic for: {html}\nError: {result:?}");
+        assert!(
+            result.is_ok(),
+            "Should not panic for: {html}\nError: {result:?}"
+        );
     }
 }
 

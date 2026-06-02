@@ -27,7 +27,10 @@ fn test_header_with_nested_elements() {
     let html = "<header><h1>Title</h1><p>Subtitle</p></header>";
     let result = convert(html);
     assert!(result.contains("# Title"), "Should contain h1: {result}");
-    assert!(result.contains("Subtitle"), "Should contain paragraph: {result}");
+    assert!(
+        result.contains("Subtitle"),
+        "Should contain paragraph: {result}"
+    );
 }
 
 // --- footer ---
@@ -52,10 +55,17 @@ fn test_h2_inside_main() {
 
 #[test]
 fn test_article_with_header_and_section() {
-    let html = "<article><header><h1>Title</h1></header><section><p>Content here</p></section></article>";
+    let html =
+        "<article><header><h1>Title</h1></header><section><p>Content here</p></section></article>";
     let result = convert(html);
-    assert!(result.contains("# Title"), "Should contain heading: {result}");
-    assert!(result.contains("Content here"), "Should contain content: {result}");
+    assert!(
+        result.contains("# Title"),
+        "Should contain heading: {result}"
+    );
+    assert!(
+        result.contains("Content here"),
+        "Should contain content: {result}"
+    );
 }
 
 // --- section ---
@@ -64,8 +74,14 @@ fn test_article_with_header_and_section() {
 fn test_heading_inside_section() {
     let html = "<section><h2>Section Heading</h2><p>Section body</p></section>";
     let result = convert(html);
-    assert!(result.contains("## Section Heading"), "Should contain h2: {result}");
-    assert!(result.contains("Section body"), "Should contain body: {result}");
+    assert!(
+        result.contains("## Section Heading"),
+        "Should contain h2: {result}"
+    );
+    assert!(
+        result.contains("Section body"),
+        "Should contain body: {result}"
+    );
 }
 
 // --- nav ---
@@ -75,7 +91,10 @@ fn test_nav_dropped_by_default() {
     // nav is dropped by default when remove_navigation is true (the default)
     let html = r#"<nav><a href="/home">Home</a><a href="/about">About</a></nav>"#;
     let result = convert(html);
-    assert!(result.is_empty(), "nav should be dropped by default: '{result}'");
+    assert!(
+        result.is_empty(),
+        "nav should be dropped by default: '{result}'"
+    );
 }
 
 #[test]
@@ -133,5 +152,8 @@ fn test_header_with_role_navigation_dropped() {
         !result.contains("Home"),
         "navigation header should be dropped: '{result}'"
     );
-    assert!(result.contains("Body"), "body content should be preserved: '{result}'");
+    assert!(
+        result.contains("Body"),
+        "body content should be preserved: '{result}'"
+    );
 }

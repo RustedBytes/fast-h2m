@@ -126,7 +126,14 @@ pub fn process_text_node(
             );
             escaped_result.into_owned()
         } else {
-            text::escape(text.as_ref(), options.escape_misc, true, true, options.escape_ascii).into_owned()
+            text::escape(
+                text.as_ref(),
+                options.escape_misc,
+                true,
+                true,
+                options.escape_ascii,
+            )
+            .into_owned()
         };
         if options.escape_misc {
             escaped
@@ -183,7 +190,8 @@ pub fn process_text_node(
             // Without this distinction, the second paragraph after a "\n\n" boundary
             // would incorrectly suppress the trailing space before inline elements.
             let safe_start = ctx.block_content_start.min(output.len());
-            let safe_start = crate::converter::utility::content::floor_char_boundary(output, safe_start);
+            let safe_start =
+                crate::converter::utility::content::floor_char_boundary(output, safe_start);
             let current_block_output = &output[safe_start..];
             let at_paragraph_break = current_block_output.ends_with("\n\n");
             if !at_paragraph_break {

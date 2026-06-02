@@ -31,7 +31,9 @@ pub fn handle_small(
 ) {
     use crate::converter::walk_node;
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -40,7 +42,15 @@ pub fn handle_small(
 
     let children = tag.children();
     for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+        walk_node(
+            child_handle,
+            parser,
+            output,
+            options,
+            ctx,
+            depth + 1,
+            dom_ctx,
+        );
     }
 }
 
@@ -57,9 +67,13 @@ pub fn handle_subscript(
     dom_ctx: &DomContext,
 ) {
     #[allow(unused_imports)]
-    use crate::converter::{append_inline_suffix, chomp_inline, get_text_content, serialize_node, walk_node};
+    use crate::converter::{
+        append_inline_suffix, chomp_inline, get_text_content, serialize_node, walk_node,
+    };
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -69,7 +83,15 @@ pub fn handle_subscript(
     let mut content = String::with_capacity(32);
     let children = tag.children();
     for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+        walk_node(
+            child_handle,
+            parser,
+            &mut content,
+            options,
+            ctx,
+            depth + 1,
+            dom_ctx,
+        );
     }
 
     if ctx.in_code {
@@ -142,7 +164,14 @@ pub fn handle_subscript(
         } else {
             output.push_str(trimmed);
         }
-        append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+        append_inline_suffix(
+            output,
+            suffix,
+            !trimmed.is_empty(),
+            node_handle,
+            parser,
+            dom_ctx,
+        );
     }
 }
 
@@ -159,9 +188,13 @@ pub fn handle_superscript(
     dom_ctx: &DomContext,
 ) {
     #[allow(unused_imports)]
-    use crate::converter::{append_inline_suffix, chomp_inline, get_text_content, serialize_node, walk_node};
+    use crate::converter::{
+        append_inline_suffix, chomp_inline, get_text_content, serialize_node, walk_node,
+    };
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -171,7 +204,15 @@ pub fn handle_superscript(
     let mut content = String::with_capacity(32);
     let children = tag.children();
     for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+        walk_node(
+            child_handle,
+            parser,
+            &mut content,
+            options,
+            ctx,
+            depth + 1,
+            dom_ctx,
+        );
     }
 
     if ctx.in_code {
@@ -244,7 +285,14 @@ pub fn handle_superscript(
         } else {
             output.push_str(trimmed);
         }
-        append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+        append_inline_suffix(
+            output,
+            suffix,
+            !trimmed.is_empty(),
+            node_handle,
+            parser,
+            dom_ctx,
+        );
     }
 }
 
@@ -262,7 +310,9 @@ pub fn handle_variable(
 ) {
     use crate::converter::{append_inline_suffix, chomp_inline, walk_node};
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -272,7 +322,15 @@ pub fn handle_variable(
     let mut content = String::with_capacity(32);
     let children = tag.children();
     for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+        walk_node(
+            child_handle,
+            parser,
+            &mut content,
+            options,
+            ctx,
+            depth + 1,
+            dom_ctx,
+        );
     }
 
     let (prefix, suffix, trimmed) = chomp_inline(&content);
@@ -281,7 +339,14 @@ pub fn handle_variable(
         output.push(options.strong_em_symbol);
         output.push_str(trimmed);
         output.push(options.strong_em_symbol);
-        append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+        append_inline_suffix(
+            output,
+            suffix,
+            !trimmed.is_empty(),
+            node_handle,
+            parser,
+            dom_ctx,
+        );
     }
 }
 
@@ -299,7 +364,9 @@ pub fn handle_definition(
 ) {
     use crate::converter::{append_inline_suffix, chomp_inline, walk_node};
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -309,7 +376,15 @@ pub fn handle_definition(
     let mut content = String::with_capacity(32);
     let children = tag.children();
     for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+        walk_node(
+            child_handle,
+            parser,
+            &mut content,
+            options,
+            ctx,
+            depth + 1,
+            dom_ctx,
+        );
     }
 
     let (prefix, suffix, trimmed) = chomp_inline(&content);
@@ -318,7 +393,14 @@ pub fn handle_definition(
         output.push(options.strong_em_symbol);
         output.push_str(trimmed);
         output.push(options.strong_em_symbol);
-        append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
+        append_inline_suffix(
+            output,
+            suffix,
+            !trimmed.is_empty(),
+            node_handle,
+            parser,
+            dom_ctx,
+        );
     }
 }
 
@@ -336,7 +418,9 @@ pub fn handle_abbreviation(
 ) {
     use crate::converter::walk_node;
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -346,7 +430,15 @@ pub fn handle_abbreviation(
     let mut content = String::with_capacity(32);
     let children = tag.children();
     for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+        walk_node(
+            child_handle,
+            parser,
+            &mut content,
+            options,
+            ctx,
+            depth + 1,
+            dom_ctx,
+        );
     }
 
     let trimmed = content.trim();
@@ -354,7 +446,12 @@ pub fn handle_abbreviation(
     if !trimmed.is_empty() {
         output.push_str(trimmed);
 
-        if let Some(title) = tag.attributes().get("title").flatten().map(|v| v.as_utf8_str()) {
+        if let Some(title) = tag
+            .attributes()
+            .get("title")
+            .flatten()
+            .map(|v| v.as_utf8_str())
+        {
             let trimmed_title = title.trim();
             if !trimmed_title.is_empty() {
                 output.push_str(" (");
@@ -382,7 +479,9 @@ pub fn handle_span(
 ) {
     use crate::converter::walk_node;
 
-    let Some(node) = node_handle.get(parser) else { return };
+    let Some(node) = node_handle.get(parser) else {
+        return;
+    };
 
     let tag = match node {
         tl::Node::Tag(tag) => tag,
@@ -391,7 +490,10 @@ pub fn handle_span(
 
     // Check if this is an OCR word span (class="ocrx_word")
     let is_hocr_word = tag.attributes().iter().any(|(name, value)| {
-        name.as_ref() == "class" && value.as_ref().is_some_and(|v| v.as_ref().contains("ocrx_word"))
+        name.as_ref() == "class"
+            && value
+                .as_ref()
+                .is_some_and(|v| v.as_ref().contains("ocrx_word"))
     });
 
     // Add space before OCR words if needed
@@ -495,8 +597,16 @@ mod tests {
         let html = "<p>H<sub>2</sub>O</p>";
         let result = convert(html, Some(make_visitor(SubSkipVisitor))).unwrap();
         let content = result.content.unwrap_or_default();
-        assert!(!content.contains('2'), "sub content should be absent: {}", content);
-        assert!(content.contains('H'), "surrounding text should be present: {}", content);
+        assert!(
+            !content.contains('2'),
+            "sub content should be absent: {}",
+            content
+        );
+        assert!(
+            content.contains('H'),
+            "surrounding text should be present: {}",
+            content
+        );
     }
 
     #[test]
@@ -528,7 +638,11 @@ mod tests {
         let html = "<p>E=mc<sup>2</sup></p>";
         let result = convert(html, Some(make_visitor(SupSkipVisitor))).unwrap();
         let content = result.content.unwrap_or_default();
-        assert!(!content.contains('2'), "sup content should be absent: {}", content);
+        assert!(
+            !content.contains('2'),
+            "sup content should be absent: {}",
+            content
+        );
     }
 
     #[test]

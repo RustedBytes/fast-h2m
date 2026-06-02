@@ -135,7 +135,9 @@ impl StructureCollector {
         let id = Self::generate_id("paragraph", text, self.nodes.len() as u32);
         let idx = self.raw_push(DocumentNode {
             id,
-            content: NodeContent::Paragraph { text: text.to_string() },
+            content: NodeContent::Paragraph {
+                text: text.to_string(),
+            },
             parent,
             children: Vec::new(),
             annotations: Vec::new(),
@@ -187,7 +189,9 @@ impl StructureCollector {
         let id = Self::generate_id("list_item", text, self.nodes.len() as u32);
         let idx = self.raw_push(DocumentNode {
             id,
-            content: NodeContent::ListItem { text: text.to_string() },
+            content: NodeContent::ListItem {
+                text: text.to_string(),
+            },
             parent,
             children: Vec::new(),
             annotations: Vec::new(),
@@ -436,7 +440,10 @@ mod tests {
         assert!(group.children.contains(&1));
 
         let heading = &c.nodes[1];
-        assert!(matches!(&heading.content, NodeContent::Heading { level: 1, .. }));
+        assert!(matches!(
+            &heading.content,
+            NodeContent::Heading { level: 1, .. }
+        ));
         assert_eq!(heading.parent, Some(0));
     }
 

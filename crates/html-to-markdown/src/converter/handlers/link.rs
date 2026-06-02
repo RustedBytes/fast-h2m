@@ -12,14 +12,17 @@
 use std::collections::BTreeMap;
 
 use crate::converter::Context;
-use crate::converter::block::heading::{find_single_heading_child, heading_allows_inline_images, push_heading};
+use crate::converter::block::heading::{
+    find_single_heading_child, heading_allows_inline_images, push_heading,
+};
 use crate::converter::dom_context::DomContext;
 use crate::converter::inline::link::{append_markdown_link, has_uri_scheme};
 use crate::converter::main::walk_node;
 #[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::converter::utility::content::{
-    collect_link_label_text, escape_link_label, get_text_content, normalize_link_label, normalized_tag_name,
+    collect_link_label_text, escape_link_label, get_text_content, normalize_link_label,
+    normalized_tag_name,
 };
 use crate::options::ConversionOptions;
 use crate::text;
@@ -85,10 +88,13 @@ pub fn handle_link(
             return;
         }
 
-        if let Some((heading_level, heading_handle)) = find_single_heading_child(*node_handle, parser) {
+        if let Some((heading_level, heading_handle)) =
+            find_single_heading_child(*node_handle, parser)
+        {
             if let Some(heading_node) = heading_handle.get(parser) {
                 if let tl::Node::Tag(heading_tag) = heading_node {
-                    let heading_name = normalized_tag_name(heading_tag.name().as_utf8_str()).into_owned();
+                    let heading_name =
+                        normalized_tag_name(heading_tag.name().as_utf8_str()).into_owned();
                     let mut heading_text = String::new();
                     let heading_ctx = Context {
                         in_heading: true,
@@ -129,7 +135,8 @@ pub fn handle_link(
         }
 
         let children: Vec<_> = tag.children().top().iter().copied().collect();
-        let (inline_label, _block_nodes, saw_block) = collect_link_label_text(&children, parser, dom_ctx);
+        let (inline_label, _block_nodes, saw_block) =
+            collect_link_label_text(&children, parser, dom_ctx);
         let mut label = if saw_block {
             let mut content = String::new();
             let link_ctx = Context {
@@ -183,7 +190,8 @@ pub fn handle_link(
         };
 
         if label.is_empty() && saw_block {
-            let fallback = text::normalize_whitespace(&get_text_content(node_handle, parser, dom_ctx));
+            let fallback =
+                text::normalize_whitespace(&get_text_content(node_handle, parser, dom_ctx));
             label = normalize_link_label(&fallback);
         }
 
@@ -303,16 +311,28 @@ pub fn handle_link(
                     let value = value_opt.map(|v| v.to_string()).unwrap_or_default();
                     attributes_map.insert(key_str, value);
                 }
-                collector
-                    .borrow_mut()
-                    .add_link(href.clone(), label, title.clone(), rel_attr, attributes_map);
+                collector.borrow_mut().add_link(
+                    href.clone(),
+                    label,
+                    title.clone(),
+                    rel_attr,
+                    attributes_map,
+                );
             }
         }
     } else {
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
     }

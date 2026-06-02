@@ -5,7 +5,8 @@
 
 use html_to_markdown_rs::{ConversionOptions, NodeContent};
 
-const NESTED_LIST_HTML: &str = "<ul><li>outer<ul><li>mid<ol><li>inner1</li><li>inner2</li></ol></li></ul></li></ul>";
+const NESTED_LIST_HTML: &str =
+    "<ul><li>outer<ul><li>mid<ol><li>inner1</li><li>inner2</li></ol></li></ul></li></ul>";
 
 #[test]
 fn markdown_output_no_content_duplication() {
@@ -30,7 +31,9 @@ fn structure_collector_list_items_no_duplication() {
         ..Default::default()
     };
     let result = html_to_markdown_rs::convert(NESTED_LIST_HTML, Some(options)).unwrap();
-    let doc = result.document.expect("document structure must be populated");
+    let doc = result
+        .document
+        .expect("document structure must be populated");
 
     let list_item_texts: Vec<&str> = doc
         .nodes
@@ -44,8 +47,14 @@ fn structure_collector_list_items_no_duplication() {
         })
         .collect();
 
-    let inner1_count = list_item_texts.iter().filter(|t| t.contains("inner1")).count();
-    let inner2_count = list_item_texts.iter().filter(|t| t.contains("inner2")).count();
+    let inner1_count = list_item_texts
+        .iter()
+        .filter(|t| t.contains("inner1"))
+        .count();
+    let inner2_count = list_item_texts
+        .iter()
+        .filter(|t| t.contains("inner2"))
+        .count();
     assert_eq!(
         inner1_count, 1,
         "inner1 must appear in exactly one ListItem text; got items: {list_item_texts:?}"

@@ -52,7 +52,10 @@ pub fn indent_table_for_list(
 }
 
 /// Get continuation indent string for list nesting.
-fn continuation_indent_string(list_depth: usize, options: &crate::options::ConversionOptions) -> Option<String> {
+fn continuation_indent_string(
+    list_depth: usize,
+    options: &crate::options::ConversionOptions,
+) -> Option<String> {
     use crate::converter::list::utils::continuation_indent_string;
     continuation_indent_string(list_depth, options)
 }

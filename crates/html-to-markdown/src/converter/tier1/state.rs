@@ -115,7 +115,8 @@ impl Tier1State {
             stack: Vec::with_capacity(16),
             escape_ctx: EscapeCtx::empty(),
             output: String::with_capacity(
-                (input_len / OUTPUT_CAPACITY_DIVISOR).clamp(OUTPUT_CAPACITY_MIN, OUTPUT_CAPACITY_MAX),
+                (input_len / OUTPUT_CAPACITY_DIVISOR)
+                    .clamp(OUTPUT_CAPACITY_MIN, OUTPUT_CAPACITY_MAX),
             ),
             list_depth: 0,
             last_block_sep_pos: 0,

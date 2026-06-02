@@ -35,7 +35,11 @@ where
     for child_handle in children {
         if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
             if tag_name_eq(child_tag.name().as_utf8_str(), "source") {
-                return child_tag.attributes().get("src").flatten().map(|v| v.as_utf8_str());
+                return child_tag
+                    .attributes()
+                    .get("src")
+                    .flatten()
+                    .map(|v| v.as_utf8_str());
             }
         }
     }
@@ -77,7 +81,11 @@ pub fn handle_audio(
     } else {
         extract_media_src(tag)
     };
-    let src_opt: Option<&str> = if src.is_empty() { None } else { Some(src.as_ref()) };
+    let src_opt: Option<&str> = if src.is_empty() {
+        None
+    } else {
+        Some(src.as_ref())
+    };
 
     // Dispatch the visitor callback when a visitor is attached.
     #[cfg(feature = "visitor")]
@@ -155,7 +163,15 @@ pub fn handle_audio(
         };
 
         if !is_source {
-            walk_node(child_handle, parser, &mut fallback, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                &mut fallback,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
     if !fallback.is_empty() {
@@ -189,7 +205,11 @@ pub fn handle_video(
     } else {
         extract_media_src(tag)
     };
-    let src_opt: Option<&str> = if src.is_empty() { None } else { Some(src.as_ref()) };
+    let src_opt: Option<&str> = if src.is_empty() {
+        None
+    } else {
+        Some(src.as_ref())
+    };
 
     // Dispatch the visitor callback when a visitor is attached.
     #[cfg(feature = "visitor")]
@@ -267,7 +287,15 @@ pub fn handle_video(
         };
 
         if !is_source {
-            walk_node(child_handle, parser, &mut fallback, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                &mut fallback,
+                options,
+                ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
     if !fallback.is_empty() {
@@ -322,7 +350,11 @@ pub fn handle_iframe(
         .get("src")
         .flatten()
         .map_or(Cow::Borrowed(""), |v| v.as_utf8_str());
-    let src_opt: Option<&str> = if src.is_empty() { None } else { Some(src.as_ref()) };
+    let src_opt: Option<&str> = if src.is_empty() {
+        None
+    } else {
+        Some(src.as_ref())
+    };
 
     // Dispatch the visitor callback when a visitor is attached.
     #[cfg(feature = "visitor")]
