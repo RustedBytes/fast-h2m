@@ -11,13 +11,133 @@ use crate::converter::main_helpers::is_inline_element;
 use crate::converter::utility::content::{is_block_level_name, normalized_tag_name};
 use crate::text;
 
+pub enum TagName {
+    Static(&'static str),
+    Owned(String),
+}
+
+impl TagName {
+    fn from_raw(raw: std::borrow::Cow<'_, str>) -> Self {
+        if let Some(name) = common_html_tag(raw.as_ref()) {
+            return Self::Static(name);
+        }
+
+        match normalized_tag_name(raw) {
+            std::borrow::Cow::Borrowed(name) => Self::Owned(name.to_string()),
+            std::borrow::Cow::Owned(name) => {
+                common_html_tag(&name).map_or_else(|| Self::Owned(name), Self::Static)
+            }
+        }
+    }
+
+    pub(crate) fn as_str(&self) -> &str {
+        match self {
+            Self::Static(name) => name,
+            Self::Owned(name) => name.as_str(),
+        }
+    }
+}
+
+impl PartialEq<&str> for TagName {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl AsRef<str> for TagName {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+fn common_html_tag(raw: &str) -> Option<&'static str> {
+    match raw.len() {
+        1 if raw.eq_ignore_ascii_case("a") => Some("a"),
+        1 if raw.eq_ignore_ascii_case("b") => Some("b"),
+        1 if raw.eq_ignore_ascii_case("i") => Some("i"),
+        1 if raw.eq_ignore_ascii_case("p") => Some("p"),
+        1 if raw.eq_ignore_ascii_case("s") => Some("s"),
+        1 if raw.eq_ignore_ascii_case("u") => Some("u"),
+        2 if raw.eq_ignore_ascii_case("br") => Some("br"),
+        2 if raw.eq_ignore_ascii_case("dd") => Some("dd"),
+        2 if raw.eq_ignore_ascii_case("dl") => Some("dl"),
+        2 if raw.eq_ignore_ascii_case("dt") => Some("dt"),
+        2 if raw.eq_ignore_ascii_case("em") => Some("em"),
+        2 if raw.eq_ignore_ascii_case("h1") => Some("h1"),
+        2 if raw.eq_ignore_ascii_case("h2") => Some("h2"),
+        2 if raw.eq_ignore_ascii_case("h3") => Some("h3"),
+        2 if raw.eq_ignore_ascii_case("h4") => Some("h4"),
+        2 if raw.eq_ignore_ascii_case("h5") => Some("h5"),
+        2 if raw.eq_ignore_ascii_case("h6") => Some("h6"),
+        2 if raw.eq_ignore_ascii_case("hr") => Some("hr"),
+        2 if raw.eq_ignore_ascii_case("li") => Some("li"),
+        2 if raw.eq_ignore_ascii_case("ol") => Some("ol"),
+        2 if raw.eq_ignore_ascii_case("rb") => Some("rb"),
+        2 if raw.eq_ignore_ascii_case("rp") => Some("rp"),
+        2 if raw.eq_ignore_ascii_case("rt") => Some("rt"),
+        2 if raw.eq_ignore_ascii_case("td") => Some("td"),
+        2 if raw.eq_ignore_ascii_case("th") => Some("th"),
+        2 if raw.eq_ignore_ascii_case("tr") => Some("tr"),
+        2 if raw.eq_ignore_ascii_case("ul") => Some("ul"),
+        3 if raw.eq_ignore_ascii_case("div") => Some("div"),
+        3 if raw.eq_ignore_ascii_case("dfn") => Some("dfn"),
+        3 if raw.eq_ignore_ascii_case("img") => Some("img"),
+        3 if raw.eq_ignore_ascii_case("ins") => Some("ins"),
+        3 if raw.eq_ignore_ascii_case("kbd") => Some("kbd"),
+        3 if raw.eq_ignore_ascii_case("nav") => Some("nav"),
+        3 if raw.eq_ignore_ascii_case("pre") => Some("pre"),
+        3 if raw.eq_ignore_ascii_case("rtc") => Some("rtc"),
+        3 if raw.eq_ignore_ascii_case("sub") => Some("sub"),
+        3 if raw.eq_ignore_ascii_case("sup") => Some("sup"),
+        3 if raw.eq_ignore_ascii_case("var") => Some("var"),
+        3 if raw.eq_ignore_ascii_case("wbr") => Some("wbr"),
+        4 if raw.eq_ignore_ascii_case("abbr") => Some("abbr"),
+        4 if raw.eq_ignore_ascii_case("body") => Some("body"),
+        4 if raw.eq_ignore_ascii_case("code") => Some("code"),
+        4 if raw.eq_ignore_ascii_case("data") => Some("data"),
+        4 if raw.eq_ignore_ascii_case("form") => Some("form"),
+        4 if raw.eq_ignore_ascii_case("head") => Some("head"),
+        4 if raw.eq_ignore_ascii_case("html") => Some("html"),
+        4 if raw.eq_ignore_ascii_case("link") => Some("link"),
+        4 if raw.eq_ignore_ascii_case("main") => Some("main"),
+        4 if raw.eq_ignore_ascii_case("mark") => Some("mark"),
+        4 if raw.eq_ignore_ascii_case("ruby") => Some("ruby"),
+        4 if raw.eq_ignore_ascii_case("samp") => Some("samp"),
+        4 if raw.eq_ignore_ascii_case("span") => Some("span"),
+        4 if raw.eq_ignore_ascii_case("time") => Some("time"),
+        5 if raw.eq_ignore_ascii_case("aside") => Some("aside"),
+        5 if raw.eq_ignore_ascii_case("small") => Some("small"),
+        5 if raw.eq_ignore_ascii_case("style") => Some("style"),
+        5 if raw.eq_ignore_ascii_case("table") => Some("table"),
+        5 if raw.eq_ignore_ascii_case("tbody") => Some("tbody"),
+        5 if raw.eq_ignore_ascii_case("tfoot") => Some("tfoot"),
+        5 if raw.eq_ignore_ascii_case("thead") => Some("thead"),
+        6 if raw.eq_ignore_ascii_case("figure") => Some("figure"),
+        6 if raw.eq_ignore_ascii_case("footer") => Some("footer"),
+        6 if raw.eq_ignore_ascii_case("header") => Some("header"),
+        6 if raw.eq_ignore_ascii_case("iframe") => Some("iframe"),
+        6 if raw.eq_ignore_ascii_case("script") => Some("script"),
+        6 if raw.eq_ignore_ascii_case("source") => Some("source"),
+        6 if raw.eq_ignore_ascii_case("strong") => Some("strong"),
+        7 if raw.eq_ignore_ascii_case("address") => Some("address"),
+        7 if raw.eq_ignore_ascii_case("article") => Some("article"),
+        7 if raw.eq_ignore_ascii_case("caption") => Some("caption"),
+        7 if raw.eq_ignore_ascii_case("details") => Some("details"),
+        7 if raw.eq_ignore_ascii_case("section") => Some("section"),
+        7 if raw.eq_ignore_ascii_case("summary") => Some("summary"),
+        10 if raw.eq_ignore_ascii_case("blockquote") => Some("blockquote"),
+        10 if raw.eq_ignore_ascii_case("figcaption") => Some("figcaption"),
+        _ => None,
+    }
+}
+
 /// Cached information about an HTML tag element.
 ///
 /// This struct stores pre-computed information about tag elements to avoid
 /// repeated parsing during tree traversal.
 pub struct TagInfo {
     /// The normalized (lowercase) tag name.
-    pub(crate) name: String,
+    pub(crate) name: TagName,
     /// Whether this element behaves like an inline element (including script/style).
     pub(crate) is_inline_like: bool,
     /// Whether this element is a block-level element.
@@ -283,10 +403,10 @@ impl DomContext {
         let node_handle = self.node_handle(id)?;
         match node_handle.get(parser) {
             Some(tl::Node::Tag(tag)) => {
-                let name = normalized_tag_name(tag.name().as_utf8_str()).into_owned();
-                let is_inline = is_inline_element(&name);
+                let name = TagName::from_raw(tag.name().as_utf8_str());
+                let is_inline = is_inline_element(name.as_str());
                 let is_inline_like = is_inline || matches!(name.as_str(), "script" | "style");
-                let is_block = is_block_level_name(&name, is_inline);
+                let is_block = is_block_level_name(name.as_str(), is_inline);
                 Some(TagInfo {
                     name,
                     is_inline_like,
@@ -347,7 +467,7 @@ impl DomContext {
         let parent_handle = self.node_handle(parent_id)?;
 
         if let Some(info) = self.tag_info(parent_id, parser) {
-            return Some(info.name.clone());
+            return Some(info.name.as_str().to_string());
         }
 
         if let Some(tl::Node::Tag(tag)) = parent_handle.get(parser) {

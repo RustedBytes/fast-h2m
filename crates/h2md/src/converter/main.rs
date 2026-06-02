@@ -41,6 +41,57 @@ use crate::options::ConversionOptions;
 use crate::converter::context::{Context, InlineCollectorHandle};
 use crate::types::structure_collector::StructureCollectorHandle;
 
+struct PreprocessedHtml<'a> {
+    html: Cow<'a, str>,
+}
+
+impl<'a> PreprocessedHtml<'a> {
+    fn new(html: &'a str) -> Self {
+        Self {
+            html: preprocess_for_tier2(Cow::Borrowed(html)),
+        }
+    }
+
+    fn from_repaired(repaired_html: String) -> Self {
+        Self {
+            html: preprocess_for_tier2(Cow::Owned(repaired_html)),
+        }
+    }
+
+    fn as_str(&self) -> &str {
+        self.html.as_ref()
+    }
+
+    fn len(&self) -> usize {
+        self.html.len()
+    }
+}
+
+fn preprocess_for_tier2(input: Cow<'_, str>) -> Cow<'_, str> {
+    let input = apply_preprocess(input, strip_script_and_style_tags);
+    let input = apply_preprocess(input, strip_hidden_elements);
+    let input = apply_preprocess(input, normalize_bogus_comment_endings);
+    let input = apply_preprocess(input, normalize_split_closing_tags);
+    let input = apply_preprocess(input, normalize_unclosed_list_items);
+    apply_preprocess(input, preprocess_html)
+}
+
+fn apply_preprocess<'a, F>(input: Cow<'a, str>, f: F) -> Cow<'a, str>
+where
+    F: for<'b> FnOnce(&'b str) -> Cow<'b, str>,
+{
+    match input {
+        Cow::Borrowed(borrowed) => match f(borrowed) {
+            Cow::Borrowed(_) => Cow::Borrowed(borrowed),
+            Cow::Owned(owned) => Cow::Owned(owned),
+        },
+        Cow::Owned(owned) => match f(&owned) {
+            Cow::Borrowed(_) => Cow::Owned(owned),
+            Cow::Owned(next) => Cow::Owned(next),
+        },
+    }
+}
+
 /// Internal implementation of HTML to Markdown conversion.
 ///
 /// Returns `(markdown, Option<DocumentStructure>)`.  The structure is populated when
@@ -70,50 +121,20 @@ pub fn convert_html_impl(
     Option<crate::types::DocumentStructure>,
     Vec<crate::types::TableData>,
 )> {
-    // Strip script and style tags completely to prevent parser confusion from HTML-like content
-    // inside script/style elements. This preserves JSON-LD for metadata extraction.
-    let stripped = strip_script_and_style_tags(html);
-    // Strip elements with the `hidden` attribute before parsing.
-    let stripped = strip_hidden_elements(&stripped);
-    // Normalise bogus HTML comment endings (`--->`, `---->`, …) that cause the
-    // `tl` parser to silently discard all document content that follows them.
-    let stripped = normalize_bogus_comment_endings(&stripped);
-    // Normalise closing tags whose `>` is on a subsequent line (JSX-style `</a\n>`).
-    // The `tl` parser does not handle such end-tags and leaves the element unclosed,
-    // causing all subsequent siblings to be absorbed as children.
-    let stripped = normalize_split_closing_tags(&stripped);
-    // Insert missing `</li>`, `</dt>`, `</dd>` close tags that the HTML5 spec
-    // says are implicitly added when a new list-item starts or the parent list
-    // closes.  Without this, `tl` nests each item inside the previous one,
-    // building a chain as deep as the number of items and causing a stack
-    // overflow on large changelogs with hundreds of unclosed `<li>` tags.
-    let stripped = normalize_unclosed_list_items(&stripped);
-    let mut preprocessed = preprocess_html(&stripped).into_owned();
-    let mut preprocessed_len = preprocessed.len();
+    let mut preprocessed = PreprocessedHtml::new(html);
 
-    if has_custom_element_tags(&preprocessed) {
-        if let Some(repaired_html) = repair_with_html5ever(&preprocessed) {
-            let stripped = strip_script_and_style_tags(&repaired_html);
-            let stripped = strip_hidden_elements(&stripped);
-            let stripped = normalize_bogus_comment_endings(&stripped);
-            let stripped = normalize_split_closing_tags(&stripped);
-            let repaired = preprocess_html(&stripped).into_owned();
-            preprocessed = repaired;
-            preprocessed_len = preprocessed.len();
+    if has_custom_element_tags(preprocessed.as_str()) {
+        if let Some(repaired_html) = repair_with_html5ever(preprocessed.as_str()) {
+            preprocessed = PreprocessedHtml::from_repaired(repaired_html);
         }
     }
     let parser_options = tl::ParserOptions::default();
     let mut dom = loop {
-        if let Ok(dom) = tl::parse(&preprocessed, parser_options) {
+        if let Ok(dom) = tl::parse(preprocessed.as_str(), parser_options) {
             break dom;
         }
-        if let Some(repaired_html) = repair_with_html5ever(&preprocessed) {
-            let stripped = strip_script_and_style_tags(&repaired_html);
-            let stripped = strip_hidden_elements(&stripped);
-            let stripped = normalize_bogus_comment_endings(&stripped);
-            let stripped = normalize_split_closing_tags(&stripped);
-            preprocessed = preprocess_html(&stripped).into_owned();
-            preprocessed_len = preprocessed.len();
+        if let Some(repaired_html) = repair_with_html5ever(preprocessed.as_str()) {
+            preprocessed = PreprocessedHtml::from_repaired(repaired_html);
             continue;
         }
         return Err(crate::error::ConversionError::ParseError(
@@ -121,30 +142,27 @@ pub fn convert_html_impl(
         ));
     };
     let mut parser = dom.parser();
-    let mut output = String::with_capacity(preprocessed_len.saturating_add(preprocessed_len / 4));
+    let mut output =
+        String::with_capacity(preprocessed.len().saturating_add(preprocessed.len() / 4));
 
-    let mut dom_ctx = build_dom_context(&dom, parser, preprocessed_len);
+    let mut dom_ctx = build_dom_context(&dom, parser, preprocessed.len());
 
     // Check for inline-block misnesting and repair if needed
     if has_inline_block_misnest(&dom_ctx, parser) {
-        if let Some(repaired_html) = repair_with_html5ever(&preprocessed) {
+        if let Some(repaired_html) = repair_with_html5ever(preprocessed.as_str()) {
             // Drop dom to release borrow on preprocessed
             drop(dom);
-            let stripped = strip_script_and_style_tags(&repaired_html);
-            let stripped = strip_hidden_elements(&stripped);
-            let stripped = normalize_bogus_comment_endings(&stripped);
-            let stripped = normalize_split_closing_tags(&stripped);
-            preprocessed = preprocess_html(&stripped).into_owned();
-            preprocessed_len = preprocessed.len();
+            preprocessed = PreprocessedHtml::from_repaired(repaired_html);
             // Re-parse with repaired HTML
-            dom = tl::parse(&preprocessed, parser_options).map_err(|_| {
+            dom = tl::parse(preprocessed.as_str(), parser_options).map_err(|_| {
                 crate::error::ConversionError::ParseError(
                     "Failed to parse repaired HTML".to_string(),
                 )
             })?;
             parser = dom.parser();
-            dom_ctx = build_dom_context(&dom, parser, preprocessed_len);
-            output = String::with_capacity(preprocessed_len.saturating_add(preprocessed_len / 4));
+            dom_ctx = build_dom_context(&dom, parser, preprocessed.len());
+            output =
+                String::with_capacity(preprocessed.len().saturating_add(preprocessed.len() / 4));
         }
     }
 
@@ -394,7 +412,7 @@ pub fn walk_node(
 
             #[cfg(feature = "visitor")]
             if let Some(ref visitor_handle) = ctx.visitor {
-                use crate::converter::visitor_hooks::{VisitAction, handle_visitor_element_start};
+                use crate::converter::visitor_hooks::{handle_visitor_element_start, VisitAction};
 
                 let action = handle_visitor_element_start(
                     visitor_handle,
@@ -814,5 +832,50 @@ pub fn walk_node(
         }
 
         tl::Node::Comment(_) => {}
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::borrow::Cow;
+
+    use super::{preprocess_for_tier2, PreprocessedHtml};
+    use crate::options::ConversionOptions;
+
+    #[test]
+    fn clean_preprocessing_path_stays_borrowed() {
+        let html = "<main><h1>Hello</h1><p>World</p></main>";
+        let preprocessed = PreprocessedHtml::new(html);
+
+        assert!(matches!(preprocessed.html, Cow::Borrowed(_)));
+        assert_eq!(preprocessed.as_str(), html);
+    }
+
+    #[test]
+    fn rewriting_preprocessing_paths_become_owned() {
+        let html = "<p>Before</p><script>ignored()</script><p>After</p>";
+        let preprocessed = preprocess_for_tier2(Cow::Borrowed(html));
+
+        assert!(matches!(preprocessed, Cow::Owned(_)));
+        assert!(!preprocessed.contains("ignored()"));
+        assert!(preprocessed.contains("<p>Before</p>"));
+        assert!(preprocessed.contains("<p>After</p>"));
+    }
+
+    #[test]
+    fn split_closing_tag_rewrite_still_converts() {
+        let html = "<p><a href=\"https://example.com\">Example</a\n></p>";
+        let result = super::convert_html_impl(
+            html,
+            &ConversionOptions::default(),
+            None,
+            #[cfg(feature = "metadata")]
+            None,
+            None,
+            None,
+        )
+        .expect("split closing tag should be normalized before parsing");
+
+        assert!(result.0.contains("[Example](https://example.com)"));
     }
 }

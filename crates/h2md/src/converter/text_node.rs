@@ -111,20 +111,31 @@ pub fn process_text_node(
         return;
     }
 
-    let processed_text = if ctx.in_code || ctx.in_ruby {
-        text.into_owned()
+    let processed_text: Cow<'_, str> = if ctx.in_code || ctx.in_ruby {
+        text
     } else if ctx.in_table_cell {
         // Always escape * and _ in table cells to prevent unintended emphasis.
         let escaped = if options.whitespace_mode == crate::options::WhitespaceMode::Normalized {
             let normalized_text = text::normalize_whitespace_cow(text.as_ref());
-            let escaped_result = text::escape(
-                normalized_text.as_ref(),
-                options.escape_misc,
-                true,
-                true,
-                options.escape_ascii,
-            );
-            escaped_result.into_owned()
+            match normalized_text {
+                Cow::Borrowed(normalized) => text::escape(
+                    normalized,
+                    options.escape_misc,
+                    true,
+                    true,
+                    options.escape_ascii,
+                ),
+                Cow::Owned(normalized) => Cow::Owned(
+                    text::escape(
+                        &normalized,
+                        options.escape_misc,
+                        true,
+                        true,
+                        options.escape_ascii,
+                    )
+                    .into_owned(),
+                ),
+            }
         } else {
             text::escape(
                 text.as_ref(),
@@ -133,12 +144,13 @@ pub fn process_text_node(
                 true,
                 options.escape_ascii,
             )
-            .into_owned()
         };
         if options.escape_misc {
             escaped
+        } else if escaped.contains('|') {
+            Cow::Owned(escaped.replace('|', r"\|"))
         } else {
-            escaped.replace('|', r"\|")
+            escaped
         }
     } else if options.whitespace_mode == crate::options::WhitespaceMode::Strict {
         text::escape(
@@ -148,7 +160,6 @@ pub fn process_text_node(
             options.escape_underscores,
             options.escape_ascii,
         )
-        .into_owned()
     } else {
         let has_double_newline = text.contains("\n\n") || text.contains("\r\n\r\n");
         let has_trailing_single_newline =
@@ -212,7 +223,7 @@ pub fn process_text_node(
             }
         }
 
-        final_text
+        Cow::Owned(final_text)
     };
 
     #[cfg(feature = "visitor")]
@@ -235,13 +246,13 @@ pub fn process_text_node(
         };
 
         let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
-        match visitor.visit_text(&node_ctx, &processed_text) {
+        match visitor.visit_text(&node_ctx, processed_text.as_ref()) {
             VisitResult::Continue => processed_text,
             VisitResult::Custom(custom) => {
                 if ctx.inline_depth > 0 || ctx.in_heading {
                     processed_text
                 } else {
-                    custom
+                    Cow::Owned(custom)
                 }
             }
             VisitResult::Skip => return,

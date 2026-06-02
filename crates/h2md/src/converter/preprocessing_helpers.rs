@@ -63,8 +63,8 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bo
             let mut current = dom_ctx.parent_of(node_id);
             while let Some(parent_id) = current {
                 if let Some(parent_info) = dom_ctx.tag_info(parent_id, parser) {
-                    if is_inline_element(&parent_info.name)
-                        && !inline_ancestor_allows_block(&parent_info.name)
+                    if is_inline_element(parent_info.name.as_str())
+                        && !inline_ancestor_allows_block(parent_info.name.as_str())
                     {
                         return true;
                     }
