@@ -5,6 +5,8 @@ use std::borrow::Cow;
 use std::ops::Range;
 use std::str;
 
+use memchr::memchr;
+
 /// Signals captured during the single prescan pass.
 #[derive(Debug, Default, Clone)]
 pub struct PrescanReport {
@@ -64,8 +66,12 @@ pub fn run(html: &str) -> (Cow<'_, str>, PrescanReport) {
 
     while idx < len {
         if bytes[idx] != b'<' {
-            idx += 1;
-            continue;
+            match memchr(b'<', &bytes[idx + 1..]) {
+                Some(next) => {
+                    idx += next + 1;
+                }
+                None => break,
+            }
         }
 
         // ── `<![CDATA[` detection (signal only; cleaning falls through) ─────────

@@ -39,6 +39,10 @@ pub enum RouterDecision {
 /// `options.keep_inline_images_in` (inline-images feature) is now handled
 /// natively in Tier-1; it no longer forces a Tier-2 route.
 ///
+/// Use [`options_allow_tier1`] when only options are available. It lets the
+/// dispatcher skip prescan entirely for option combinations that must route to
+/// Tier-2.
+///
 /// # Style-option gates (A1 — router style-option gate)
 ///
 /// Tier-1 hardcodes certain output style choices.  When a `ConversionOptions`
@@ -73,16 +77,30 @@ pub enum RouterDecision {
 /// | `br_in_tables`       | bails on `<br>` in cells                | No — covered by scanner bail             |
 /// | `hocr_spatial_tables`| Tier-2 only (structural gate)           | Already gated above                      |
 pub fn classify(report: &PrescanReport, options: &ConversionOptions) -> RouterDecision {
+    if !options_allow_tier1(options)
+        || report.had_custom_elements
+        || report.had_cdata
+        || report.had_unescaped_lt
+        || report.has_svg
+    {
+        return RouterDecision::Tier2;
+    }
+
+    RouterDecision::Tier1
+}
+
+/// Return whether the current options are compatible with Tier-1.
+///
+/// This intentionally ignores input-dependent gates from [`PrescanReport`].
+/// If it returns `false`, Tier-1 cannot produce byte-identical output for any
+/// input under these options, so Auto can route straight to Tier-2.
+pub fn options_allow_tier1(options: &ConversionOptions) -> bool {
     use crate::options::{
         CodeBlockStyle, HeadingStyle, HighlightStyle, LinkStyle, ListIndentType, NewlineStyle,
         OutputFormat, PreprocessingPreset, UrlEscapeStyle, WhitespaceMode,
     };
 
-    if report.had_custom_elements
-        || report.had_cdata
-        || report.had_unescaped_lt
-        || report.has_svg
-        || options.wrap
+    !(options.wrap
         || options.convert_as_inline
         || options.preprocessing.preset != PreprocessingPreset::Standard
         || !options.strip_tags.is_empty()
@@ -131,10 +149,5 @@ pub fn classify(report: &PrescanReport, options: &ConversionOptions) -> RouterDe
         || options.url_escape_style != UrlEscapeStyle::Angle
         // compact_tables: Tier-1 always emits padded `| cell |` GFM tables.
         // compact_tables=true would produce `|cell|`, which Tier-1 never does.
-        || options.compact_tables
-    {
-        return RouterDecision::Tier2;
-    }
-
-    RouterDecision::Tier1
+        || options.compact_tables)
 }

@@ -32,6 +32,50 @@ const TABLE_HTML: &str = r#"
 </table>
 "#;
 
+const INLINE_HEAVY_HTML: &str = r#"
+<p>Inline formatting mixes <strong>bold</strong>, <em>emphasis</em>,
+<code>code()</code>, <a href="https://example.com/docs">links</a>,
+<mark>marks</mark>, <sub>sub</sub>, and <sup>sup</sup> in one paragraph.</p>
+"#;
+
+const LIST_HTML: &str = r#"
+<ol start="3">
+  <li>Install Rust</li>
+  <li>Run cargo test</li>
+  <li>Compare benchmark output</li>
+</ol>
+<ul>
+  <li>Small documents</li>
+  <li>Medium documents</li>
+  <li>Real-world fixtures</li>
+</ul>
+"#;
+
+const MEDIA_HTML: &str = r#"
+<figure>
+  <img src="https://example.com/chart.png" alt="Conversion chart">
+  <figcaption>Images should keep useful alternate text and captions.</figcaption>
+</figure>
+"#;
+
+const SCRIPT_STYLE_HTML: &str = r#"
+<style>.hidden { display: none }</style>
+<script>window.__bench__ = "<div>not content</div>";</script>
+<article><p>Visible content after script and style stripping.</p></article>
+"#;
+
+const CUSTOM_ELEMENT_HTML: &str = r#"
+<article-card>
+  <h2>Custom element fallback</h2>
+  <p>Custom elements intentionally route through Tier-2.</p>
+</article-card>
+"#;
+
+const ENTITY_HEAVY_HTML: &str =
+    "<p>&amp; &quot;quoted&quot; &#x1F680; &lt;escaped&gt; &nbsp; repeated &amp; text</p>";
+
+const TEXT_WITH_NEWLINES: &str = "Plain text\nwith multiple\nlines and no HTML tags.";
+
 const HACKER_NEWS_FIXTURE: &str =
     include_str!("../../../test_documents/html/issues/gh-121-hacker-news.html");
 
@@ -48,7 +92,14 @@ fn options_for(strategy: TierStrategy) -> ConversionOptions {
 fn bench_convert_cases(c: &mut Criterion) {
     let cases = [
         ("plain_text", "Just text with no HTML tags."),
+        ("text_with_newlines", TEXT_WITH_NEWLINES),
         ("simple_html", SIMPLE_HTML),
+        ("inline_heavy_html", INLINE_HEAVY_HTML),
+        ("list_html", LIST_HTML),
+        ("media_html", MEDIA_HTML),
+        ("script_style_html", SCRIPT_STYLE_HTML),
+        ("custom_element_html", CUSTOM_ELEMENT_HTML),
+        ("entity_heavy_html", ENTITY_HEAVY_HTML),
         ("table_html", TABLE_HTML),
         ("hacker_news_fixture", HACKER_NEWS_FIXTURE),
         ("wikipedia_small_fixture", WIKIPEDIA_SMALL_FIXTURE),

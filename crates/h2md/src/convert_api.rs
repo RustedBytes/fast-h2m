@@ -98,31 +98,33 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
             // Skip Tier-1 entirely; fall through to the Tier-2 path below.
         }
         crate::options::TierStrategy::Auto => {
-            let normalized = normalize_input(html)?;
-            let (cleaned, report) = crate::converter::prescan::run(normalized.as_ref());
-            let decision = crate::converter::tier1::router::classify(&report, &options);
-            if decision == crate::converter::tier1::RouterDecision::Tier1 {
-                match crate::converter::tier1::run(cleaned.as_ref(), &report, &options) {
-                    Ok(markdown) => {
-                        return Ok(crate::types::ConversionResult {
-                            content: Some(markdown),
-                            document: None,
-                            tables: Vec::new(),
-                            warnings: Vec::new(),
-                            #[cfg(feature = "metadata")]
-                            metadata: crate::metadata::HtmlMetadata::default(),
-                            #[cfg(feature = "inline-images")]
-                            images: Vec::new(),
-                        });
+            if crate::converter::tier1::router::options_allow_tier1(&options) {
+                let normalized = normalize_input(html)?;
+                let (cleaned, report) = crate::converter::prescan::run(normalized.as_ref());
+                let decision = crate::converter::tier1::router::classify(&report, &options);
+                if decision == crate::converter::tier1::RouterDecision::Tier1 {
+                    match crate::converter::tier1::run(cleaned.as_ref(), &report, &options) {
+                        Ok(markdown) => {
+                            return Ok(crate::types::ConversionResult {
+                                content: Some(markdown),
+                                document: None,
+                                tables: Vec::new(),
+                                warnings: Vec::new(),
+                                #[cfg(feature = "metadata")]
+                                metadata: crate::metadata::HtmlMetadata::default(),
+                                #[cfg(feature = "inline-images")]
+                                images: Vec::new(),
+                            });
+                        }
+                        Err(_bail) => {
+                            // Fall through to Tier-2 with the already-normalized input.
+                            precomputed_normalized = Some(normalized);
+                        }
                     }
-                    Err(_bail) => {
-                        // Fall through to Tier-2 with the already-normalized input.
-                        precomputed_normalized = Some(normalized);
-                    }
+                } else {
+                    // RouterDecision::Tier2: fall through with the already-normalized input.
+                    precomputed_normalized = Some(normalized);
                 }
-            } else {
-                // RouterDecision::Tier2: fall through with the already-normalized input.
-                precomputed_normalized = Some(normalized);
             }
         }
         #[cfg(any(test, feature = "testkit"))]
