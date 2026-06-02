@@ -48,8 +48,13 @@ thiserror.workspace = true
 tl.workspace = true
 
 [dev-dependencies]
+criterion = "0.8.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+[[bench]]
+name = "convert"
+harness = false
 
 [lints]
 workspace = true
