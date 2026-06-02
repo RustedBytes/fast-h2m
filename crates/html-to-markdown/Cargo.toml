@@ -26,6 +26,7 @@ inline-images = ["dep:image"]
 metadata = ["dep:serde", "dep:serde_json"]
 visitor = []
 serde = ["dep:serde", "dep:serde_json"]
+simd = ["tl/portable-simd"]
 testkit = []
 
 [dependencies]

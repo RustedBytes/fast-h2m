@@ -39,7 +39,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tempfile = "3.27"
 thiserror = "2.0"
-tl = { package = "astral-tl", version = "0.7.11" }
+tl = { package = "astral-tl", git = "https://github.com/RustedBytes/astral-tl", version = "0.1.0", features = ["std"] }
 toml = "1.1"
 which = "8"
 
