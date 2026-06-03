@@ -40,3 +40,8 @@ manifest-path = "Cargo.toml"
 strip = true
 profile = "release"
 include = ["fast_h2m.pyi", "py.typed"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.15",
+]
