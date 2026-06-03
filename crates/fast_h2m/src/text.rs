@@ -69,25 +69,25 @@ pub fn escape(
     result
 }
 
-#[cfg(feature = "simd")]
+#[cfg(all(feature = "simd", nightly))]
 #[inline]
 fn contains_ascii_punctuation(bytes: &[u8]) -> bool {
     crate::simd_scan::contains_ascii_punctuation(bytes)
 }
 
-#[cfg(not(feature = "simd"))]
+#[cfg(not(all(feature = "simd", nightly)))]
 #[inline]
 fn contains_ascii_punctuation(bytes: &[u8]) -> bool {
     bytes.iter().any(|byte| byte.is_ascii_punctuation())
 }
 
-#[cfg(feature = "simd")]
+#[cfg(all(feature = "simd", nightly))]
 #[inline]
 fn contains_misc_markdown(bytes: &[u8]) -> bool {
     crate::simd_scan::contains_misc_markdown(bytes)
 }
 
-#[cfg(not(feature = "simd"))]
+#[cfg(not(all(feature = "simd", nightly)))]
 #[inline]
 fn contains_misc_markdown(bytes: &[u8]) -> bool {
     bytes.iter().any(|b| {
@@ -110,13 +110,13 @@ fn contains_misc_markdown(bytes: &[u8]) -> bool {
     })
 }
 
-#[cfg(feature = "simd")]
+#[cfg(all(feature = "simd", nightly))]
 #[inline]
 fn contains_numbered_marker_punctuation(bytes: &[u8]) -> bool {
     crate::simd_scan::find_any2(bytes, b'.', b')').is_some()
 }
 
-#[cfg(not(feature = "simd"))]
+#[cfg(not(all(feature = "simd", nightly)))]
 #[inline]
 fn contains_numbered_marker_punctuation(bytes: &[u8]) -> bool {
     bytes.iter().any(|b| matches!(b, b'.' | b')'))

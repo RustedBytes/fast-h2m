@@ -1,5 +1,5 @@
 #![allow(clippy::too_many_arguments, clippy::trivially_copy_pass_by_ref)]
-#![cfg_attr(feature = "simd", feature(portable_simd))]
+#![cfg_attr(all(feature = "simd", nightly), feature(portable_simd))]
 
 //! High-performance HTML to Markdown converter.
 //!
@@ -50,7 +50,7 @@ pub use converter::tier1;
 mod inline_images;
 pub(crate) mod prelude;
 mod rcdom;
-#[cfg(feature = "simd")]
+#[cfg(all(feature = "simd", nightly))]
 mod simd_scan;
 pub(crate) mod text;
 mod validation;

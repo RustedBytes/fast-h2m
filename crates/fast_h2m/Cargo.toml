@@ -23,8 +23,9 @@ inline-images = ["dep:image"]
 metadata = ["dep:serde", "dep:serde_json"]
 visitor = []
 serde = ["dep:serde", "dep:serde_json"]
-# Nightly-only: enables `std::simd` in fast_h2m and portable SIMD in rustedbytes-tl.
-simd = ["rustedbytes-tl/portable-simd"]
+# Enables `std::simd` fast paths when compiled with nightly.
+# On stable this feature is intentionally a no-op so `--all-features` remains usable.
+simd = []
 testkit = []
 
 [dependencies]

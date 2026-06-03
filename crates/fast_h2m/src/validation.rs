@@ -10,7 +10,7 @@ const BINARY_CONTROL_RATIO: f64 = 0.3;
 const BINARY_UTF16_NULL_RATIO: f64 = 0.2;
 const BINARY_NUL_RATIO: f64 = 0.01;
 const BINARY_NUL_MAX: usize = 8;
-#[cfg(feature = "simd")]
+#[cfg(all(feature = "simd", nightly))]
 const SIMD_VALIDATION_THRESHOLD: usize = BINARY_SCAN_LIMIT;
 
 const BINARY_MAGIC_PREFIXES: &[(&[u8], &str)] = &[
@@ -78,7 +78,7 @@ pub fn validate_input(html: &str) -> Result<()> {
     Ok(())
 }
 
-#[cfg(feature = "simd")]
+#[cfg(all(feature = "simd", nightly))]
 #[inline(always)]
 fn count_binary_markers(bytes: &[u8]) -> (usize, usize) {
     if bytes.len() >= SIMD_VALIDATION_THRESHOLD {
@@ -88,7 +88,7 @@ fn count_binary_markers(bytes: &[u8]) -> (usize, usize) {
     }
 }
 
-#[cfg(not(feature = "simd"))]
+#[cfg(not(all(feature = "simd", nightly)))]
 #[inline(always)]
 fn count_binary_markers(bytes: &[u8]) -> (usize, usize) {
     count_binary_markers_scalar(bytes)
