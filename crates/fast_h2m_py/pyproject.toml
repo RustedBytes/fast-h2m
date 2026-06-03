@@ -1,0 +1,42 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "fast-h2m"
+version = "0.1.0"
+description = "Python bindings for fast_h2m, a high-performance HTML to Markdown converter"
+authors = [
+    { name = "Na'aman Hirschfeld", email = "naaman@kreuzberg.dev" },
+    { name = "Yehor Smoliakov", email = "egorsmkv@gmail.com" },
+]
+requires-python = ">=3.8"
+license = "MIT"
+readme = "README.md"
+keywords = ["html", "markdown", "converter", "pyo3", "rust"]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Rust",
+    "Typing :: Typed",
+]
+urls = { Homepage = "https://github.com/RustedBytes/fast_h2m", Documentation = "https://github.com/RustedBytes/fast_h2m#readme", Repository = "https://github.com/RustedBytes/fast_h2m", Issues = "https://github.com/RustedBytes/fast_h2m/issues" }
+
+[project.optional-dependencies]
+dev = ["maturin", "pytest"]
+
+[tool.maturin]
+bindings = "pyo3"
+features = ["extension-module"]
+manifest-path = "Cargo.toml"
+strip = true
+profile = "release"
+include = ["fast_h2m.pyi", "py.typed"]
