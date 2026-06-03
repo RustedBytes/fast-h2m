@@ -2,10 +2,10 @@
 //!
 //! This module defines the `DomContext` structure which is built once during conversion
 //! and provides O(1) access to node relationships via precomputed maps. It also includes
-//! an LRU cache for text content extraction to avoid redundant string allocations.
+//! a bounded cache for text content extraction to avoid redundant string allocations.
 
-use lru::LruCache;
 use std::cell::{OnceCell, RefCell};
+use std::num::NonZeroUsize;
 
 use crate::converter::main_helpers::is_inline_element;
 use crate::converter::utility::content::{is_block_level_name, normalized_tag_name};
@@ -172,10 +172,42 @@ pub struct TagInfo {
     pub(crate) is_block: bool,
 }
 
+pub(crate) struct TextCache {
+    entries: Vec<(u32, String)>,
+    capacity: usize,
+}
+
+impl TextCache {
+    pub(crate) fn new(capacity: NonZeroUsize) -> Self {
+        Self {
+            entries: Vec::with_capacity(capacity.get()),
+            capacity: capacity.get(),
+        }
+    }
+
+    pub(crate) fn get(&mut self, id: u32) -> Option<String> {
+        let index = self.entries.iter().position(|(key, _)| *key == id)?;
+        let (_, value) = self.entries.remove(index);
+        let cloned = value.clone();
+        self.entries.push((id, value));
+        Some(cloned)
+    }
+
+    pub(crate) fn put(&mut self, id: u32, value: String) {
+        if let Some(index) = self.entries.iter().position(|(key, _)| *key == id) {
+            self.entries.remove(index);
+        } else if self.entries.len() == self.capacity {
+            self.entries.remove(0);
+        }
+
+        self.entries.push((id, value));
+    }
+}
+
 /// DOM context that provides efficient access to parent/child relationships and text content.
 ///
 /// This context is built once during conversion and provides O(1) access to node relationships
-/// via precomputed maps. It also includes an LRU cache for text content extraction.
+/// via precomputed maps. It also includes a bounded cache for text content extraction.
 pub struct DomContext {
     pub(crate) parent_map: Vec<Option<u32>>,
     pub(crate) children_map: Vec<Option<ChildRange>>,
@@ -188,7 +220,7 @@ pub struct DomContext {
     pub(crate) next_inline_like_map: Vec<OnceCell<bool>>,
     pub(crate) next_tag_map: Vec<OnceCell<Option<u32>>>,
     pub(crate) next_whitespace_map: Vec<OnceCell<bool>>,
-    pub(crate) text_cache: RefCell<LruCache<u32, String>>,
+    pub(crate) text_cache: RefCell<TextCache>,
 }
 
 impl DomContext {
@@ -467,7 +499,7 @@ impl DomContext {
         let id = node_handle.get_inner();
         let cached = {
             let mut cache = self.text_cache.borrow_mut();
-            cache.get(&id).cloned()
+            cache.get(id)
         };
         if let Some(value) = cached {
             return value;
@@ -486,7 +518,7 @@ impl DomContext {
     ) {
         if let Some(value) = {
             let mut cache = self.text_cache.borrow_mut();
-            cache.get(&node_handle.get_inner()).cloned()
+            cache.get(node_handle.get_inner())
         } {
             output.push_str(&value);
             return;

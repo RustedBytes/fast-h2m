@@ -3,7 +3,10 @@
 //! Caching mechanisms for expensive operations during conversion, including
 //! DOM context building and cache capacity management.
 
-use crate::converter::{DomContext, dom_context::ChildRange};
+use crate::converter::{
+    DomContext,
+    dom_context::{ChildRange, TextCache},
+};
 use std::num::NonZeroUsize;
 
 /// Build a DOM context with hierarchical node information.
@@ -28,7 +31,7 @@ pub fn build_dom_context(
         next_inline_like_map: Vec::new(),
         next_tag_map: Vec::new(),
         next_whitespace_map: Vec::new(),
-        text_cache: std::cell::RefCell::new(lru::LruCache::new(cache_capacity)),
+        text_cache: std::cell::RefCell::new(TextCache::new(cache_capacity)),
     };
 
     for (index, child_handle) in dom.children().iter().enumerate() {

@@ -364,23 +364,53 @@ fn normalize_input(html: &str) -> Result<Cow<'_, str>> {
 /// syntax correctly. EPUB/XHTML-derived HTML uses this form heavily for empty
 /// table cells; see issue #391.
 fn fix_xhtml_self_closing(html: Cow<'_, str>) -> Cow<'_, str> {
-    use std::sync::OnceLock;
-    static RE: OnceLock<regex::Regex> = OnceLock::new();
-    // Match `<tag/>` (no whitespace, no attributes) where `tag` is a valid HTML
-    // tag name. Tag names per the HTML spec must start with a letter and may
-    // contain letters, digits, hyphens, underscores, colons (namespaces), and
-    // periods. The replacement inserts a single space before the `/`.
-    let re = RE.get_or_init(|| {
-        regex::Regex::new(r"<([a-zA-Z][a-zA-Z0-9_:.\-]*)/>")
-            .expect("XHTML self-closing regex is well-formed")
-    });
     if !html.contains("/>") {
         return html;
     }
-    match re.replace_all(html.as_ref(), "<$1 />") {
-        Cow::Borrowed(_) => html,
-        Cow::Owned(s) => Cow::Owned(s),
+
+    let input = html.as_ref();
+    let bytes = input.as_bytes();
+    let mut output = String::new();
+    let mut last_copied = 0;
+    let mut index = 0;
+
+    while index + 3 <= bytes.len() {
+        if bytes[index] != b'<' || !bytes[index + 1].is_ascii_alphabetic() {
+            index += 1;
+            continue;
+        }
+
+        let mut end = index + 2;
+        while end < bytes.len() && is_html_tag_name_byte(bytes[end]) {
+            end += 1;
+        }
+
+        if end + 1 < bytes.len() && bytes[end] == b'/' && bytes[end + 1] == b'>' {
+            if output.is_empty() {
+                output.reserve(input.len() + 4);
+            }
+            output.push_str(&input[last_copied..end]);
+            output.push_str(" />");
+            index = end + 2;
+            last_copied = index;
+        } else {
+            index += 1;
+        }
     }
+
+    if output.is_empty() {
+        html
+    } else {
+        output.push_str(&input[last_copied..]);
+        Cow::Owned(output)
+    }
+}
+
+const fn is_html_tag_name_byte(byte: u8) -> bool {
+    matches!(
+        byte,
+        b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | b':' | b'.' | b'-'
+    )
 }
 
 /// Attempt to decode UTF-16 HTML that was provided as a lossy UTF-8 string.

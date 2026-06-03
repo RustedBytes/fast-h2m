@@ -5,23 +5,7 @@
 )]
 //! Text processing utilities for Markdown conversion.
 
-use regex::Regex;
 use std::borrow::Cow;
-use std::sync::LazyLock;
-
-/// Regex for escaping miscellaneous characters
-static ESCAPE_MISC_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"([\\&<`\[\]>~#=+|\-])").expect("valid regex pattern"));
-
-/// Regex for escaping numbered lists
-static ESCAPE_NUMBERED_LIST_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"([0-9])([.)])").expect("valid regex pattern"));
-
-/// Regex for escaping ASCII punctuation (CommonMark spec example 12)
-/// Matches: `! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ \` { | } ~`
-static ESCAPE_ASCII_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"([!\x22#$%&\x27()*+,\-./:;<=>?@\[\\\]^_`{|}~])").expect("valid regex pattern")
-});
 
 /// Escape Markdown special characters in text.
 ///
@@ -122,23 +106,16 @@ pub fn escape(
     let mut result: Cow<'_, str> = Cow::Borrowed(text);
 
     if escape_ascii {
-        result = match ESCAPE_ASCII_RE.replace_all(result.as_ref(), r"\$1") {
-            Cow::Borrowed(_) => result,
-            Cow::Owned(s) => Cow::Owned(s),
-        };
-        return result;
+        return escape_chars(text, is_ascii_punctuation).map_or(Cow::Borrowed(text), Cow::Owned);
     }
 
     if escape_misc {
-        result = match ESCAPE_MISC_RE.replace_all(result.as_ref(), r"\$1") {
-            Cow::Borrowed(_) => result,
-            Cow::Owned(s) => Cow::Owned(s),
-        };
-
-        result = match ESCAPE_NUMBERED_LIST_RE.replace_all(result.as_ref(), r"$1\$2") {
-            Cow::Borrowed(_) => result,
-            Cow::Owned(s) => Cow::Owned(s),
-        };
+        if let Some(escaped) = escape_chars(result.as_ref(), is_misc_markdown_char) {
+            result = Cow::Owned(escaped);
+        }
+        if let Some(escaped) = escape_numbered_list_markers(result.as_ref()) {
+            result = Cow::Owned(escaped);
+        }
     }
 
     if escape_asterisks && result.contains('*') {
@@ -150,6 +127,54 @@ pub fn escape(
     }
 
     result
+}
+
+fn escape_chars(text: &str, should_escape: fn(char) -> bool) -> Option<String> {
+    if !text.chars().any(should_escape) {
+        return None;
+    }
+
+    let mut escaped = String::with_capacity(text.len());
+    for ch in text.chars() {
+        if should_escape(ch) {
+            escaped.push('\\');
+        }
+        escaped.push(ch);
+    }
+    Some(escaped)
+}
+
+fn escape_numbered_list_markers(text: &str) -> Option<String> {
+    let mut prev_was_digit = false;
+    if !text.chars().any(|ch| {
+        let should_escape = prev_was_digit && matches!(ch, '.' | ')');
+        prev_was_digit = ch.is_ascii_digit();
+        should_escape
+    }) {
+        return None;
+    }
+
+    let mut escaped = String::with_capacity(text.len());
+    let mut prev_was_digit = false;
+    for ch in text.chars() {
+        if prev_was_digit && matches!(ch, '.' | ')') {
+            escaped.push('\\');
+        }
+        escaped.push(ch);
+        prev_was_digit = ch.is_ascii_digit();
+    }
+    Some(escaped)
+}
+
+const fn is_misc_markdown_char(ch: char) -> bool {
+    matches!(
+        ch,
+        '\\' | '&' | '<' | '`' | '[' | ']' | '>' | '~' | '#' | '=' | '+' | '|' | '-'
+    )
+}
+
+const fn is_ascii_punctuation(ch: char) -> bool {
+    ch.is_ascii_punctuation()
 }
 
 /// Extract boundary whitespace from text (chomp).
