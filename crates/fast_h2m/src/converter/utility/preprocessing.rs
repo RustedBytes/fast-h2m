@@ -6,6 +6,8 @@
 use std::borrow::Cow;
 use std::str;
 
+use memchr::{memchr, memmem};
+
 /// Strip script and style tags and their content from HTML.
 pub fn strip_script_and_style_tags(input: &str) -> Cow<'_, str> {
     let bytes = input.as_bytes();
@@ -21,7 +23,7 @@ pub fn strip_script_and_style_tags(input: &str) -> Cow<'_, str> {
     let mut svg_depth = 0usize;
 
     // Fast-path: check if there are any < characters at all
-    if !bytes.contains(&b'<') {
+    if memchr(b'<', bytes).is_none() {
         return Cow::Borrowed(input);
     }
 
@@ -254,7 +256,7 @@ pub fn normalize_bogus_comment_endings(input: &str) -> Cow<'_, str> {
     // Fast path: the input must contain at least "<!--" and "--->".
     // Without "<!--" there are no comments; without "---" there cannot be a
     // bogus closing.
-    if len < 7 || !bytes.windows(4).any(|w| w == b"<!--") {
+    if len < 7 || memmem::find(bytes, b"<!--").is_none() {
         return Cow::Borrowed(input);
     }
 

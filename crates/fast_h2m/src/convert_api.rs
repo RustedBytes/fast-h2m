@@ -4,6 +4,8 @@
 
 use std::borrow::Cow;
 
+use memchr::{memchr, memchr3, memmem};
+
 #[cfg(any(feature = "metadata", feature = "inline-images"))]
 use crate::ConversionError;
 use crate::error::Result;
@@ -68,9 +70,8 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     // binary/control-heavy inputs are still rejected.
     if !options.wrap && can_fast_text_only_before_normalize(html) {
         validate_input(html)?;
-        if let Some(markdown) = fast_text_only(html, &options) {
-            return Ok(conversion_result_from_content(markdown));
-        }
+        let markdown = fast_text_only_unchecked(html, &options, false);
+        return Ok(conversion_result_from_content(markdown));
     }
 
     // Tier-1 dispatcher.
@@ -364,7 +365,7 @@ fn normalize_input(html: &str) -> Result<Cow<'_, str>> {
 /// syntax correctly. EPUB/XHTML-derived HTML uses this form heavily for empty
 /// table cells; see issue #391.
 fn fix_xhtml_self_closing(html: Cow<'_, str>) -> Cow<'_, str> {
-    if !html.contains("/>") {
+    if memmem::find(html.as_ref().as_bytes(), b"/>").is_none() {
         return html;
     }
 
@@ -420,7 +421,7 @@ const fn is_html_tag_name_byte(byte: u8) -> bool {
 /// recover the original HTML instead of rejecting it as binary data.
 fn decode_utf16_if_needed(html: &str) -> Cow<'_, str> {
     let bytes = html.as_bytes();
-    if !bytes.contains(&0) {
+    if memchr(0, bytes).is_none() {
         return Cow::Borrowed(html);
     }
 
@@ -463,7 +464,7 @@ fn decode_utf16_bytes(bytes: &[u8], encoding: Utf16Encoding) -> String {
 
 /// Strip NUL bytes that can appear in malformed HTML inputs.
 fn strip_nul_bytes(html: &str) -> Cow<'_, str> {
-    if html.contains('\0') {
+    if memchr(0, html.as_bytes()).is_some() {
         Cow::Owned(html.replace('\0', ""))
     } else {
         Cow::Borrowed(html)
@@ -474,7 +475,7 @@ fn strip_nul_bytes(html: &str) -> Cow<'_, str> {
 ///
 /// Converts CRLF and CR line endings to LF for consistent processing.
 fn normalize_line_endings(html: &str) -> Cow<'_, str> {
-    if html.contains('\r') {
+    if memchr(b'\r', html.as_bytes()).is_some() {
         Cow::Owned(html.replace("\r\n", "\n").replace('\r', "\n"))
     } else {
         Cow::Borrowed(html)
@@ -486,27 +487,37 @@ fn normalize_line_endings(html: &str) -> Cow<'_, str> {
 /// Inputs containing CR or NUL need `normalize_input` first for line-ending
 /// normalization, NUL stripping, or UTF-16 recovery.
 fn can_fast_text_only_before_normalize(html: &str) -> bool {
-    !html
-        .as_bytes()
-        .iter()
-        .any(|&byte| matches!(byte, b'<' | b'\r' | 0))
+    let bytes = html.as_bytes();
+    memchr3(b'<', b'&', b'\r', bytes).is_none() && memchr(0, bytes).is_none()
 }
 
 /// Fast path for plain text (no HTML) conversion.
 ///
 /// Skips HTML parsing if no angle brackets are present.
 fn fast_text_only(html: &str, options: &ConversionOptions) -> Option<String> {
-    if html.contains('<') {
+    if memchr(b'<', html.as_bytes()).is_some() {
         return None;
     }
 
-    let mut decoded = text::decode_html_entities_cow(html);
+    Some(fast_text_only_unchecked(html, options, true))
+}
+
+fn fast_text_only_unchecked(
+    html: &str,
+    options: &ConversionOptions,
+    decode_entities: bool,
+) -> String {
+    let mut decoded = if decode_entities {
+        text::decode_html_entities_cow(html)
+    } else {
+        Cow::Borrowed(html)
+    };
     if options.strip_newlines && (decoded.contains('\n') || decoded.contains('\r')) {
         decoded = Cow::Owned(decoded.replace(&['\r', '\n'][..], " "));
     }
     let trimmed = decoded.trim_end_matches('\n');
     if trimmed.is_empty() {
-        return Some(String::new());
+        return String::new();
     }
 
     let normalized = if options.whitespace_mode == WhitespaceMode::Normalized {
@@ -540,5 +551,5 @@ fn fast_text_only(html: &str, options: &ConversionOptions) -> Option<String> {
         output.pop();
     }
     output.push('\n');
-    Some(output)
+    output
 }
