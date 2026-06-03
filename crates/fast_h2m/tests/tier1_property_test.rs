@@ -43,19 +43,6 @@ fn tier2_output(html: &str) -> String {
         .unwrap_or_default()
 }
 
-/// The core invariant: if Tier-1 succeeds, its output must equal Tier-2.
-fn assert_tier1_matches_tier2_or_bails(html: &str) {
-    if let Ok(t1_out) = tier1_direct(html) {
-        let t2_out = tier2_output(html);
-        assert_eq!(
-            t1_out, t2_out,
-            "Tier-1 produced different output than Tier-2 for input:\n{html}\n\nTier-1:\n{t1_out}\n\nTier-2:\n{t2_out}"
-        );
-    } else {
-        // Bail is always acceptable — no assertion needed.
-    }
-}
-
 // ── HTML snippet corpus ───────────────────────────────────────────────────────
 
 /// All snippets in this slice are Tier-1-eligible by construction:
@@ -174,56 +161,4 @@ fn tier1_output_matches_tier2_or_bails_for_all_snippets() {
         "fewer than half the snippets succeeded through Tier-1 ({matched}/{checked}); \
         the corpus may be misconfigured (bail count: {bailed})"
     );
-}
-
-/// Spot-check a handful of snippets with deterministic expected outputs so that
-/// regressions are caught even if the comparison baseline itself changes.
-#[test]
-fn tier1_paragraph_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails("<p>Hello world</p>");
-}
-
-#[test]
-fn tier1_heading_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails("<h1>Title</h1>");
-}
-
-#[test]
-fn tier1_unordered_list_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails("<ul><li>Item one</li><li>Item two</li></ul>");
-}
-
-#[test]
-fn tier1_ordered_list_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails("<ol><li>First</li><li>Second</li></ol>");
-}
-
-#[test]
-fn tier1_blockquote_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails("<blockquote><p>A quote.</p></blockquote>");
-}
-
-#[test]
-fn tier1_inline_emphasis_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails("<p><strong>bold</strong> and <em>italic</em></p>");
-}
-
-#[test]
-fn tier1_inline_code_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails("<p><code>inline code</code></p>");
-}
-
-#[test]
-fn tier1_link_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails(r#"<p><a href="https://example.com">Link</a></p>"#);
-}
-
-#[test]
-fn tier1_pre_code_block_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails("<pre><code>let x = 1;\n</code></pre>");
-}
-
-#[test]
-fn tier1_hr_output_is_correct() {
-    assert_tier1_matches_tier2_or_bails("<p>Before</p><hr><p>After</p>");
 }

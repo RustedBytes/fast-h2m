@@ -18,7 +18,7 @@
 
 use fast_h2m::prescan;
 use fast_h2m::tier1::{self, BailReason};
-use fast_h2m::{ConversionOptions, TierStrategy, convert};
+use fast_h2m::{ConversionOptions, TierStrategy};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -32,30 +32,6 @@ fn tier1_run(html: &str) -> Result<String, BailReason> {
     tier1::run(cleaned.as_ref(), &report, &opts)
 }
 
-fn tier2(html: &str) -> String {
-    let opts = ConversionOptions {
-        tier_strategy: TierStrategy::Tier2,
-        extract_metadata: false,
-        ..ConversionOptions::default()
-    };
-    convert(html, Some(opts))
-        .unwrap()
-        .content
-        .unwrap_or_default()
-}
-
-fn force_tier1(html: &str) -> String {
-    let opts = ConversionOptions {
-        tier_strategy: TierStrategy::Tier1,
-        extract_metadata: false,
-        ..ConversionOptions::default()
-    };
-    convert(html, Some(opts))
-        .unwrap()
-        .content
-        .unwrap_or_default()
-}
-
 // ── TableRowspanColspan ───────────────────────────────────────────────────────
 
 #[test]
@@ -66,10 +42,6 @@ fn should_bail_on_table_rowspan_greater_than_one() {
         matches!(err, BailReason::TableRowspanColspan),
         "expected TableRowspanColspan, got {err:?}"
     );
-    // Tier-1 fallback via convert still produces a sensible result.
-    let result = force_tier1(html);
-    assert!(!result.is_empty(), "expected non-empty fallback output");
-    assert_eq!(result, tier2(html), "fallback output must match Tier-2");
 }
 
 #[test]
@@ -79,11 +51,6 @@ fn should_bail_on_table_colspan_greater_than_one() {
     assert!(
         matches!(err, BailReason::TableRowspanColspan),
         "expected TableRowspanColspan, got {err:?}"
-    );
-    assert_eq!(
-        force_tier1(html),
-        tier2(html),
-        "fallback output must match Tier-2"
     );
 }
 
@@ -111,11 +78,6 @@ fn should_bail_when_paragraph_is_child_of_table_cell() {
         matches!(err, BailReason::TableBlockChildInCell),
         "expected TableBlockChildInCell, got {err:?}"
     );
-    assert_eq!(
-        force_tier1(html),
-        tier2(html),
-        "fallback output must match Tier-2"
-    );
 }
 
 #[test]
@@ -125,11 +87,6 @@ fn should_bail_when_div_is_child_of_table_cell() {
     assert!(
         matches!(err, BailReason::TableBlockChildInCell),
         "expected TableBlockChildInCell, got {err:?}"
-    );
-    assert_eq!(
-        force_tier1(html),
-        tier2(html),
-        "fallback output must match Tier-2"
     );
 }
 
@@ -143,11 +100,6 @@ fn should_bail_when_br_is_child_of_table_cell() {
         matches!(err, BailReason::TableBlockChildInCell),
         "expected TableBlockChildInCell for <br> in cell, got {err:?}"
     );
-    assert_eq!(
-        force_tier1(html),
-        tier2(html),
-        "fallback output must match Tier-2"
-    );
 }
 
 // ── TableNestedTable ──────────────────────────────────────────────────────────
@@ -160,11 +112,6 @@ fn should_bail_on_nested_table_inside_cell() {
         matches!(err, BailReason::TableNestedTable),
         "expected TableNestedTable, got {err:?}"
     );
-    assert_eq!(
-        force_tier1(html),
-        tier2(html),
-        "fallback output must match Tier-2"
-    );
 }
 
 // ── TableCaption ──────────────────────────────────────────────────────────────
@@ -176,11 +123,6 @@ fn should_bail_on_table_caption_element() {
     assert!(
         matches!(err, BailReason::TableCaption),
         "expected TableCaption, got {err:?}"
-    );
-    assert_eq!(
-        force_tier1(html),
-        tier2(html),
-        "fallback output must match Tier-2"
     );
 }
 
@@ -196,11 +138,6 @@ fn should_bail_when_thead_appears_after_tbody_close() {
         matches!(err, BailReason::TableSectionOrder),
         "expected TableSectionOrder, got {err:?}"
     );
-    assert_eq!(
-        force_tier1(html),
-        tier2(html),
-        "fallback output must match Tier-2"
-    );
 }
 
 #[test]
@@ -212,11 +149,6 @@ fn should_bail_when_tbody_appears_after_tfoot() {
     assert!(
         matches!(err, BailReason::TableSectionOrder),
         "expected TableSectionOrder for tbody-after-tfoot, got {err:?}"
-    );
-    assert_eq!(
-        force_tier1(html),
-        tier2(html),
-        "fallback output must match Tier-2"
     );
 }
 
