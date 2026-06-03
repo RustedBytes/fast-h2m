@@ -15,7 +15,7 @@ use fast_h2m::{CodeBlockStyle, ConversionOptions};
 fn fixture_path(name: &str) -> PathBuf {
     [
         env!("CARGO_MANIFEST_DIR"),
-        "../../test_documents/html/issues/gh-190",
+        "../../fixtures/test_documents/html/issues/gh-190",
         name,
     ]
     .iter()

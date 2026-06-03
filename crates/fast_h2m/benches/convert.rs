@@ -77,10 +77,10 @@ const ENTITY_HEAVY_HTML: &str =
 const TEXT_WITH_NEWLINES: &str = "Plain text\nwith multiple\nlines and no HTML tags.";
 
 const HACKER_NEWS_FIXTURE: &str =
-    include_str!("../../../test_documents/html/issues/gh-121-hacker-news.html");
+    include_str!("../../../fixtures/test_documents/html/issues/gh-121-hacker-news.html");
 
 const WIKIPEDIA_SMALL_FIXTURE: &str =
-    include_str!("../../../test_documents/html/wikipedia/small_html.html");
+    include_str!("../../../fixtures/test_documents/html/wikipedia/small_html.html");
 
 fn options_for(strategy: TierStrategy) -> ConversionOptions {
     ConversionOptions {

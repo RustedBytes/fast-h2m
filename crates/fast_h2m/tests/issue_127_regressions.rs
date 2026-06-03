@@ -18,7 +18,7 @@ use fast_h2m::{
 fn fixture_path(name: &str) -> PathBuf {
     [
         env!("CARGO_MANIFEST_DIR"),
-        "../../test_documents/html/issues",
+        "../../fixtures/test_documents/html/issues",
         name,
     ]
     .iter()
