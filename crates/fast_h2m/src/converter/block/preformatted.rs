@@ -39,20 +39,20 @@ pub fn handle_pre(
     let language = extract_language_from_pre(node_handle, parser);
 
     let mut content = String::with_capacity(256);
-    if let Some(node) = node_handle.get(parser) {
-        if let tl::Node::Tag(tag) = node {
-            let children = tag.children();
-            for child_handle in children.top().iter() {
-                walk_node(
-                    child_handle,
-                    parser,
-                    &mut content,
-                    options,
-                    &code_ctx,
-                    depth + 1,
-                    dom_ctx,
-                );
-            }
+    if let Some(node) = node_handle.get(parser)
+        && let tl::Node::Tag(tag) = node
+    {
+        let children = tag.children();
+        for child_handle in children.top().iter() {
+            walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                options,
+                &code_ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 
@@ -94,62 +94,57 @@ pub fn handle_pre(
             if let Some(ref visitor_handle) = ctx.visitor {
                 use crate::visitor::{NodeContext, NodeType, VisitResult};
 
-                if let Some(node) = node_handle.get(parser) {
-                    if let tl::Node::Tag(tag) = node {
-                        let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+                if let Some(node) = node_handle.get(parser)
+                    && let tl::Node::Tag(tag) = node
+                {
+                    let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
-                        let node_id = node_handle.get_inner();
-                        let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
-                        let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
+                    let node_id = node_handle.get_inner();
+                    let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
+                    let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
 
-                        let node_ctx = NodeContext {
-                            node_type: NodeType::Pre,
-                            tag_name: "pre".to_string(),
-                            attributes,
-                            depth,
-                            index_in_parent,
-                            parent_tag,
-                            is_inline: false,
-                        };
+                    let node_ctx = NodeContext {
+                        node_type: NodeType::Pre,
+                        tag_name: "pre".to_string(),
+                        attributes,
+                        depth,
+                        index_in_parent,
+                        parent_tag,
+                        is_inline: false,
+                    };
 
-                        let visit_result = {
-                            let mut visitor =
-                                visitor_handle.lock().expect("visitor mutex poisoned");
-                            visitor.visit_code_block(
-                                &node_ctx,
-                                language.as_deref(),
+                    let visit_result = {
+                        let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
+                        visitor.visit_code_block(&node_ctx, language.as_deref(), &processed_content)
+                    };
+                    match visit_result {
+                        VisitResult::Continue => {
+                            format_code_block(
+                                output,
+                                options,
+                                ctx,
                                 &processed_content,
-                            )
-                        };
-                        match visit_result {
-                            VisitResult::Continue => {
-                                format_code_block(
-                                    output,
-                                    options,
-                                    ctx,
-                                    &processed_content,
-                                    language.as_deref(),
-                                );
-                            }
-                            VisitResult::Custom(custom) => {
-                                output.push_str(&custom);
-                            }
-                            VisitResult::Skip => {
-                                // Skip code block
-                            }
-                            VisitResult::PreserveHtml => {
-                                format_code_block(
-                                    output,
-                                    options,
-                                    ctx,
-                                    &processed_content,
-                                    language.as_deref(),
-                                );
-                            }
-                            VisitResult::Error(err) => {
-                                if ctx.visitor_error.borrow().is_none() {
-                                    *ctx.visitor_error.borrow_mut() = Some(err);
-                                }
+                                language.as_deref(),
+                            );
+                        }
+                        VisitResult::Custom(custom) => {
+                            output.push_str(&custom);
+                        }
+                        VisitResult::Skip => {
+                            // Skip code block
+                        }
+                        VisitResult::PreserveHtml => {
+                            format_code_block(
+                                output,
+                                options,
+                                ctx,
+                                &processed_content,
+                                language.as_deref(),
+                            );
+                        }
+                        VisitResult::Error(err) => {
+                            if ctx.visitor_error.borrow().is_none() {
+                                *ctx.visitor_error.borrow_mut() = Some(err);
                             }
                         }
                     }
@@ -180,11 +175,32 @@ pub fn handle_pre(
 
 /// Extract programming language from pre or nested code element's class attribute.
 fn extract_language_from_pre(node_handle: &NodeHandle, parser: &Parser) -> Option<String> {
-    if let Some(node) = node_handle.get(parser) {
-        if let tl::Node::Tag(tag) = node {
-            // First, try to extract language from <pre> tag's class attribute
-            if let Some(class_attr) = tag.attributes().get("class") {
-                if let Some(class_bytes) = class_attr {
+    if let Some(node) = node_handle.get(parser)
+        && let tl::Node::Tag(tag) = node
+    {
+        // First, try to extract language from <pre> tag's class attribute
+        if let Some(class_attr) = tag.attributes().get("class")
+            && let Some(class_bytes) = class_attr
+        {
+            let class_str = class_bytes.as_utf8_str();
+            for cls in class_str.split_whitespace() {
+                if let Some(stripped) = cls.strip_prefix("language-") {
+                    return Some(String::from(stripped));
+                } else if let Some(stripped) = cls.strip_prefix("lang-") {
+                    return Some(String::from(stripped));
+                }
+            }
+        }
+
+        // If not found on <pre>, try to extract from nested <code> tag's class attribute
+        let children = tag.children();
+        for child_handle in children.top().iter() {
+            if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser)
+                && child_tag.name() == "code"
+            {
+                if let Some(class_attr) = child_tag.attributes().get("class")
+                    && let Some(class_bytes) = class_attr
+                {
                     let class_str = class_bytes.as_utf8_str();
                     for cls in class_str.split_whitespace() {
                         if let Some(stripped) = cls.strip_prefix("language-") {
@@ -194,28 +210,7 @@ fn extract_language_from_pre(node_handle: &NodeHandle, parser: &Parser) -> Optio
                         }
                     }
                 }
-            }
-
-            // If not found on <pre>, try to extract from nested <code> tag's class attribute
-            let children = tag.children();
-            for child_handle in children.top().iter() {
-                if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-                    if child_tag.name() == "code" {
-                        if let Some(class_attr) = child_tag.attributes().get("class") {
-                            if let Some(class_bytes) = class_attr {
-                                let class_str = class_bytes.as_utf8_str();
-                                for cls in class_str.split_whitespace() {
-                                    if let Some(stripped) = cls.strip_prefix("language-") {
-                                        return Some(String::from(stripped));
-                                    } else if let Some(stripped) = cls.strip_prefix("lang-") {
-                                        return Some(String::from(stripped));
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    }
-                }
+                break;
             }
         }
     }

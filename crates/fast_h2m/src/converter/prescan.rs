@@ -122,14 +122,14 @@ pub fn run(html: &str) -> (Cow<'_, str>, PrescanReport) {
                 idx = open_end;
                 continue;
             }
-        } else if matches_end_tag_start(bytes, idx + 1, SVG_TAG) {
-            if let Some(close_end) = find_tag_end(bytes, idx + 2 + SVG_TAG.len()) {
-                if svg_depth > 0 {
-                    svg_depth = svg_depth.saturating_sub(1);
-                }
-                idx = close_end;
-                continue;
+        } else if matches_end_tag_start(bytes, idx + 1, SVG_TAG)
+            && let Some(close_end) = find_tag_end(bytes, idx + 2 + SVG_TAG.len())
+        {
+            if svg_depth > 0 {
+                svg_depth = svg_depth.saturating_sub(1);
             }
+            idx = close_end;
+            continue;
         }
 
         // ── Operations only outside SVG ───────────────────────────────────────
@@ -137,21 +137,21 @@ pub fn run(html: &str) -> (Cow<'_, str>, PrescanReport) {
             // ── `<script>` / `<style>` content stripping ──────────────────────
             let mut handled = false;
             for tag in &STRIP_CONTENT_TAGS {
-                if matches_tag_start(bytes, idx + 1, tag) {
-                    if let Some(open_end) = find_tag_end(bytes, idx + 1 + tag.len()) {
-                        report.has_script_or_style = true;
-                        let remove_end = find_closing_tag(bytes, open_end, tag).unwrap_or(len);
-                        let out = output.get_or_insert_with(|| String::with_capacity(html.len()));
-                        out.push_str(&html[last..idx]);
-                        out.push_str(&html[idx..open_end]);
-                        out.push_str("</");
-                        out.push_str(str::from_utf8(tag).unwrap());
-                        out.push('>');
-                        last = remove_end;
-                        idx = remove_end;
-                        handled = true;
-                        break;
-                    }
+                if matches_tag_start(bytes, idx + 1, tag)
+                    && let Some(open_end) = find_tag_end(bytes, idx + 1 + tag.len())
+                {
+                    report.has_script_or_style = true;
+                    let remove_end = find_closing_tag(bytes, open_end, tag).unwrap_or(len);
+                    let out = output.get_or_insert_with(|| String::with_capacity(html.len()));
+                    out.push_str(&html[last..idx]);
+                    out.push_str(&html[idx..open_end]);
+                    out.push_str("</");
+                    out.push_str(str::from_utf8(tag).unwrap());
+                    out.push('>');
+                    last = remove_end;
+                    idx = remove_end;
+                    handled = true;
+                    break;
                 }
             }
 
@@ -167,14 +167,13 @@ pub fn run(html: &str) -> (Cow<'_, str>, PrescanReport) {
                 }
                 if cursor + DOCTYPE.len() <= len
                     && bytes[cursor..cursor + DOCTYPE.len()].eq_ignore_ascii_case(DOCTYPE)
+                    && let Some(end) = find_tag_end(bytes, cursor + DOCTYPE.len())
                 {
-                    if let Some(end) = find_tag_end(bytes, cursor + DOCTYPE.len()) {
-                        let out = output.get_or_insert_with(|| String::with_capacity(html.len()));
-                        out.push_str(&html[last..idx]);
-                        last = end;
-                        idx = end;
-                        continue;
-                    }
+                    let out = output.get_or_insert_with(|| String::with_capacity(html.len()));
+                    out.push_str(&html[last..idx]);
+                    last = end;
+                    idx = end;
+                    continue;
                 }
             }
 
@@ -192,20 +191,20 @@ pub fn run(html: &str) -> (Cow<'_, str>, PrescanReport) {
                     idx = open_end;
                     continue;
                 }
-            } else if matches_end_tag_start(bytes, idx + 1, HEAD_TAG) {
-                if let Some(close_end) = find_tag_end(bytes, idx + 2 + HEAD_TAG.len()) {
-                    if let Some(start) = head_open_end.take() {
-                        // The `</head>` tag itself starts at the current output position.
-                        let flushed_so_far = if let Some(ref out) = output {
-                            out.len() + (idx - last)
-                        } else {
-                            idx
-                        };
-                        report.head_range = Some(start..flushed_so_far);
-                    }
-                    idx = close_end;
-                    continue;
+            } else if matches_end_tag_start(bytes, idx + 1, HEAD_TAG)
+                && let Some(close_end) = find_tag_end(bytes, idx + 2 + HEAD_TAG.len())
+            {
+                if let Some(start) = head_open_end.take() {
+                    // The `</head>` tag itself starts at the current output position.
+                    let flushed_so_far = if let Some(ref out) = output {
+                        out.len() + (idx - last)
+                    } else {
+                        idx
+                    };
+                    report.head_range = Some(start..flushed_so_far);
                 }
+                idx = close_end;
+                continue;
             }
 
             // ── Signal: custom elements (tag name contains `-`) ───────────────
@@ -346,15 +345,15 @@ fn find_closing_tag(bytes: &[u8], mut idx: usize, tag: &[u8]) -> Option<usize> {
                     idx = next;
                     continue;
                 }
-            } else if matches_end_tag_start(bytes, idx + 1, tag) {
-                if let Some(close) = find_tag_end(bytes, idx + 2 + tag.len()) {
-                    depth -= 1;
-                    if depth == 0 {
-                        return Some(close);
-                    }
-                    idx = close;
-                    continue;
+            } else if matches_end_tag_start(bytes, idx + 1, tag)
+                && let Some(close) = find_tag_end(bytes, idx + 2 + tag.len())
+            {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(close);
                 }
+                idx = close;
+                continue;
             }
         }
         idx += 1;

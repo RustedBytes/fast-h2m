@@ -119,15 +119,15 @@ pub fn collect_row_cell_widths(
     loop {
         // Skip columns that are filled by a rowspan from a previous row.
         while col < rowspan_tracker.len() {
-            if let Some(Some(remaining)) = rowspan_tracker.get_mut(col) {
-                if *remaining > 0 {
-                    *remaining -= 1;
-                    if *remaining == 0 {
-                        rowspan_tracker[col] = None;
-                    }
-                    col += 1;
-                    continue;
+            if let Some(Some(remaining)) = rowspan_tracker.get_mut(col)
+                && *remaining > 0
+            {
+                *remaining -= 1;
+                if *remaining == 0 {
+                    rowspan_tracker[col] = None;
                 }
+                col += 1;
+                continue;
             }
             break;
         }
@@ -297,25 +297,24 @@ pub fn convert_table_row(
         let mut cell_iter = cells.iter();
 
         loop {
-            if col_index < total_cols {
-                if let Some(Some(remaining_rows)) = rowspan_tracker.get_mut(col_index) {
-                    if *remaining_rows > 0 {
-                        let width = col_widths.get(col_index).copied();
+            if col_index < total_cols
+                && let Some(Some(remaining_rows)) = rowspan_tracker.get_mut(col_index)
+                && *remaining_rows > 0
+            {
+                let width = col_widths.get(col_index).copied();
+                row_text.push(' ');
+                if let Some(w) = width {
+                    for _ in 0..w {
                         row_text.push(' ');
-                        if let Some(w) = width {
-                            for _ in 0..w {
-                                row_text.push(' ');
-                            }
-                        }
-                        row_text.push_str(" |");
-                        *remaining_rows -= 1;
-                        if *remaining_rows == 0 {
-                            rowspan_tracker[col_index] = None;
-                        }
-                        col_index += 1;
-                        continue;
                     }
                 }
+                row_text.push_str(" |");
+                *remaining_rows -= 1;
+                if *remaining_rows == 0 {
+                    rowspan_tracker[col_index] = None;
+                }
+                col_index += 1;
+                continue;
             }
 
             if let Some(cell_handle) = cell_iter.next() {

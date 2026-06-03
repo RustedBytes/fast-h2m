@@ -1,38 +1,4 @@
-#![allow(
-    clippy::too_many_lines,
-    clippy::option_if_let_else,
-    clippy::match_wildcard_for_single_variants,
-    clippy::needless_pass_by_value,
-    clippy::struct_excessive_bools,
-    clippy::fn_params_excessive_bools,
-    clippy::branches_sharing_code,
-    clippy::match_same_arms,
-    clippy::missing_errors_doc,
-    clippy::items_after_statements,
-    clippy::doc_markdown,
-    clippy::cast_sign_loss,
-    clippy::default_trait_access,
-    clippy::unused_self,
-    clippy::cast_precision_loss,
-    clippy::collapsible_if,
-    clippy::too_many_arguments,
-    clippy::collapsible_else_if,
-    clippy::extra_unused_lifetimes,
-    clippy::unnecessary_lazy_evaluations,
-    clippy::must_use_candidate,
-    clippy::trivially_copy_pass_by_ref,
-    clippy::explicit_iter_loop,
-    clippy::missing_const_for_fn,
-    clippy::manual_assert,
-    clippy::return_self_not_must_use,
-    clippy::collapsible_match,
-    clippy::cast_possible_truncation,
-    clippy::map_unwrap_or,
-    clippy::manual_let_else,
-    clippy::used_underscore_binding,
-    clippy::assigning_clones,
-    clippy::uninlined_format_args
-)]
+#![allow(clippy::too_many_arguments, clippy::trivially_copy_pass_by_ref)]
 #![cfg_attr(feature = "simd", feature(portable_simd))]
 
 //! High-performance HTML to Markdown converter.

@@ -35,34 +35,30 @@ pub fn handle(
     use crate::converter::walk_node;
 
     if ctx.convert_as_inline {
-        if let Some(node) = node_handle.get(parser) {
-            if let tl::Node::Tag(tag) = node {
-                let children = tag.children();
-                for child_handle in children.top().iter() {
-                    walk_node(
-                        child_handle,
-                        parser,
-                        output,
-                        options,
-                        ctx,
-                        depth + 1,
-                        dom_ctx,
-                    );
-                }
+        if let Some(node) = node_handle.get(parser)
+            && let tl::Node::Tag(tag) = node
+        {
+            let children = tag.children();
+            for child_handle in children.top().iter() {
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    options,
+                    ctx,
+                    depth + 1,
+                    dom_ctx,
+                );
             }
         }
         return;
     }
 
-    let cite = if let Some(node) = node_handle.get(parser) {
-        if let tl::Node::Tag(tag) = node {
-            tag.attributes()
-                .get("cite")
-                .flatten()
-                .map(|v| v.as_utf8_str().to_string())
-        } else {
-            None
-        }
+    let cite = if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
+        tag.attributes()
+            .get("cite")
+            .flatten()
+            .map(|v| v.as_utf8_str().to_string())
     } else {
         None
     };
@@ -73,20 +69,20 @@ pub fn handle(
     };
 
     let mut content = String::with_capacity(256);
-    if let Some(node) = node_handle.get(parser) {
-        if let tl::Node::Tag(tag) = node {
-            let children = tag.children();
-            for child_handle in children.top().iter() {
-                walk_node(
-                    child_handle,
-                    parser,
-                    &mut content,
-                    options,
-                    &blockquote_ctx,
-                    depth + 1,
-                    dom_ctx,
-                );
-            }
+    if let Some(node) = node_handle.get(parser)
+        && let tl::Node::Tag(tag) = node
+    {
+        let children = tag.children();
+        for child_handle in children.top().iter() {
+            walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                options,
+                &blockquote_ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 
@@ -97,46 +93,43 @@ pub fn handle(
         if let Some(ref visitor) = ctx.visitor {
             use crate::visitor::{NodeContext, NodeType, VisitResult};
 
-            if let Some(node) = node_handle.get(parser) {
-                if let tl::Node::Tag(tag) = node {
-                    let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            if let Some(node) = node_handle.get(parser)
+                && let tl::Node::Tag(tag) = node
+            {
+                let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
-                    let node_id = node_handle.get_inner();
-                    let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
-                    let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
+                let node_id = node_handle.get_inner();
+                let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
+                let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
 
-                    let node_ctx = NodeContext {
-                        node_type: NodeType::Blockquote,
-                        tag_name: "blockquote".to_string(),
-                        attributes,
-                        depth,
-                        index_in_parent,
-                        parent_tag,
-                        is_inline: false,
-                    };
+                let node_ctx = NodeContext {
+                    node_type: NodeType::Blockquote,
+                    tag_name: "blockquote".to_string(),
+                    attributes,
+                    depth,
+                    index_in_parent,
+                    parent_tag,
+                    is_inline: false,
+                };
 
-                    let mut visitor_ref = visitor.lock().expect("visitor mutex poisoned");
-                    match visitor_ref.visit_blockquote(
-                        &node_ctx,
-                        trimmed_content,
-                        ctx.blockquote_depth,
-                    ) {
-                        VisitResult::Continue => {}
-                        VisitResult::Custom(custom) => {
-                            output.push_str(&custom);
-                            return;
+                let mut visitor_ref = visitor.lock().expect("visitor mutex poisoned");
+                match visitor_ref.visit_blockquote(&node_ctx, trimmed_content, ctx.blockquote_depth)
+                {
+                    VisitResult::Continue => {}
+                    VisitResult::Custom(custom) => {
+                        output.push_str(&custom);
+                        return;
+                    }
+                    VisitResult::Skip => return,
+                    VisitResult::PreserveHtml => {
+                        serialize_node_to_html(node_handle, parser, output);
+                        return;
+                    }
+                    VisitResult::Error(err) => {
+                        if ctx.visitor_error.borrow().is_none() {
+                            *ctx.visitor_error.borrow_mut() = Some(err);
                         }
-                        VisitResult::Skip => return,
-                        VisitResult::PreserveHtml => {
-                            serialize_node_to_html(node_handle, parser, output);
-                            return;
-                        }
-                        VisitResult::Error(err) => {
-                            if ctx.visitor_error.borrow().is_none() {
-                                *ctx.visitor_error.borrow_mut() = Some(err);
-                            }
-                            return;
-                        }
+                        return;
                     }
                 }
             }

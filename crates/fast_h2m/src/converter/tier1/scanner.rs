@@ -369,12 +369,11 @@ fn emit_open(
         TagKind::Emphasis => {
             state.cell_or_output_mut().push('*');
         }
-        TagKind::Code => {
+        TagKind::Code
             // When inside <pre>, <code> is transparent — no backtick markers.
-            if !state.escape_ctx.contains(EscapeCtx::PRE) {
+            if !state.escape_ctx.contains(EscapeCtx::PRE) => {
                 state.cell_or_output_mut().push('`');
             }
-        }
         TagKind::Link => open_link(state),
         TagKind::Table => open_table(state),
         TagKind::TableCaption => return Err(BailReason::TableCaption),

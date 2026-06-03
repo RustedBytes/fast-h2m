@@ -77,14 +77,12 @@ pub fn handle(
     if ctx.in_heading {
         trim_trailing_whitespace(output);
         output.push_str("  ");
+    } else if output.is_empty() || output.ends_with('\n') {
+        output.push('\n');
     } else {
-        if output.is_empty() || output.ends_with('\n') {
-            output.push('\n');
-        } else {
-            match options.newline_style {
-                NewlineStyle::Spaces => output.push_str("  \n"),
-                NewlineStyle::Backslash => output.push_str("\\\n"),
-            }
+        match options.newline_style {
+            NewlineStyle::Spaces => output.push_str("  \n"),
+            NewlineStyle::Backslash => output.push_str("\\\n"),
         }
     }
 }

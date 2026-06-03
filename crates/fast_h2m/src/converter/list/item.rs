@@ -258,18 +258,18 @@ pub fn handle_li(
 
         trim_trailing_whitespace(output);
 
-        if !ctx.in_table_cell {
-            if let Some(ref sc) = ctx.structure_collector {
-                let safe_end = text_end_pos.min(output.len());
-                if item_start_pos <= safe_end
-                    && output.is_char_boundary(item_start_pos)
-                    && output.is_char_boundary(safe_end)
-                {
-                    let rendered = &output[item_start_pos..safe_end];
-                    let content = rendered.trim();
-                    if !content.is_empty() {
-                        sc.borrow_mut().push_list_item(content);
-                    }
+        if !ctx.in_table_cell
+            && let Some(ref sc) = ctx.structure_collector
+        {
+            let safe_end = text_end_pos.min(output.len());
+            if item_start_pos <= safe_end
+                && output.is_char_boundary(item_start_pos)
+                && output.is_char_boundary(safe_end)
+            {
+                let rendered = &output[item_start_pos..safe_end];
+                let content = rendered.trim();
+                if !content.is_empty() {
+                    sc.borrow_mut().push_list_item(content);
                 }
             }
         }

@@ -139,20 +139,20 @@ pub fn has_semantic_content_ancestor(
 ) -> bool {
     let mut current_id = node_handle.get_inner();
     while let Some(parent_id) = dom_ctx.parent_of(current_id) {
-        if let Some(parent_info) = dom_ctx.tag_info(parent_id, parser) {
-            if matches!(parent_info.name.as_str(), "main" | "article" | "section") {
+        if let Some(parent_info) = dom_ctx.tag_info(parent_id, parser)
+            && matches!(parent_info.name.as_str(), "main" | "article" | "section")
+        {
+            return true;
+        }
+        if let Some(parent_handle) = dom_ctx.node_handle(parent_id)
+            && let Some(tl::Node::Tag(parent_tag)) = parent_handle.get(parser)
+        {
+            let parent_name = normalized_tag_name(parent_tag.name().as_utf8_str());
+            if matches!(parent_name.as_ref(), "main" | "article" | "section") {
                 return true;
             }
-        }
-        if let Some(parent_handle) = dom_ctx.node_handle(parent_id) {
-            if let Some(tl::Node::Tag(parent_tag)) = parent_handle.get(parser) {
-                let parent_name = normalized_tag_name(parent_tag.name().as_utf8_str());
-                if matches!(parent_name.as_ref(), "main" | "article" | "section") {
-                    return true;
-                }
-                if tag_has_main_semantics(parent_tag) {
-                    return true;
-                }
+            if tag_has_main_semantics(parent_tag) {
+                return true;
             }
         }
         current_id = parent_id;

@@ -21,12 +21,11 @@ const MAX_TABLE_COLS: usize = 1000;
 /// The colspan value (minimum 1, maximum MAX_TABLE_COLS)
 #[inline]
 pub fn get_colspan(node_handle: &tl::NodeHandle, parser: &crate::tl_types::Parser) -> usize {
-    if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-        if let Some(Some(bytes)) = tag.attributes().get("colspan") {
-            if let Ok(colspan) = bytes.as_utf8_str().parse::<usize>() {
-                return clamp_table_span(colspan);
-            }
-        }
+    if let Some(tl::Node::Tag(tag)) = node_handle.get(parser)
+        && let Some(Some(bytes)) = tag.attributes().get("colspan")
+        && let Ok(colspan) = bytes.as_utf8_str().parse::<usize>()
+    {
+        return clamp_table_span(colspan);
     }
     1
 }
@@ -96,10 +95,10 @@ pub fn collect_table_cells(
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            if let Some(cell_name) = dom_ctx.tag_name_for(*child_handle, parser) {
-                if matches!(cell_name.as_ref(), "th" | "td" | "cell") {
-                    cells.push(*child_handle);
-                }
+            if let Some(cell_name) = dom_ctx.tag_name_for(*child_handle, parser)
+                && matches!(cell_name.as_ref(), "th" | "td" | "cell")
+            {
+                cells.push(*child_handle);
             }
         }
     }

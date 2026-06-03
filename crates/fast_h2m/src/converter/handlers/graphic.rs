@@ -90,10 +90,10 @@ pub fn handle_graphic(
                 if let Ok(parsed) = value.parse::<u32>() {
                     width = Some(parsed);
                 }
-            } else if key_str == "height" {
-                if let Ok(parsed) = value.parse::<u32>() {
-                    height = Some(parsed);
-                }
+            } else if key_str == "height"
+                && let Ok(parsed) = value.parse::<u32>()
+            {
+                height = Some(parsed);
             }
             attributes_map.insert(key_str, value);
         }
@@ -170,36 +170,34 @@ pub fn handle_graphic(
         ctx.reference_collector.as_ref(),
     ));
 
-    if !options.skip_images {
-        if let Some(graphic_text) = graphic_output {
-            output.push_str(&graphic_text);
-        }
+    if !options.skip_images
+        && let Some(graphic_text) = graphic_output
+    {
+        output.push_str(&graphic_text);
     }
 
     // Add graphic to metadata collector
     #[cfg(feature = "metadata")]
-    if ctx.metadata_wants_images {
-        if let Some(ref collector) = ctx.metadata_collector {
-            if let Some((attributes_map, width, height)) = metadata_payload {
-                if !src.is_empty() {
-                    let dimensions = match (width, height) {
-                        (Some(w), Some(h)) => Some((w, h)),
-                        _ => None,
-                    };
-                    collector.borrow_mut().add_image(
-                        src.to_string(),
-                        if alt.is_empty() {
-                            None
-                        } else {
-                            Some(alt.to_string())
-                        },
-                        title.as_deref().map(std::string::ToString::to_string),
-                        dimensions,
-                        attributes_map,
-                    );
-                }
-            }
-        }
+    if ctx.metadata_wants_images
+        && let Some(ref collector) = ctx.metadata_collector
+        && let Some((attributes_map, width, height)) = metadata_payload
+        && !src.is_empty()
+    {
+        let dimensions = match (width, height) {
+            (Some(w), Some(h)) => Some((w, h)),
+            _ => None,
+        };
+        collector.borrow_mut().add_image(
+            src.to_string(),
+            if alt.is_empty() {
+                None
+            } else {
+                Some(alt.to_string())
+            },
+            title.as_deref().map(std::string::ToString::to_string),
+            dimensions,
+            attributes_map,
+        );
     }
 }
 
@@ -218,17 +216,17 @@ fn format_graphic_markdown(
     if use_alt_only {
         return alt.to_string();
     }
-    if link_style == crate::options::validation::LinkStyle::Reference {
-        if let Some(collector) = reference_collector {
-            let ref_num = collector.borrow_mut().get_or_insert(src, title);
-            let mut buf = String::with_capacity(alt.len() + 10);
-            buf.push_str("![");
-            buf.push_str(alt);
-            buf.push_str("][");
-            buf.push_str(&ref_num.to_string());
-            buf.push(']');
-            return buf;
-        }
+    if link_style == crate::options::validation::LinkStyle::Reference
+        && let Some(collector) = reference_collector
+    {
+        let ref_num = collector.borrow_mut().get_or_insert(src, title);
+        let mut buf = String::with_capacity(alt.len() + 10);
+        buf.push_str("![");
+        buf.push_str(alt);
+        buf.push_str("][");
+        buf.push_str(&ref_num.to_string());
+        buf.push(']');
+        return buf;
     }
     let mut buf = String::with_capacity(src.len() + alt.len() + 10);
     buf.push_str("![");

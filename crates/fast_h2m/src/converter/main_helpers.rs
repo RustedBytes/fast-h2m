@@ -59,8 +59,7 @@ pub fn trim_line_end_whitespace(output: &mut String) {
     for line in output.split('\n') {
         let (line, suffix) = line
             .strip_suffix("  ")
-            .map(|line| (line, "  \n"))
-            .unwrap_or((line, "\n"));
+            .map_or((line, "\n"), |line| (line, "  \n"));
         cleaned.push_str(line.trim_end_matches([' ', '\t']));
         cleaned.push_str(suffix);
     }
@@ -390,27 +389,25 @@ pub fn extract_head_metadata(
                         }
                     }
                     // Look for link tags with rel attribute (e.g., canonical)
-                    if child_tag.name().as_utf8_str().eq_ignore_ascii_case("link") {
-                        if let Some(rel_attr) = child_tag.attributes().get("rel").flatten() {
-                            let rel_str = rel_attr.as_utf8_str();
-                            // Check for canonical link
-                            if rel_str.contains("canonical") {
-                                if let Some(href_attr) =
-                                    child_tag.attributes().get("href").flatten()
-                                {
-                                    let href_str = href_attr.as_utf8_str();
-                                    metadata.insert("canonical".to_string(), href_str.to_string());
-                                }
-                            }
+                    if child_tag.name().as_utf8_str().eq_ignore_ascii_case("link")
+                        && let Some(rel_attr) = child_tag.attributes().get("rel").flatten()
+                    {
+                        let rel_str = rel_attr.as_utf8_str();
+                        // Check for canonical link
+                        if rel_str.contains("canonical")
+                            && let Some(href_attr) = child_tag.attributes().get("href").flatten()
+                        {
+                            let href_str = href_attr.as_utf8_str();
+                            metadata.insert("canonical".to_string(), href_str.to_string());
                         }
                     }
                     // Look for base tag with href attribute
-                    if child_tag.name().as_utf8_str().eq_ignore_ascii_case("base") {
-                        if let Some(href_attr) = child_tag.attributes().get("href").flatten() {
-                            let href_str = href_attr.as_utf8_str();
-                            // Store as "base" which will be mapped to base_href in extract_document_metadata
-                            metadata.insert("base".to_string(), href_str.to_string());
-                        }
+                    if child_tag.name().as_utf8_str().eq_ignore_ascii_case("base")
+                        && let Some(href_attr) = child_tag.attributes().get("href").flatten()
+                    {
+                        let href_str = href_attr.as_utf8_str();
+                        // Store as "base" which will be mapped to base_href in extract_document_metadata
+                        metadata.insert("base".to_string(), href_str.to_string());
                     }
                 }
             }

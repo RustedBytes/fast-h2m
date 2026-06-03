@@ -281,12 +281,12 @@ fn walk_plain(
                     ensure_blank_line(buf);
                 }
                 "img" => {
-                    if !state.options.skip_images {
-                        if let Some(Some(alt)) = tag.attributes().get("alt") {
-                            let alt_text = alt.as_utf8_str();
-                            if !alt_text.is_empty() {
-                                buf.push_str(alt_text.as_ref());
-                            }
+                    if !state.options.skip_images
+                        && let Some(Some(alt)) = tag.attributes().get("alt")
+                    {
+                        let alt_text = alt.as_utf8_str();
+                        if !alt_text.is_empty() {
+                            buf.push_str(alt_text.as_ref());
                         }
                     }
                 }

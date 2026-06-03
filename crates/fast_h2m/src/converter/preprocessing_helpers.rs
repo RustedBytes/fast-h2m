@@ -46,11 +46,11 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &crate::tl_types::
             let mut check_parent = Some(node_id);
             let mut inside_preformatted = false;
             while let Some(check_id) = check_parent {
-                if let Some(info) = dom_ctx.tag_info(check_id, parser) {
-                    if matches!(info.name.as_str(), "pre" | "code") {
-                        inside_preformatted = true;
-                        break;
-                    }
+                if let Some(info) = dom_ctx.tag_info(check_id, parser)
+                    && matches!(info.name.as_str(), "pre" | "code")
+                {
+                    inside_preformatted = true;
+                    break;
                 }
                 check_parent = dom_ctx.parent_of(check_id);
             }
@@ -68,14 +68,14 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &crate::tl_types::
                     {
                         return true;
                     }
-                } else if let Some(parent_handle) = dom_ctx.node_handle(parent_id) {
-                    if let Some(tl::Node::Tag(parent_tag)) = parent_handle.get(parser) {
-                        let parent_name = normalized_tag_name(parent_tag.name().as_utf8_str());
-                        if is_inline_element(&parent_name)
-                            && !inline_ancestor_allows_block(&parent_name)
-                        {
-                            return true;
-                        }
+                } else if let Some(parent_handle) = dom_ctx.node_handle(parent_id)
+                    && let Some(tl::Node::Tag(parent_tag)) = parent_handle.get(parser)
+                {
+                    let parent_name = normalized_tag_name(parent_tag.name().as_utf8_str());
+                    if is_inline_element(&parent_name)
+                        && !inline_ancestor_allows_block(&parent_name)
+                    {
+                        return true;
                     }
                 }
                 current = dom_ctx.parent_of(parent_id);
@@ -181,10 +181,8 @@ pub fn should_drop_for_preprocessing(
     }
 
     // Aggressive: drop elements with noise-related roles.
-    if is_aggressive {
-        if element_has_noise_hint(tag) {
-            return true;
-        }
+    if is_aggressive && element_has_noise_hint(tag) {
+        return true;
     }
 
     false

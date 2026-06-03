@@ -359,10 +359,10 @@ fn handle_emphasis(
                 .attributes()
                 .get("class")
                 .and_then(|v| v.as_ref().map(|val| val.as_utf8_str().to_string()))
+                && class_value.contains("caret")
+                && !output.ends_with(' ')
             {
-                if class_value.contains("caret") && !output.ends_with(' ') {
-                    output.push_str(" > ");
-                }
+                output.push_str(" > ");
             }
         }
 

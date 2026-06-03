@@ -71,20 +71,20 @@ pub fn handle(
         ..ctx.clone()
     };
 
-    if let Some(node) = node_handle.get(parser) {
-        if let tl::Node::Tag(tag) = node {
-            let children = tag.children();
-            for child_handle in children.top().iter() {
-                walk_node(
-                    child_handle,
-                    parser,
-                    &mut text,
-                    options,
-                    &heading_ctx,
-                    depth + 1,
-                    dom_ctx,
-                );
-            }
+    if let Some(node) = node_handle.get(parser)
+        && let tl::Node::Tag(tag) = node
+    {
+        let children = tag.children();
+        for child_handle in children.top().iter() {
+            walk_node(
+                child_handle,
+                parser,
+                &mut text,
+                options,
+                &heading_ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 
@@ -118,47 +118,36 @@ pub fn handle(
         }
 
         #[cfg(feature = "metadata")]
-        if ctx.metadata_wants_headers {
-            if let Some(ref collector) = ctx.metadata_collector {
-                if let Some(node) = node_handle.get(parser) {
-                    if let tl::Node::Tag(tag) = node {
-                        let id = tag
-                            .attributes()
-                            .get("id")
-                            .flatten()
-                            .map(|v| v.as_utf8_str().to_string());
-                        collector.borrow_mut().add_header(
-                            level as u8,
-                            normalized.to_string(),
-                            id,
-                            depth,
-                            0,
-                        );
-                    }
-                }
-            }
+        if ctx.metadata_wants_headers
+            && let Some(ref collector) = ctx.metadata_collector
+            && let Some(node) = node_handle.get(parser)
+            && let tl::Node::Tag(tag) = node
+        {
+            let id = tag
+                .attributes()
+                .get("id")
+                .flatten()
+                .map(|v| v.as_utf8_str().to_string());
+            collector
+                .borrow_mut()
+                .add_header(level as u8, normalized.to_string(), id, depth, 0);
         }
 
         // Notify the structure collector if present.
         // Skip headings inside table cells — they are part of the table content,
         // not standalone structural headings.
-        if !ctx.in_table_cell {
-            if let Some(ref sc) = ctx.structure_collector {
-                if let Some(node) = node_handle.get(parser) {
-                    if let tl::Node::Tag(tag) = node {
-                        let id = tag
-                            .attributes()
-                            .get("id")
-                            .flatten()
-                            .map(|v| v.as_utf8_str().to_string());
-                        sc.borrow_mut().push_heading(
-                            level as u8,
-                            normalized.as_ref(),
-                            id.as_deref(),
-                        );
-                    }
-                }
-            }
+        if !ctx.in_table_cell
+            && let Some(ref sc) = ctx.structure_collector
+            && let Some(node) = node_handle.get(parser)
+            && let tl::Node::Tag(tag) = node
+        {
+            let id = tag
+                .attributes()
+                .get("id")
+                .flatten()
+                .map(|v| v.as_utf8_str().to_string());
+            sc.borrow_mut()
+                .push_heading(level as u8, normalized.as_ref(), id.as_deref());
         }
     }
 }
@@ -328,56 +317,47 @@ fn visitor_heading_output(
     use crate::visitor::{NodeContext, NodeType, VisitResult};
 
     if let Some(ref visitor_handle) = ctx.visitor {
-        if let Some(node) = node_handle.get(parser) {
-            if let tl::Node::Tag(tag) = node {
-                let id_attr = tag
-                    .attributes()
-                    .get("id")
-                    .flatten()
-                    .map(|v| v.as_utf8_str().to_string());
+        if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
+            let id_attr = tag
+                .attributes()
+                .get("id")
+                .flatten()
+                .map(|v| v.as_utf8_str().to_string());
 
-                let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
-                let node_id = node_handle.get_inner();
-                let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
-                let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
+            let node_id = node_handle.get_inner();
+            let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
+            let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
 
-                let node_ctx = NodeContext {
-                    node_type: NodeType::Heading,
-                    tag_name: tag_name.to_string(),
-                    attributes,
-                    depth,
-                    index_in_parent,
-                    parent_tag,
-                    is_inline: false,
-                };
+            let node_ctx = NodeContext {
+                node_type: NodeType::Heading,
+                tag_name: tag_name.to_string(),
+                attributes,
+                depth,
+                index_in_parent,
+                parent_tag,
+                is_inline: false,
+            };
 
-                let visit_result = {
-                    let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
-                    visitor.visit_heading(&node_ctx, level as u32, normalized, id_attr.as_deref())
-                };
-                match visit_result {
-                    VisitResult::Continue => {
-                        let mut buf = String::new();
-                        push_heading(&mut buf, ctx, options, level, normalized);
-                        Some(buf)
+            let visit_result = {
+                let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
+                visitor.visit_heading(&node_ctx, level as u32, normalized, id_attr.as_deref())
+            };
+            match visit_result {
+                VisitResult::Custom(custom) => Some(custom),
+                VisitResult::Skip => None,
+                VisitResult::Error(err) => {
+                    if ctx.visitor_error.borrow().is_none() {
+                        *ctx.visitor_error.borrow_mut() = Some(err);
                     }
-                    VisitResult::Custom(custom) => Some(custom),
-                    VisitResult::Skip => None,
-                    VisitResult::Error(err) => {
-                        if ctx.visitor_error.borrow().is_none() {
-                            *ctx.visitor_error.borrow_mut() = Some(err);
-                        }
-                        None
-                    }
-                    VisitResult::PreserveHtml => {
-                        let mut buf = String::new();
-                        push_heading(&mut buf, ctx, options, level, normalized);
-                        Some(buf)
-                    }
+                    None
                 }
-            } else {
-                None
+                VisitResult::Continue | VisitResult::PreserveHtml => {
+                    let mut buf = String::new();
+                    push_heading(&mut buf, ctx, options, level, normalized);
+                    Some(buf)
+                }
             }
         } else {
             None

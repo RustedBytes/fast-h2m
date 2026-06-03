@@ -71,13 +71,11 @@ fn scan_table_node(
 ) {
     if let Some(node) = node_handle.get(parser) {
         match node {
-            tl::Node::Raw(bytes) => {
-                if !scan.has_text {
-                    let raw = bytes.as_utf8_str();
-                    let decoded = crate::text::decode_html_entities_cow(raw.as_ref());
-                    if !decoded.trim().is_empty() {
-                        scan.has_text = true;
-                    }
+            tl::Node::Raw(bytes) if !scan.has_text => {
+                let raw = bytes.as_utf8_str();
+                let decoded = crate::text::decode_html_entities_cow(raw.as_ref());
+                if !decoded.trim().is_empty() {
+                    scan.has_text = true;
                 }
             }
             tl::Node::Tag(tag) => {
@@ -96,24 +94,22 @@ fn scan_table_node(
                     "a" => scan.link_count += 1,
                     "caption" => scan.has_caption = true,
                     "th" => scan.has_header = true,
-                    "img" | "graphic" => {
+                    "img" | "graphic"
                         // Images with src or alt attributes count as content
-                        if tag.attributes().get("src").is_some()
-                            || tag.attributes().get("alt").is_some()
-                        {
+                        if (tag.attributes().get("src").is_some()
+                            || tag.attributes().get("alt").is_some())
+                        => {
                             scan.has_text = true;
                         }
-                    }
                     "cell" => {
                         // Check if cell has role="head" attribute
-                        if let Some(role) = tag.attributes().get("role") {
-                            if let Some(role_val) = role {
+                        if let Some(role) = tag.attributes().get("role")
+                            && let Some(role_val) = role {
                                 let role_str = role_val.as_utf8_str();
                                 if role_str == "head" {
                                     scan.has_header = true;
                                 }
                             }
-                        }
                     }
                     "table" if !is_root => scan.nested_table_count += 1,
                     "tr" | "row" => {
@@ -121,13 +117,11 @@ fn scan_table_node(
                         for child in tag.children().top().iter() {
                             if let Some(tl::Node::Tag(cell_tag)) = child.get(parser) {
                                 let cell_name: Cow<'_, str> = dom_ctx
-                                    .tag_info(child.get_inner(), parser)
-                                    .map(|info| Cow::Borrowed(info.name.as_str()))
-                                    .unwrap_or_else(|| {
+                                    .tag_info(child.get_inner(), parser).map_or_else(|| {
                                         normalized_tag_name(cell_tag.name().as_utf8_str())
                                             .into_owned()
                                             .into()
-                                    });
+                                    }, |info| Cow::Borrowed(info.name.as_str()));
                                 if matches!(cell_name.as_ref(), "td" | "th" | "cell") {
                                     cell_count += super::cell::get_colspan(child, parser);
                                     let attrs = cell_tag.attributes();

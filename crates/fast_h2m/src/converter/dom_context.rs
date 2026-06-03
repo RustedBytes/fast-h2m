@@ -456,10 +456,10 @@ impl DomContext {
                             let sibling_id = sibling.get_inner();
                             return Some(sibling_id);
                         }
-                        if let Some(tl::Node::Raw(raw)) = sibling.get(parser) {
-                            if !raw.as_utf8_str().trim().is_empty() {
-                                return None;
-                            }
+                        if let Some(tl::Node::Raw(raw)) = sibling.get(parser)
+                            && !raw.as_utf8_str().trim().is_empty()
+                        {
+                            return None;
                         }
                     }
                     None

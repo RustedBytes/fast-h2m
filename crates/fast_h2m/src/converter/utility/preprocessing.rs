@@ -36,14 +36,14 @@ pub fn strip_script_and_style_tags(input: &str) -> Cow<'_, str> {
                     idx = open_end;
                     continue;
                 }
-            } else if matches_end_tag_start(bytes, idx + 1, b"svg") {
-                if let Some(close_end) = find_tag_end(bytes, idx + 2 + b"svg".len()) {
-                    if svg_depth > 0 {
-                        svg_depth = svg_depth.saturating_sub(1);
-                    }
-                    idx = close_end;
-                    continue;
+            } else if matches_end_tag_start(bytes, idx + 1, b"svg")
+                && let Some(close_end) = find_tag_end(bytes, idx + 2 + b"svg".len())
+            {
+                if svg_depth > 0 {
+                    svg_depth = svg_depth.saturating_sub(1);
                 }
+                idx = close_end;
+                continue;
             }
 
             if svg_depth > 0 {
@@ -490,43 +490,40 @@ pub fn preprocess_html(input: &str) -> Cow<'_, str> {
                     idx = open_end;
                     continue;
                 }
-            } else if matches_end_tag_start(bytes, idx + 1, SVG) {
-                if let Some(close_end) = find_tag_end(bytes, idx + 2 + SVG.len()) {
-                    if svg_depth > 0 {
-                        svg_depth = svg_depth.saturating_sub(1);
-                    }
-                    idx = close_end;
-                    continue;
+            } else if matches_end_tag_start(bytes, idx + 1, SVG)
+                && let Some(close_end) = find_tag_end(bytes, idx + 2 + SVG.len())
+            {
+                if svg_depth > 0 {
+                    svg_depth = svg_depth.saturating_sub(1);
                 }
+                idx = close_end;
+                continue;
             }
 
             if svg_depth == 0 {
                 let mut handled = false;
                 for tag in TAGS {
-                    if matches_tag_start(bytes, idx + 1, tag) {
-                        if let Some(open_end) = find_tag_end(bytes, idx + 1 + tag.len()) {
-                            if tag == b"script" && is_json_ld_script_open_tag(&input[idx..open_end])
-                            {
-                                continue;
-                            }
-                            let remove_end =
-                                find_closing_tag(bytes, open_end, tag).unwrap_or(open_end);
-                            let out =
-                                output.get_or_insert_with(|| String::with_capacity(input.len()));
-                            out.push_str(&input[last..idx]);
-                            out.push_str(&input[idx..open_end]);
-                            out.push_str("</");
-                            // `TAGS` contains only ASCII byte literals (`b"script"`, `b"style"`),
-                            // which are always valid UTF-8; `from_utf8` cannot fail here.
-                            if let Ok(tag_str) = str::from_utf8(tag) {
-                                out.push_str(tag_str);
-                            }
-                            out.push('>');
-
-                            last = remove_end;
-                            idx = remove_end;
-                            handled = true;
+                    if matches_tag_start(bytes, idx + 1, tag)
+                        && let Some(open_end) = find_tag_end(bytes, idx + 1 + tag.len())
+                    {
+                        if tag == b"script" && is_json_ld_script_open_tag(&input[idx..open_end]) {
+                            continue;
                         }
+                        let remove_end = find_closing_tag(bytes, open_end, tag).unwrap_or(open_end);
+                        let out = output.get_or_insert_with(|| String::with_capacity(input.len()));
+                        out.push_str(&input[last..idx]);
+                        out.push_str(&input[idx..open_end]);
+                        out.push_str("</");
+                        // `TAGS` contains only ASCII byte literals (`b"script"`, `b"style"`),
+                        // which are always valid UTF-8; `from_utf8` cannot fail here.
+                        if let Ok(tag_str) = str::from_utf8(tag) {
+                            out.push_str(tag_str);
+                        }
+                        out.push('>');
+
+                        last = remove_end;
+                        idx = remove_end;
+                        handled = true;
                     }
 
                     if handled {
@@ -546,15 +543,13 @@ pub fn preprocess_html(input: &str) -> Cow<'_, str> {
 
                     if cursor + DOCTYPE.len() <= len
                         && bytes[cursor..cursor + DOCTYPE.len()].eq_ignore_ascii_case(DOCTYPE)
+                        && let Some(end) = find_tag_end(bytes, cursor + DOCTYPE.len())
                     {
-                        if let Some(end) = find_tag_end(bytes, cursor + DOCTYPE.len()) {
-                            let out =
-                                output.get_or_insert_with(|| String::with_capacity(input.len()));
-                            out.push_str(&input[last..idx]);
-                            last = end;
-                            idx = end;
-                            continue;
-                        }
+                        let out = output.get_or_insert_with(|| String::with_capacity(input.len()));
+                        out.push_str(&input[last..idx]);
+                        last = end;
+                        idx = end;
+                        continue;
                     }
                 }
             }
@@ -742,15 +737,15 @@ pub fn find_closing_tag(bytes: &[u8], mut idx: usize, tag: &[u8]) -> Option<usiz
                     idx = next;
                     continue;
                 }
-            } else if matches_end_tag_start(bytes, idx + 1, tag) {
-                if let Some(close) = find_tag_end(bytes, idx + 2 + tag.len()) {
-                    depth -= 1;
-                    if depth == 0 {
-                        return Some(close);
-                    }
-                    idx = close;
-                    continue;
+            } else if matches_end_tag_start(bytes, idx + 1, tag)
+                && let Some(close) = find_tag_end(bytes, idx + 2 + tag.len())
+            {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(close);
                 }
+                idx = close;
+                continue;
             }
         }
 

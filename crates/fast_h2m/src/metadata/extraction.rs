@@ -135,10 +135,10 @@ pub(crate) fn extract_document_metadata(
         doc.language = Some(lang);
     }
 
-    if let Some(dir) = dir {
-        if let Some(parsed_dir) = TextDirection::parse(&dir) {
-            doc.text_direction = Some(parsed_dir);
-        }
+    if let Some(dir) = dir
+        && let Some(parsed_dir) = TextDirection::parse(&dir)
+    {
+        doc.text_direction = Some(parsed_dir);
     }
 
     doc

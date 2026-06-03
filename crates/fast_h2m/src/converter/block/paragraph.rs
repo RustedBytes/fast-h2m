@@ -68,37 +68,37 @@ pub fn handle(
         ..ctx.clone()
     };
 
-    if let Some(node) = node_handle.get(parser) {
-        if let tl::Node::Tag(tag) = node {
-            let children = tag.children();
-            let child_handles: Vec<_> = children.top().iter().collect();
+    if let Some(node) = node_handle.get(parser)
+        && let tl::Node::Tag(tag) = node
+    {
+        let children = tag.children();
+        let child_handles: Vec<_> = children.top().iter().collect();
 
-            for (i, child_handle) in child_handles.iter().enumerate() {
-                if let Some(node) = child_handle.get(parser) {
-                    if let tl::Node::Raw(bytes) = node {
-                        let text = bytes.as_utf8_str();
-                        if text.trim().is_empty() && i > 0 && i < child_handles.len() - 1 {
-                            let prev = &child_handles[i - 1];
-                            let next = &child_handles[i + 1];
-                            if is_empty_inline_element(prev, parser, dom_ctx)
-                                && is_empty_inline_element(next, parser, dom_ctx)
-                            {
-                                continue;
-                            }
-                        }
+        for (i, child_handle) in child_handles.iter().enumerate() {
+            if let Some(node) = child_handle.get(parser)
+                && let tl::Node::Raw(bytes) = node
+            {
+                let text = bytes.as_utf8_str();
+                if text.trim().is_empty() && i > 0 && i < child_handles.len() - 1 {
+                    let prev = &child_handles[i - 1];
+                    let next = &child_handles[i + 1];
+                    if is_empty_inline_element(prev, parser, dom_ctx)
+                        && is_empty_inline_element(next, parser, dom_ctx)
+                    {
+                        continue;
                     }
                 }
-
-                walk_node(
-                    child_handle,
-                    parser,
-                    output,
-                    options,
-                    &p_ctx,
-                    depth + 1,
-                    dom_ctx,
-                );
             }
+
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                options,
+                &p_ctx,
+                depth + 1,
+                dom_ctx,
+            );
         }
     }
 
@@ -109,18 +109,21 @@ pub fn handle(
     }
 
     // Notify the structure collector if present and we produced non-empty top-level paragraph content.
-    if has_content && !ctx.in_table_cell && !ctx.in_list_item && !ctx.convert_as_inline {
-        if let Some(ref sc) = ctx.structure_collector {
-            // An inline element's whitespace-normalisation pop can remove a byte from the
-            // separator that was appended after `content_start_pos` was captured, leaving
-            // `content_start_pos` pointing at the interior of a multibyte character.
-            // Clamp to the nearest valid char boundary to avoid a slice panic (#380).
-            let safe_start =
-                crate::converter::utility::content::floor_char_boundary(output, content_start_pos);
-            let text = output[safe_start..].trim().to_string();
-            if !text.is_empty() {
-                sc.borrow_mut().push_paragraph(&text);
-            }
+    if has_content
+        && !ctx.in_table_cell
+        && !ctx.in_list_item
+        && !ctx.convert_as_inline
+        && let Some(ref sc) = ctx.structure_collector
+    {
+        // An inline element's whitespace-normalisation pop can remove a byte from the
+        // separator that was appended after `content_start_pos` was captured, leaving
+        // `content_start_pos` pointing at the interior of a multibyte character.
+        // Clamp to the nearest valid char boundary to avoid a slice panic (#380).
+        let safe_start =
+            crate::converter::utility::content::floor_char_boundary(output, content_start_pos);
+        let text = output[safe_start..].trim().to_string();
+        if !text.is_empty() {
+            sc.borrow_mut().push_paragraph(&text);
         }
     }
 }
@@ -146,18 +149,13 @@ fn is_empty_inline_element(
     parser: &Parser,
     _dom_ctx: &DomContext,
 ) -> bool {
-    if let Some(node) = node_handle.get(parser) {
-        match node {
-            tl::Node::Tag(tag) => {
-                let tag_name = tag.name().as_utf8_str();
-                // Elements that are always empty or only contain attributes
-                matches!(
-                    tag_name.as_ref(),
-                    "br" | "hr" | "img" | "input" | "meta" | "link"
-                )
-            }
-            _ => false,
-        }
+    if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
+        let tag_name = tag.name().as_utf8_str();
+        // Elements that are always empty or only contain attributes
+        matches!(
+            tag_name.as_ref(),
+            "br" | "hr" | "img" | "input" | "meta" | "link"
+        )
     } else {
         false
     }

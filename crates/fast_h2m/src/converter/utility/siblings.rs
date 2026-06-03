@@ -40,10 +40,10 @@ pub fn get_previous_sibling_tag<'a>(
         if let Some(info) = dom_ctx.tag_info(sibling.get_inner(), parser) {
             return Some(info.name.as_str());
         }
-        if let Some(tl::Node::Raw(raw)) = sibling.get(parser) {
-            if !raw.as_utf8_str().trim().is_empty() {
-                return None;
-            }
+        if let Some(tl::Node::Raw(raw)) = sibling.get(parser)
+            && !raw.as_utf8_str().trim().is_empty()
+        {
+            return None;
         }
     }
 

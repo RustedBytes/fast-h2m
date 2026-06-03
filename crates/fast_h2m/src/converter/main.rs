@@ -122,10 +122,10 @@ pub fn convert_html_impl(
 )> {
     let mut preprocessed = PreprocessedHtml::new(html);
 
-    if has_custom_element_tags(preprocessed.as_str()) {
-        if let Some(repaired_html) = repair_with_html5ever(preprocessed.as_str()) {
-            preprocessed = PreprocessedHtml::from_repaired(repaired_html);
-        }
+    if has_custom_element_tags(preprocessed.as_str())
+        && let Some(repaired_html) = repair_with_html5ever(preprocessed.as_str())
+    {
+        preprocessed = PreprocessedHtml::from_repaired(repaired_html);
     }
     let parser_options = tl::ParserOptions::default();
     let mut dom = loop {
@@ -147,22 +147,19 @@ pub fn convert_html_impl(
     let mut dom_ctx = build_dom_context(&dom, parser, preprocessed.len());
 
     // Check for inline-block misnesting and repair if needed
-    if has_inline_block_misnest(&dom_ctx, parser) {
-        if let Some(repaired_html) = repair_with_html5ever(preprocessed.as_str()) {
-            // Drop dom to release borrow on preprocessed
-            drop(dom);
-            preprocessed = PreprocessedHtml::from_repaired(repaired_html);
-            // Re-parse with repaired HTML
-            dom = tl::parse(preprocessed.as_str(), parser_options).map_err(|_| {
-                crate::error::ConversionError::ParseError(
-                    "Failed to parse repaired HTML".to_string(),
-                )
-            })?;
-            parser = dom.parser();
-            dom_ctx = build_dom_context(&dom, parser, preprocessed.len());
-            output =
-                String::with_capacity(preprocessed.len().saturating_add(preprocessed.len() / 4));
-        }
+    if has_inline_block_misnest(&dom_ctx, parser)
+        && let Some(repaired_html) = repair_with_html5ever(preprocessed.as_str())
+    {
+        // Drop dom to release borrow on preprocessed
+        drop(dom);
+        preprocessed = PreprocessedHtml::from_repaired(repaired_html);
+        // Re-parse with repaired HTML
+        dom = tl::parse(preprocessed.as_str(), parser_options).map_err(|_| {
+            crate::error::ConversionError::ParseError("Failed to parse repaired HTML".to_string())
+        })?;
+        parser = dom.parser();
+        dom_ctx = build_dom_context(&dom, parser, preprocessed.len());
+        output = String::with_capacity(preprocessed.len().saturating_add(preprocessed.len() / 4));
     }
 
     // Plain text output: run the full pipeline (for metadata + visitor callbacks),
@@ -193,48 +190,43 @@ pub fn convert_html_impl(
             }
 
             #[cfg(feature = "metadata")]
-            if wants_document {
-                if let Some(tl::Node::Tag(tag)) = child_handle.get(parser) {
-                    let tag_name = tag.name().as_utf8_str();
-                    if tag_name == "html" || tag_name == "body" {
-                        if document_lang.is_none() {
-                            if let Some(Some(lang_bytes)) = tag.attributes().get("lang") {
-                                document_lang = Some(lang_bytes.as_utf8_str().to_string());
-                            }
-                        }
-                        if document_dir.is_none() {
-                            if let Some(Some(dir_bytes)) = tag.attributes().get("dir") {
-                                document_dir = Some(dir_bytes.as_utf8_str().to_string());
-                            }
-                        }
+            if wants_document && let Some(tl::Node::Tag(tag)) = child_handle.get(parser) {
+                let tag_name = tag.name().as_utf8_str();
+                if tag_name == "html" || tag_name == "body" {
+                    if document_lang.is_none()
+                        && let Some(Some(lang_bytes)) = tag.attributes().get("lang")
+                    {
+                        document_lang = Some(lang_bytes.as_utf8_str().to_string());
+                    }
+                    if document_dir.is_none()
+                        && let Some(Some(dir_bytes)) = tag.attributes().get("dir")
+                    {
+                        document_dir = Some(dir_bytes.as_utf8_str().to_string());
                     }
                 }
             }
         }
 
-        if wants_frontmatter {
-            if let Some(metadata) = head_metadata.as_ref() {
-                if !metadata.is_empty() {
-                    let metadata_frontmatter = format_metadata_frontmatter(metadata);
-                    output.push_str(&metadata_frontmatter);
-                }
-            }
+        if wants_frontmatter
+            && let Some(metadata) = head_metadata.as_ref()
+            && !metadata.is_empty()
+        {
+            let metadata_frontmatter = format_metadata_frontmatter(metadata);
+            output.push_str(&metadata_frontmatter);
         }
 
         #[cfg(feature = "metadata")]
-        if wants_document {
-            if let Some(ref collector) = metadata_collector {
-                if let Some(metadata) = head_metadata {
-                    if !metadata.is_empty() {
-                        collector.borrow_mut().set_head_metadata(metadata);
-                    }
-                }
-                if let Some(lang) = document_lang {
-                    collector.borrow_mut().set_language(lang);
-                }
-                if let Some(dir) = document_dir {
-                    collector.borrow_mut().set_text_direction(dir);
-                }
+        if wants_document && let Some(ref collector) = metadata_collector {
+            if let Some(metadata) = head_metadata
+                && !metadata.is_empty()
+            {
+                collector.borrow_mut().set_head_metadata(metadata);
+            }
+            if let Some(lang) = document_lang {
+                collector.borrow_mut().set_language(lang);
+            }
+            if let Some(dir) = document_dir {
+                collector.borrow_mut().set_text_direction(dir);
             }
         }
     }
@@ -320,15 +312,15 @@ pub fn convert_html_impl(
     drop(ctx);
 
     // Append reference-style link definitions if any were collected
-    if let Some(rc) = reference_collector {
-        if let Ok(collector) = std::rc::Rc::try_unwrap(rc) {
-            let ref_section = collector.into_inner().finish();
-            if !ref_section.is_empty() {
-                let trimmed_len = output.trim_end_matches('\n').len();
-                output.truncate(trimmed_len);
-                output.push_str("\n\n");
-                output.push_str(&ref_section);
-            }
+    if let Some(rc) = reference_collector
+        && let Ok(collector) = std::rc::Rc::try_unwrap(rc)
+    {
+        let ref_section = collector.into_inner().finish();
+        if !ref_section.is_empty() {
+            let trimmed_len = output.trim_end_matches('\n').len();
+            output.truncate(trimmed_len);
+            output.push_str("\n\n");
+            output.push_str(&ref_section);
         }
     }
 
@@ -379,10 +371,10 @@ pub fn walk_node(
         return;
     };
 
-    if let Some(max) = options.max_depth {
-        if depth >= max {
-            return;
-        }
+    if let Some(max) = options.max_depth
+        && depth >= max
+    {
+        return;
     }
 
     match node {
@@ -474,18 +466,18 @@ pub fn walk_node(
             }
 
             #[cfg(feature = "metadata")]
-            if matches!(tag_name.as_ref(), "html" | "head" | "body") && ctx.metadata_wants_document
+            if matches!(tag_name.as_ref(), "html" | "head" | "body")
+                && ctx.metadata_wants_document
+                && let Some(ref collector) = ctx.metadata_collector
             {
-                if let Some(ref collector) = ctx.metadata_collector {
-                    let mut c = collector.borrow_mut();
+                let mut c = collector.borrow_mut();
 
-                    if let Some(lang) = tag.attributes().get("lang").flatten() {
-                        c.set_language(lang.as_utf8_str().to_string());
-                    }
+                if let Some(lang) = tag.attributes().get("lang").flatten() {
+                    c.set_language(lang.as_utf8_str().to_string());
+                }
 
-                    if let Some(dir) = tag.attributes().get("dir").flatten() {
-                        c.set_text_direction(dir.as_utf8_str().to_string());
-                    }
+                if let Some(dir) = tag.attributes().get("dir").flatten() {
+                    c.set_text_direction(dir.as_utf8_str().to_string());
                 }
             }
 

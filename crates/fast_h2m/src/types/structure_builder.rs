@@ -724,8 +724,7 @@ fn process_tag(
                 tag.attributes()
                     .get("type")
                     .flatten()
-                    .map(|v| v.as_utf8_str().to_string())
-                    .unwrap_or_else(|| "javascript".to_string())
+                    .map_or_else(|| "javascript".to_string(), |v| v.as_utf8_str().to_string())
             } else {
                 "css".to_string()
             };
@@ -829,10 +828,10 @@ fn collect_attributes(tag: &tl::HTMLTag) -> Option<HashMap<String, String>> {
         if key.starts_with("on") {
             continue;
         }
-        if matches!(key.as_str(), "id" | "class" | "lang" | "dir") || key.starts_with("data-") {
-            if let Some(val) = val_opt {
-                map.insert(key, val.to_string());
-            }
+        if (matches!(key.as_str(), "id" | "class" | "lang" | "dir") || key.starts_with("data-"))
+            && let Some(val) = val_opt
+        {
+            map.insert(key, val.to_string());
         }
     }
 

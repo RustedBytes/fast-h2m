@@ -89,23 +89,23 @@ fn extract_metadata_from_dom(
         None => return metadata,
     };
 
-    if let Some(head_node) = head_handle.get(parser) {
-        if let tl::Node::Tag(head_tag) = head_node {
-            let children = head_tag.children();
-            for child_handle in children.top().iter() {
-                if let Some(child_node) = child_handle.get(parser) {
-                    if let tl::Node::Tag(child_tag) = child_node {
-                        let raw_name = child_tag.name().as_utf8_str();
-                        let tag_name = normalize_tag_name(raw_name);
+    if let Some(head_node) = head_handle.get(parser)
+        && let tl::Node::Tag(head_tag) = head_node
+    {
+        let children = head_tag.children();
+        for child_handle in children.top().iter() {
+            if let Some(child_node) = child_handle.get(parser)
+                && let tl::Node::Tag(child_tag) = child_node
+            {
+                let raw_name = child_tag.name().as_utf8_str();
+                let tag_name = normalize_tag_name(raw_name);
 
-                        match tag_name.as_ref() {
-                            "title" => extract_title(child_tag, parser, &mut metadata),
-                            "base" => extract_base(child_tag, &mut metadata),
-                            "meta" => extract_meta(child_tag, &mut metadata),
-                            "link" => extract_link(child_tag, &mut metadata),
-                            _ => {}
-                        }
-                    }
+                match tag_name.as_ref() {
+                    "title" => extract_title(child_tag, parser, &mut metadata),
+                    "base" => extract_base(child_tag, &mut metadata),
+                    "meta" => extract_meta(child_tag, &mut metadata),
+                    "link" => extract_link(child_tag, &mut metadata),
+                    _ => {}
                 }
             }
         }
@@ -119,16 +119,16 @@ fn find_head_node(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,
 ) -> Option<tl::NodeHandle> {
-    if let Some(node) = node_handle.get(parser) {
-        if let tl::Node::Tag(tag) = node {
-            if normalize_tag_name(tag.name().as_utf8_str()) == "head" {
-                return Some(*node_handle);
-            }
-            let children = tag.children();
-            for child_handle in children.top().iter() {
-                if let Some(result) = find_head_node(child_handle, parser) {
-                    return Some(result);
-                }
+    if let Some(node) = node_handle.get(parser)
+        && let tl::Node::Tag(tag) = node
+    {
+        if normalize_tag_name(tag.name().as_utf8_str()) == "head" {
+            return Some(*node_handle);
+        }
+        let children = tag.children();
+        for child_handle in children.top().iter() {
+            if let Some(result) = find_head_node(child_handle, parser) {
+                return Some(result);
             }
         }
     }
@@ -141,27 +141,26 @@ fn extract_title(
     metadata: &mut BTreeMap<String, String>,
 ) {
     let children = tag.children();
-    if let Some(first_child) = children.top().iter().next() {
-        if let Some(text_node) = first_child.get(parser) {
-            if let tl::Node::Raw(bytes) = text_node {
-                let title = text::normalize_whitespace(&bytes.as_utf8_str())
-                    .trim()
-                    .to_string();
-                if !title.is_empty() {
-                    metadata.insert("title".to_string(), title);
-                }
-            }
+    if let Some(first_child) = children.top().iter().next()
+        && let Some(text_node) = first_child.get(parser)
+        && let tl::Node::Raw(bytes) = text_node
+    {
+        let title = text::normalize_whitespace(&bytes.as_utf8_str())
+            .trim()
+            .to_string();
+        if !title.is_empty() {
+            metadata.insert("title".to_string(), title);
         }
     }
 }
 
 fn extract_base(tag: &tl::HTMLTag, metadata: &mut BTreeMap<String, String>) {
-    if let Some(href_attr) = tag.attributes().get("href") {
-        if let Some(href_bytes) = href_attr {
-            let href = href_bytes.as_utf8_str().to_string();
-            if !href.is_empty() {
-                metadata.insert("base-href".to_string(), href);
-            }
+    if let Some(href_attr) = tag.attributes().get("href")
+        && let Some(href_bytes) = href_attr
+    {
+        let href = href_bytes.as_utf8_str().to_string();
+        if !href.is_empty() {
+            metadata.insert("base-href".to_string(), href);
         }
     }
 }
@@ -172,25 +171,25 @@ fn extract_meta(tag: &tl::HTMLTag, metadata: &mut BTreeMap<String, String>) {
     let mut http_equiv_attr: Option<String> = None;
     let mut content_attr: Option<String> = None;
 
-    if let Some(attr) = tag.attributes().get("name") {
-        if let Some(bytes) = attr {
-            name_attr = Some(bytes.as_utf8_str().to_string());
-        }
+    if let Some(attr) = tag.attributes().get("name")
+        && let Some(bytes) = attr
+    {
+        name_attr = Some(bytes.as_utf8_str().to_string());
     }
-    if let Some(attr) = tag.attributes().get("property") {
-        if let Some(bytes) = attr {
-            property_attr = Some(bytes.as_utf8_str().to_string());
-        }
+    if let Some(attr) = tag.attributes().get("property")
+        && let Some(bytes) = attr
+    {
+        property_attr = Some(bytes.as_utf8_str().to_string());
     }
-    if let Some(attr) = tag.attributes().get("http-equiv") {
-        if let Some(bytes) = attr {
-            http_equiv_attr = Some(bytes.as_utf8_str().to_string());
-        }
+    if let Some(attr) = tag.attributes().get("http-equiv")
+        && let Some(bytes) = attr
+    {
+        http_equiv_attr = Some(bytes.as_utf8_str().to_string());
     }
-    if let Some(attr) = tag.attributes().get("content") {
-        if let Some(bytes) = attr {
-            content_attr = Some(bytes.as_utf8_str().to_string());
-        }
+    if let Some(attr) = tag.attributes().get("content")
+        && let Some(bytes) = attr
+    {
+        content_attr = Some(bytes.as_utf8_str().to_string());
     }
 
     if let Some(content) = content_attr {
@@ -211,15 +210,15 @@ fn extract_link(tag: &tl::HTMLTag, metadata: &mut BTreeMap<String, String>) {
     let mut rel_attr: Option<String> = None;
     let mut href_attr: Option<String> = None;
 
-    if let Some(attr) = tag.attributes().get("rel") {
-        if let Some(bytes) = attr {
-            rel_attr = Some(bytes.as_utf8_str().to_string());
-        }
+    if let Some(attr) = tag.attributes().get("rel")
+        && let Some(bytes) = attr
+    {
+        rel_attr = Some(bytes.as_utf8_str().to_string());
     }
-    if let Some(attr) = tag.attributes().get("href") {
-        if let Some(bytes) = attr {
-            href_attr = Some(bytes.as_utf8_str().to_string());
-        }
+    if let Some(attr) = tag.attributes().get("href")
+        && let Some(bytes) = attr
+    {
+        href_attr = Some(bytes.as_utf8_str().to_string());
     }
 
     if let (Some(rel), Some(href)) = (rel_attr, href_attr) {

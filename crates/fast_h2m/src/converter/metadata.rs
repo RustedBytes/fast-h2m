@@ -89,35 +89,32 @@ fn handle_head(
     });
 
     #[cfg(feature = "metadata")]
-    if ctx.metadata_wants_structured_data {
-        if let Some(ref collector) = ctx.metadata_collector {
-            for child_handle in children.top().iter() {
-                if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-                    let child_name =
-                        dom_ctx
-                            .tag_name_for(*child_handle, parser)
-                            .unwrap_or_else(|| {
-                                crate::converter::normalized_tag_name(
-                                    child_tag.name().as_utf8_str(),
-                                )
-                            });
-                    if child_name.as_ref() == "script" {
-                        if let Some(type_attr) = child_tag.attributes().get("type").flatten() {
-                            let type_value = type_attr.as_utf8_str();
-                            let type_value = type_value.as_ref();
-                            let type_value = type_value.split(';').next().unwrap_or(type_value);
-                            if type_value
-                                .trim()
-                                .eq_ignore_ascii_case("application/ld+json")
-                            {
-                                let json = child_tag.inner_text(parser);
-                                let json = json.trim();
-                                if !json.is_empty() {
-                                    let json = decode_html_entities(json);
-                                    if !json.is_empty() {
-                                        collector.borrow_mut().add_json_ld(json);
-                                    }
-                                }
+    if ctx.metadata_wants_structured_data
+        && let Some(ref collector) = ctx.metadata_collector
+    {
+        for child_handle in children.top().iter() {
+            if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
+                let child_name = dom_ctx
+                    .tag_name_for(*child_handle, parser)
+                    .unwrap_or_else(|| {
+                        crate::converter::normalized_tag_name(child_tag.name().as_utf8_str())
+                    });
+                if child_name.as_ref() == "script"
+                    && let Some(type_attr) = child_tag.attributes().get("type").flatten()
+                {
+                    let type_value = type_attr.as_utf8_str();
+                    let type_value = type_value.as_ref();
+                    let type_value = type_value.split(';').next().unwrap_or(type_value);
+                    if type_value
+                        .trim()
+                        .eq_ignore_ascii_case("application/ld+json")
+                    {
+                        let json = child_tag.inner_text(parser);
+                        let json = json.trim();
+                        if !json.is_empty() {
+                            let json = decode_html_entities(json);
+                            if !json.is_empty() {
+                                collector.borrow_mut().add_json_ld(json);
                             }
                         }
                     }
@@ -172,15 +169,14 @@ fn handle_script(
             .trim()
             .eq_ignore_ascii_case("application/ld+json")
             && ctx.metadata_wants_structured_data
+            && let Some(ref collector) = ctx.metadata_collector
         {
-            if let Some(ref collector) = ctx.metadata_collector {
-                let json = tag.inner_text(parser);
-                let json = json.trim();
+            let json = tag.inner_text(parser);
+            let json = json.trim();
+            if !json.is_empty() {
+                let json = decode_html_entities(json);
                 if !json.is_empty() {
-                    let json = decode_html_entities(json);
-                    if !json.is_empty() {
-                        collector.borrow_mut().add_json_ld(json);
-                    }
+                    collector.borrow_mut().add_json_ld(json);
                 }
             }
         }

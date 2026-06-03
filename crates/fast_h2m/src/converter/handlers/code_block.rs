@@ -164,17 +164,17 @@ pub fn handle_pre(
         let mut lang: Option<String> = None;
 
         // First, try to extract language from <pre> tag's class attribute
-        if let Some(class_attr) = tag.attributes().get("class") {
-            if let Some(class_bytes) = class_attr {
-                let class_str = class_bytes.as_utf8_str();
-                for cls in class_str.split_whitespace() {
-                    if let Some(stripped) = cls.strip_prefix("language-") {
-                        lang = Some(String::from(stripped));
-                        break;
-                    } else if let Some(stripped) = cls.strip_prefix("lang-") {
-                        lang = Some(String::from(stripped));
-                        break;
-                    }
+        if let Some(class_attr) = tag.attributes().get("class")
+            && let Some(class_bytes) = class_attr
+        {
+            let class_str = class_bytes.as_utf8_str();
+            for cls in class_str.split_whitespace() {
+                if let Some(stripped) = cls.strip_prefix("language-") {
+                    lang = Some(String::from(stripped));
+                    break;
+                } else if let Some(stripped) = cls.strip_prefix("lang-") {
+                    lang = Some(String::from(stripped));
+                    break;
                 }
             }
         }
@@ -183,24 +183,24 @@ pub fn handle_pre(
         if lang.is_none() {
             let children = tag.children();
             for child_handle in children.top().iter() {
-                if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-                    if child_tag.name() == "code" {
-                        if let Some(class_attr) = child_tag.attributes().get("class") {
-                            if let Some(class_bytes) = class_attr {
-                                let class_str = class_bytes.as_utf8_str();
-                                for cls in class_str.split_whitespace() {
-                                    if let Some(stripped) = cls.strip_prefix("language-") {
-                                        lang = Some(String::from(stripped));
-                                        break;
-                                    } else if let Some(stripped) = cls.strip_prefix("lang-") {
-                                        lang = Some(String::from(stripped));
-                                        break;
-                                    }
-                                }
+                if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser)
+                    && child_tag.name() == "code"
+                {
+                    if let Some(class_attr) = child_tag.attributes().get("class")
+                        && let Some(class_bytes) = class_attr
+                    {
+                        let class_str = class_bytes.as_utf8_str();
+                        for cls in class_str.split_whitespace() {
+                            if let Some(stripped) = cls.strip_prefix("language-") {
+                                lang = Some(String::from(stripped));
+                                break;
+                            } else if let Some(stripped) = cls.strip_prefix("lang-") {
+                                lang = Some(String::from(stripped));
+                                break;
                             }
                         }
-                        break;
                     }
+                    break;
                 }
             }
         }

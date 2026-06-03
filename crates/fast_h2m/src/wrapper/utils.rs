@@ -94,32 +94,32 @@ pub fn parse_list_item(line: &str) -> Option<(String, String, String)> {
     let trimmed = line.trim_start();
     let indent = &line[..line.len() - trimmed.len()];
 
-    if let Some(rest) = trimmed.strip_prefix('-') {
-        if rest.starts_with(' ') || rest.is_empty() {
-            return Some((
-                indent.to_string(),
-                "- ".to_string(),
-                rest.trim_start().to_string(),
-            ));
-        }
+    if let Some(rest) = trimmed.strip_prefix('-')
+        && (rest.starts_with(' ') || rest.is_empty())
+    {
+        return Some((
+            indent.to_string(),
+            "- ".to_string(),
+            rest.trim_start().to_string(),
+        ));
     }
-    if let Some(rest) = trimmed.strip_prefix('*') {
-        if rest.starts_with(' ') || rest.is_empty() {
-            return Some((
-                indent.to_string(),
-                "* ".to_string(),
-                rest.trim_start().to_string(),
-            ));
-        }
+    if let Some(rest) = trimmed.strip_prefix('*')
+        && (rest.starts_with(' ') || rest.is_empty())
+    {
+        return Some((
+            indent.to_string(),
+            "* ".to_string(),
+            rest.trim_start().to_string(),
+        ));
     }
-    if let Some(rest) = trimmed.strip_prefix('+') {
-        if rest.starts_with(' ') || rest.is_empty() {
-            return Some((
-                indent.to_string(),
-                "+ ".to_string(),
-                rest.trim_start().to_string(),
-            ));
-        }
+    if let Some(rest) = trimmed.strip_prefix('+')
+        && (rest.starts_with(' ') || rest.is_empty())
+    {
+        return Some((
+            indent.to_string(),
+            "+ ".to_string(),
+            rest.trim_start().to_string(),
+        ));
     }
 
     let first_token = trimmed.split_whitespace().next()?;

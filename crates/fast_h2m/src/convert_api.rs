@@ -164,10 +164,10 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     };
 
     // Fast path: plain text with no HTML tags — skip full parsing pipeline.
-    if !options.wrap {
-        if let Some(markdown) = fast_text_only(normalized_html.as_ref(), &options) {
-            return Ok(conversion_result_from_content(markdown));
-        }
+    if !options.wrap
+        && let Some(markdown) = fast_text_only(normalized_html.as_ref(), &options)
+    {
+        return Ok(conversion_result_from_content(markdown));
     }
 
     // Determine whether metadata / inline-image extraction is requested.

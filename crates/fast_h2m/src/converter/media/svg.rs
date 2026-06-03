@@ -175,13 +175,13 @@ pub fn handle_svg(
     let mut title = String::from("SVG Image");
     let children = tag.children();
     for child_handle in children.top().iter() {
-        if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-            if tag_name_eq(child_tag.name().as_utf8_str(), "title") {
-                title = get_text_content(child_handle, parser, dom_ctx)
-                    .trim()
-                    .to_string();
-                break;
-            }
+        if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser)
+            && tag_name_eq(child_tag.name().as_utf8_str(), "title")
+        {
+            title = get_text_content(child_handle, parser, dom_ctx)
+                .trim()
+                .to_string();
+            break;
         }
     }
 

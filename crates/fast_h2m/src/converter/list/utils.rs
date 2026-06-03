@@ -305,10 +305,10 @@ pub fn process_list_children(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                if let Some(tl::Node::Raw(bytes)) = child_handle.get(parser) {
-                    if bytes.as_utf8_str().trim().is_empty() {
-                        continue;
-                    }
+                if let Some(tl::Node::Raw(bytes)) = child_handle.get(parser)
+                    && bytes.as_utf8_str().trim().is_empty()
+                {
+                    continue;
                 }
 
                 let list_ctx = Context {

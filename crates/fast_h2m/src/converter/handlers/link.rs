@@ -88,47 +88,44 @@ pub fn handle_link(
 
         if let Some((heading_level, heading_handle)) =
             find_single_heading_child(*node_handle, parser)
+            && let Some(heading_node) = heading_handle.get(parser)
+            && let tl::Node::Tag(heading_tag) = heading_node
         {
-            if let Some(heading_node) = heading_handle.get(parser) {
-                if let tl::Node::Tag(heading_tag) = heading_node {
-                    let heading_name =
-                        normalized_tag_name(heading_tag.name().as_utf8_str()).into_owned();
-                    let mut heading_text = String::new();
-                    let heading_ctx = Context {
-                        in_heading: true,
-                        convert_as_inline: true,
-                        heading_allow_inline_images: heading_allows_inline_images(
-                            &heading_name,
-                            &ctx.keep_inline_images_in,
-                        ),
-                        ..ctx.clone()
-                    };
-                    walk_node(
-                        &heading_handle,
-                        parser,
-                        &mut heading_text,
-                        options,
-                        &heading_ctx,
-                        depth + 1,
-                        dom_ctx,
-                    );
-                    let trimmed_heading = heading_text.trim();
-                    if !trimmed_heading.is_empty() {
-                        let escaped_label = escape_link_label(trimmed_heading);
-                        let mut link_buffer = String::new();
-                        append_markdown_link(
-                            &mut link_buffer,
-                            &escaped_label,
-                            href.as_str(),
-                            title.as_deref(),
-                            raw_text.as_str(),
-                            options,
-                            ctx.reference_collector.as_ref(),
-                        );
-                        push_heading(output, ctx, options, heading_level, link_buffer.as_str());
-                        return;
-                    }
-                }
+            let heading_name = normalized_tag_name(heading_tag.name().as_utf8_str()).into_owned();
+            let mut heading_text = String::new();
+            let heading_ctx = Context {
+                in_heading: true,
+                convert_as_inline: true,
+                heading_allow_inline_images: heading_allows_inline_images(
+                    &heading_name,
+                    &ctx.keep_inline_images_in,
+                ),
+                ..ctx.clone()
+            };
+            walk_node(
+                &heading_handle,
+                parser,
+                &mut heading_text,
+                options,
+                &heading_ctx,
+                depth + 1,
+                dom_ctx,
+            );
+            let trimmed_heading = heading_text.trim();
+            if !trimmed_heading.is_empty() {
+                let escaped_label = escape_link_label(trimmed_heading);
+                let mut link_buffer = String::new();
+                append_markdown_link(
+                    &mut link_buffer,
+                    &escaped_label,
+                    href.as_str(),
+                    title.as_deref(),
+                    raw_text.as_str(),
+                    options,
+                    ctx.reference_collector.as_ref(),
+                );
+                push_heading(output, ctx, options, heading_level, link_buffer.as_str());
+                return;
             }
         }
 
@@ -292,31 +289,31 @@ pub fn handle_link(
         }
 
         #[cfg(feature = "metadata")]
-        if ctx.metadata_wants_links {
-            if let Some(ref collector) = ctx.metadata_collector {
-                let rel_attr = tag
-                    .attributes()
-                    .get("rel")
-                    .flatten()
-                    .map(|v| v.as_utf8_str().to_string());
-                let mut attributes_map = BTreeMap::new();
-                for (key, value_opt) in tag.attributes().iter() {
-                    let key_str = key.to_string();
-                    if key_str == "href" {
-                        continue;
-                    }
-
-                    let value = value_opt.map(|v| v.to_string()).unwrap_or_default();
-                    attributes_map.insert(key_str, value);
+        if ctx.metadata_wants_links
+            && let Some(ref collector) = ctx.metadata_collector
+        {
+            let rel_attr = tag
+                .attributes()
+                .get("rel")
+                .flatten()
+                .map(|v| v.as_utf8_str().to_string());
+            let mut attributes_map = BTreeMap::new();
+            for (key, value_opt) in tag.attributes().iter() {
+                let key_str = key.to_string();
+                if key_str == "href" {
+                    continue;
                 }
-                collector.borrow_mut().add_link(
-                    href.clone(),
-                    label,
-                    title.clone(),
-                    rel_attr,
-                    attributes_map,
-                );
+
+                let value = value_opt.map(|v| v.to_string()).unwrap_or_default();
+                attributes_map.insert(key_str, value);
             }
+            collector.borrow_mut().add_link(
+                href.clone(),
+                label,
+                title.clone(),
+                rel_attr,
+                attributes_map,
+            );
         }
     } else {
         let children = tag.children();

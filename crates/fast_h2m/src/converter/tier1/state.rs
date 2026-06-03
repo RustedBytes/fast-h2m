@@ -129,10 +129,10 @@ impl Tier1State {
     ///
     /// This is the single dispatch point for "where does inline text land."
     pub fn cell_or_output_mut(&mut self) -> &mut String {
-        if let Some(ts) = self.table_stack.last_mut() {
-            if ts.in_cell {
-                return &mut ts.current_cell;
-            }
+        if let Some(ts) = self.table_stack.last_mut()
+            && ts.in_cell
+        {
+            return &mut ts.current_cell;
         }
         &mut self.output
     }

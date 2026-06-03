@@ -21,8 +21,7 @@ pub fn extract_media_src<'a>(tag: &'a HTMLTag<'a>) -> Cow<'a, str> {
     tag.attributes()
         .get("src")
         .flatten()
-        .map(|v| v.as_utf8_str())
-        .unwrap_or_else(|| Cow::Borrowed(""))
+        .map_or_else(|| Cow::Borrowed(""), |v| v.as_utf8_str())
 }
 
 /// Try to find source src from nested source element.
@@ -34,14 +33,14 @@ where
     T: IntoIterator<Item = &'a NodeHandle>,
 {
     for child_handle in children {
-        if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-            if tag_name_eq(child_tag.name().as_utf8_str(), "source") {
-                return child_tag
-                    .attributes()
-                    .get("src")
-                    .flatten()
-                    .map(|v| v.as_utf8_str());
-            }
+        if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser)
+            && tag_name_eq(child_tag.name().as_utf8_str(), "source")
+        {
+            return child_tag
+                .attributes()
+                .get("src")
+                .flatten()
+                .map(|v| v.as_utf8_str());
         }
     }
     None
@@ -323,11 +322,11 @@ pub fn handle_picture(
     use crate::converter::main::walk_node;
 
     for child_handle in tag.children().top().iter() {
-        if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-            if tag_name_eq(child_tag.name().as_utf8_str(), "img") {
-                walk_node(child_handle, parser, output, options, ctx, depth, dom_ctx);
-                break;
-            }
+        if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser)
+            && tag_name_eq(child_tag.name().as_utf8_str(), "img")
+        {
+            walk_node(child_handle, parser, output, options, ctx, depth, dom_ctx);
+            break;
         }
     }
 }
