@@ -7,7 +7,6 @@ fn main() {
     let opts: ConversionOptions = serde_json::from_str(json).unwrap();
     println!("code_block_style: {:?}", opts.code_block_style);
 
-    let result =
-        fast_h2m::convert("<pre><code>some code</code></pre>", Some(opts)).unwrap();
+    let result = fast_h2m::convert("<pre><code>some code</code></pre>", Some(opts)).unwrap();
     println!("result: {:?}", result.content);
 }

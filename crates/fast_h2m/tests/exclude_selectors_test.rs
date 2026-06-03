@@ -2,10 +2,7 @@
 
 use fast_h2m::ConversionOptions;
 
-fn convert(
-    html: &str,
-    opts: Option<ConversionOptions>,
-) -> fast_h2m::error::Result<String> {
+fn convert(html: &str, opts: Option<ConversionOptions>) -> fast_h2m::error::Result<String> {
     fast_h2m::convert(html, opts).map(|r| r.content.unwrap_or_default())
 }
 

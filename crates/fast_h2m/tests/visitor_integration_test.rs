@@ -8,9 +8,7 @@
 
 #![cfg(feature = "visitor")]
 
-use fast_h2m::visitor::{
-    HtmlVisitor, NodeContext, NodeType, VisitResult, VisitorHandle,
-};
+use fast_h2m::visitor::{HtmlVisitor, NodeContext, NodeType, VisitResult, VisitorHandle};
 use fast_h2m::{ConversionError, ConversionOptions, ConversionResult};
 use std::sync::{Arc, Mutex};
 

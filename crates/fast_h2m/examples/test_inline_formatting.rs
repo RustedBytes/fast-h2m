@@ -1,12 +1,13 @@
 #![allow(missing_docs)]
+
+use fast_h2m::ConversionOptions;
+
 fn convert(
     html: &str,
     opts: Option<fast_h2m::ConversionOptions>,
 ) -> fast_h2m::error::Result<String> {
     fast_h2m::convert(html, opts).map(|r| r.content.unwrap_or_default())
 }
-
-use fast_h2m::ConversionOptions;
 
 fn main() {
     let html = "<p>This is <mark>highlighted</mark> text</p>";

@@ -8,9 +8,6 @@ fn test_deserialize_highlight_bold_lowercase() {
     let result = serde_json::from_str::<ConversionOptions>(json);
     assert!(result.is_ok(), "Failed to deserialize: {:?}", result.err());
     if let Ok(opts) = result {
-        assert_eq!(
-            opts.highlight_style,
-            fast_h2m::HighlightStyle::Bold
-        );
+        assert_eq!(opts.highlight_style, fast_h2m::HighlightStyle::Bold);
     }
 }

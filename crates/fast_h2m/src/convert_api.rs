@@ -4,13 +4,13 @@
 
 use std::borrow::Cow;
 
+#[cfg(any(feature = "metadata", feature = "inline-images"))]
+use crate::ConversionError;
 use crate::error::Result;
 use crate::options::{ConversionOptions, WhitespaceMode};
 use crate::text;
 use crate::types::ConversionResult;
-use crate::validation::{detect_utf16_encoding, validate_input, Utf16Encoding};
-#[cfg(any(feature = "metadata", feature = "inline-images"))]
-use crate::ConversionError;
+use crate::validation::{Utf16Encoding, detect_utf16_encoding, validate_input};
 
 #[cfg(feature = "metadata")]
 use crate::{HtmlMetadata, MetadataConfig};
@@ -192,7 +192,7 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
 
     #[cfg(feature = "inline-images")]
     let image_collector = if wants_images {
-        use crate::inline_images::{InlineImageConfig as IIC, DEFAULT_INLINE_IMAGE_LIMIT};
+        use crate::inline_images::{DEFAULT_INLINE_IMAGE_LIMIT, InlineImageConfig as IIC};
         Some(Rc::new(RefCell::new(
             crate::inline_images::InlineImageCollector::new(IIC::new(DEFAULT_INLINE_IMAGE_LIMIT))?,
         )))

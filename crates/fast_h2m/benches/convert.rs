@@ -2,8 +2,8 @@
 
 use std::hint::black_box;
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use fast_h2m::{convert, ConversionOptions, TierStrategy};
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
+use fast_h2m::{ConversionOptions, TierStrategy, convert};
 
 const SIMPLE_HTML: &str = r#"
 <article>

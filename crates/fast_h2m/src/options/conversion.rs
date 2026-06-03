@@ -12,6 +12,19 @@ use crate::options::validation::{
     OutputFormat, UrlEscapeStyle, WhitespaceMode,
 };
 
+#[cfg(any(feature = "serde", feature = "metadata"))]
+mod serde_helpers {
+    use serde::Deserialize;
+
+    pub(super) fn default_on_null<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+        T: Deserialize<'de> + Default,
+    {
+        Ok(Option::<T>::deserialize(deserializer)?.unwrap_or_default())
+    }
+}
+
 /// Controls which conversion tier is used.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[cfg_attr(
@@ -64,30 +77,74 @@ pub enum TierStrategy {
 )]
 pub struct ConversionOptions {
     /// Heading style to use in Markdown output (ATX `#` or Setext underline).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "headingStyle")
+    )]
     pub heading_style: HeadingStyle,
     /// How to indent nested list items (spaces or tab).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "listIndentType")
+    )]
     pub list_indent_type: ListIndentType,
     /// Number of spaces (or tabs) to use for each level of list indentation.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "listIndentWidth")
+    )]
     pub list_indent_width: usize,
     /// Bullet character(s) to use for unordered list items (e.g. `"-"`, `"*"`).
     pub bullets: String,
     /// Character used for bold/italic emphasis markers (`*` or `_`).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "strongEmSymbol")
+    )]
     pub strong_em_symbol: char,
     /// Escape `*` characters in plain text to avoid unintended bold/italic.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "escapeAsterisks")
+    )]
     pub escape_asterisks: bool,
     /// Escape `_` characters in plain text to avoid unintended bold/italic.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "escapeUnderscores")
+    )]
     pub escape_underscores: bool,
     /// Escape miscellaneous Markdown metacharacters (`[]()#` etc.) in plain text.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "escapeMisc")
+    )]
     pub escape_misc: bool,
     /// Escape ASCII characters that have special meaning in certain Markdown dialects.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "escapeAscii")
+    )]
     pub escape_ascii: bool,
     /// Default language annotation for fenced code blocks that have no language hint.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "codeLanguage")
+    )]
     pub code_language: String,
     /// Automatically convert bare URLs into Markdown autolinks.
     pub autolinks: bool,
     /// Emit a default title when no `<title>` tag is present.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "defaultTitle")
+    )]
     pub default_title: bool,
     /// Render `<br>` elements inside table cells as literal line breaks.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "brInTables")
+    )]
     pub br_in_tables: bool,
     /// Emit tables without column padding (compact GFM format).
     ///
@@ -96,14 +153,26 @@ pub struct ConversionOptions {
     /// Produces token-efficient output suitable for RAG / LLM contexts.
     ///
     /// Default `false` (aligned padding preserved).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "compactTables")
+    )]
     pub compact_tables: bool,
     /// Style used for `<mark>` / highlighted text (e.g. `==text==`).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "highlightStyle")
+    )]
     pub highlight_style: HighlightStyle,
     /// Populate `result.metadata` with `<head>` / `<meta>` extraction
     /// (title, description, Open Graph, Twitter Card, JSON-LD, …).
     ///
     /// Default `true`. Disabling skips the metadata pass only — table
     /// extraction into `result.tables` runs unconditionally.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "extractMetadata")
+    )]
     pub extract_metadata: bool,
     /// Controls how whitespace sequences are normalised in the converted output.
     ///
@@ -114,8 +183,16 @@ pub struct ConversionOptions {
     ///
     /// Choose `Strict` only when the source HTML uses deliberate whitespace (e.g. pre-formatted
     /// content outside `<pre>` tags). For most documents `Normalized` produces cleaner output.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "whitespaceMode")
+    )]
     pub whitespace_mode: WhitespaceMode,
     /// Strip all newlines from the output, producing a single-line result.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "stripNewlines")
+    )]
     pub strip_newlines: bool,
     /// Wrap long lines at [`wrap_width`](Self::wrap_width) characters.
     pub wrap: bool,
@@ -124,18 +201,50 @@ pub struct ConversionOptions {
     /// Lines are broken at word boundaries so that no line exceeds this length. A value of `0`
     /// is treated as "no limit" — equivalent to leaving [`wrap`](Self::wrap) disabled. Has no
     /// effect when `wrap` is `false`.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "wrapWidth")
+    )]
     pub wrap_width: usize,
     /// Treat the entire document as inline content (no block-level wrappers).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "convertAsInline")
+    )]
     pub convert_as_inline: bool,
     /// Markdown notation for subscript text (e.g. `"~"`).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "subSymbol")
+    )]
     pub sub_symbol: String,
     /// Markdown notation for superscript text (e.g. `"^"`).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "supSymbol")
+    )]
     pub sup_symbol: String,
     /// How to encode hard line breaks (`<br>`) in Markdown.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "newlineStyle")
+    )]
     pub newline_style: NewlineStyle,
     /// Style used for fenced code blocks (backticks or tilde).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "codeBlockStyle")
+    )]
     pub code_block_style: CodeBlockStyle,
     /// HTML tag names whose `<img>` children are kept inline instead of block.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(
+            alias = "keepInlineImagesIn",
+            default,
+            deserialize_with = "serde_helpers::default_on_null"
+        )
+    )]
     pub keep_inline_images_in: Vec<String>,
     /// Options for the HTML pre-processing pass applied before conversion begins.
     ///
@@ -152,10 +261,30 @@ pub struct ConversionOptions {
     /// Emit debug information during conversion.
     pub debug: bool,
     /// HTML tag names whose content is stripped from the output entirely.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(
+            alias = "stripTags",
+            default,
+            deserialize_with = "serde_helpers::default_on_null"
+        )
+    )]
     pub strip_tags: Vec<String>,
     /// HTML tag names that are preserved verbatim in the output.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(
+            alias = "preserveTags",
+            default,
+            deserialize_with = "serde_helpers::default_on_null"
+        )
+    )]
     pub preserve_tags: Vec<String>,
     /// Skip conversion of `<img>` elements (omit images from output).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "skipImages")
+    )]
     pub skip_images: bool,
     /// URL encoding strategy for link and image destinations.
     ///
@@ -165,23 +294,59 @@ pub struct ConversionOptions {
     /// - [`UrlEscapeStyle::Percent`] — percent-encodes every character that is not an RFC 3986
     ///   unreserved character or `/`, producing a destination that all Markdown parsers handle
     ///   correctly even when the URL contains `<`, `>`, spaces, or parentheses.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "urlEscapeStyle")
+    )]
     pub url_escape_style: UrlEscapeStyle,
     /// Link rendering style (inline or reference).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "linkStyle")
+    )]
     pub link_style: LinkStyle,
     /// Target output format (Markdown, plain text, etc.).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "outputFormat")
+    )]
     pub output_format: OutputFormat,
     /// Include structured document tree in result.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "includeDocumentStructure")
+    )]
     pub include_document_structure: bool,
     /// Extract inline images from data URIs and SVGs.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "extractImages")
+    )]
     pub extract_images: bool,
     /// Maximum decoded image size in bytes (default 5MB).
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "maxImageSize")
+    )]
     pub max_image_size: u64,
     /// Capture SVG elements as images.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "captureSvg")
+    )]
     pub capture_svg: bool,
     /// Infer image dimensions from data.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "inferDimensions")
+    )]
     pub infer_dimensions: bool,
     /// Maximum DOM traversal depth. `None` means unlimited.
     /// When set, subtrees beyond this depth are silently truncated.
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "maxDepth")
+    )]
     pub max_depth: Option<usize>,
     /// CSS selectors for elements to exclude entirely (element + all content).
     ///
@@ -193,7 +358,14 @@ pub struct ConversionOptions {
     /// Invalid selectors are silently skipped at conversion time.
     ///
     /// Example: `vec![".cookie-banner".into(), "#ad-container".into(), "[role='complementary']".into()]`
-    #[cfg_attr(any(feature = "serde", feature = "metadata"), serde(default))]
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(
+            alias = "excludeSelectors",
+            default,
+            deserialize_with = "serde_helpers::default_on_null"
+        )
+    )]
     pub exclude_selectors: Vec<String>,
 
     /// Which conversion tier to use.
@@ -201,7 +373,10 @@ pub struct ConversionOptions {
     /// - [`TierStrategy::Auto`] (default) — automatically choose the best path.
     /// - [`TierStrategy::Tier2`] — always use the Tier-2 DOM-walk path.
     /// - `TierStrategy::Tier1` — always attempt Tier-1 (testkit only).
-    #[cfg_attr(any(feature = "serde", feature = "metadata"), serde(default))]
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(default, alias = "tierStrategy")
+    )]
     pub tier_strategy: TierStrategy,
 
     /// Optional visitor for custom traversal logic.
@@ -669,6 +844,90 @@ mod tests {
         assert!(!deserialized.escape_asterisks);
         assert!(!deserialized.escape_underscores);
         assert_eq!(deserialized.list_indent_type, ListIndentType::Spaces);
+    }
+
+    #[test]
+    fn test_conversion_options_camel_case_deserialization() {
+        let json = r#"{
+            "headingStyle": "atxclosed",
+            "listIndentType": "tabs",
+            "listIndentWidth": 4,
+            "strongEmSymbol": "_",
+            "escapeAsterisks": true,
+            "codeLanguage": "rust",
+            "defaultTitle": true,
+            "brInTables": true,
+            "compactTables": true,
+            "highlightStyle": "",
+            "extractMetadata": false,
+            "whitespaceMode": "strict",
+            "stripNewlines": true,
+            "wrapWidth": 120,
+            "convertAsInline": true,
+            "subSymbol": "~",
+            "supSymbol": "^",
+            "newlineStyle": "backslash",
+            "codeBlockStyle": "tildes",
+            "keepInlineImagesIn": null,
+            "preprocessing": {
+                "enabled": false,
+                "preset": "",
+                "removeNavigation": false,
+                "removeForms": false
+            },
+            "stripTags": null,
+            "preserveTags": null,
+            "skipImages": true,
+            "urlEscapeStyle": "percent",
+            "linkStyle": "",
+            "outputFormat": "",
+            "includeDocumentStructure": true,
+            "extractImages": true,
+            "maxImageSize": 1024,
+            "captureSvg": true,
+            "inferDimensions": false,
+            "maxDepth": 8,
+            "excludeSelectors": null,
+            "tierStrategy": "tier2"
+        }"#;
+
+        let deserialized: ConversionOptions =
+            serde_json::from_str(json).expect("Failed to deserialize camelCase JSON");
+
+        assert_eq!(deserialized.heading_style, HeadingStyle::AtxClosed);
+        assert_eq!(deserialized.list_indent_type, ListIndentType::Tabs);
+        assert_eq!(deserialized.list_indent_width, 4);
+        assert_eq!(deserialized.strong_em_symbol, '_');
+        assert!(deserialized.escape_asterisks);
+        assert_eq!(deserialized.code_language, "rust");
+        assert!(deserialized.default_title);
+        assert!(deserialized.br_in_tables);
+        assert!(deserialized.compact_tables);
+        assert!(!deserialized.extract_metadata);
+        assert_eq!(deserialized.whitespace_mode, WhitespaceMode::Strict);
+        assert!(deserialized.strip_newlines);
+        assert_eq!(deserialized.wrap_width, 120);
+        assert!(deserialized.convert_as_inline);
+        assert_eq!(deserialized.sub_symbol, "~");
+        assert_eq!(deserialized.sup_symbol, "^");
+        assert_eq!(deserialized.newline_style, NewlineStyle::Backslash);
+        assert_eq!(deserialized.code_block_style, CodeBlockStyle::Tildes);
+        assert!(deserialized.keep_inline_images_in.is_empty());
+        assert!(!deserialized.preprocessing.enabled);
+        assert!(!deserialized.preprocessing.remove_navigation);
+        assert!(!deserialized.preprocessing.remove_forms);
+        assert!(deserialized.strip_tags.is_empty());
+        assert!(deserialized.preserve_tags.is_empty());
+        assert!(deserialized.skip_images);
+        assert_eq!(deserialized.url_escape_style, UrlEscapeStyle::Percent);
+        assert!(deserialized.include_document_structure);
+        assert!(deserialized.extract_images);
+        assert_eq!(deserialized.max_image_size, 1024);
+        assert!(deserialized.capture_svg);
+        assert!(!deserialized.infer_dimensions);
+        assert_eq!(deserialized.max_depth, Some(8));
+        assert!(deserialized.exclude_selectors.is_empty());
+        assert_eq!(deserialized.tier_strategy, TierStrategy::Tier2);
     }
 
     #[test]

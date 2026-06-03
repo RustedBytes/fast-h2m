@@ -59,9 +59,17 @@ pub struct PreprocessingOptions {
     pub preset: PreprocessingPreset,
 
     /// Remove navigation elements (nav, breadcrumbs, menus, sidebars)
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "removeNavigation")
+    )]
     pub remove_navigation: bool,
 
     /// Remove form elements (forms, inputs, buttons, etc.)
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "removeForms")
+    )]
     pub remove_forms: bool,
 }
 
@@ -87,9 +95,17 @@ pub struct PreprocessingOptionsUpdate {
     pub preset: Option<PreprocessingPreset>,
 
     /// Optional navigation element removal override (nav, breadcrumbs, menus, sidebars)
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "removeNavigation")
+    )]
     pub remove_navigation: Option<bool>,
 
     /// Optional form element removal override (forms, inputs, buttons, etc.)
+    #[cfg_attr(
+        any(feature = "serde", feature = "metadata"),
+        serde(alias = "removeForms")
+    )]
     pub remove_forms: Option<bool>,
 }
 
