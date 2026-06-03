@@ -4,7 +4,7 @@
 
 #[test]
 fn curl_changes_does_not_overflow_stack() {
-    let html = include_str!("fixtures/regressions/curl_changes.html");
+    let html = include_str!("../../../fixtures/regressions/curl_changes.html");
     // Pin a lower bound on the fixture size so a future refetch that
     // shrinks the file fails loudly rather than silently weakening
     // coverage.
