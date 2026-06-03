@@ -34,13 +34,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let result = convert(html, None)?;
     println!("{}", result.content.unwrap_or_default());
 
-    if let Some(metadata) = &result.metadata {
-        println!("Title: {:?}", metadata.document.title);
-        println!("Headers: {:?}", metadata.headers);
-    }
+    println!("Title: {:?}", result.metadata.document.title);
+    println!("Headers: {:?}", result.metadata.headers);
 
     for table in &result.tables {
-        println!("Table with {} rows", table.cells.len());
+        println!("Table with {} rows", table.grid.rows);
     }
 
     Ok(())
@@ -58,9 +56,7 @@ internally to keep output sizes bounded.
 ### Builder Pattern
 
 ```rust
-use fast_h2m::{
-    convert, ConversionOptions, HeadingStyle, CodeBlockStyle,
-};
+use fast_h2m::{convert, ConversionOptions, HeadingStyle};
 
 let options = ConversionOptions::builder()
     .heading_style(HeadingStyle::Atx)
@@ -127,7 +123,7 @@ let result = convert(html, Some(options))?;
 ## Web Scraping with Preprocessing
 
 ```rust
-use fast_h2m::{convert, ConversionOptions, PreprocessingOptions};
+use fast_h2m::{convert, ConversionOptions};
 
 let mut options = ConversionOptions::default();
 options.preprocessing.enabled = true;
@@ -141,33 +137,43 @@ println!("{}", result.content.unwrap_or_default());
 
 ## Metadata Extraction
 
-Metadata is automatically included in the result. Configure which fields to extract via `MetadataConfig`:
+Metadata is automatically included in the result when the default `metadata` feature is enabled.
+Disable metadata extraction when you do not need it:
 
 ```rust
-use fast_h2m::{convert, ConversionOptions, MetadataConfig};
+use fast_h2m::{convert, ConversionOptions};
 
 let options = ConversionOptions::builder()
-    .metadata_config(MetadataConfig {
-        extract_headers: true,
-        extract_links: true,
-        extract_images: false,
-        ..Default::default()
-    })
+    .extract_metadata(false)
     .build();
 
 let result = convert(html, Some(options))?;
-if let Some(metadata) = &result.metadata {
-    println!("Title: {:?}", metadata.document.title);
-    for header in &metadata.headers {
-        println!("H{}: {}", header.level, header.text);
-    }
-    for link in &metadata.links {
-        println!("Link: {} -> {}", link.text, link.href);
-    }
+println!("{}", result.content.unwrap_or_default());
+```
+
+With metadata extraction enabled, read the collected fields from `result.metadata`:
+
+```rust
+use fast_h2m::convert;
+
+let result = convert(html, None)?;
+println!("Title: {:?}", result.metadata.document.title);
+for header in &result.metadata.headers {
+    println!("H{}: {}", header.level, header.text);
+}
+for link in &result.metadata.links {
+    println!("Link: {} -> {}", link.text, link.href);
 }
 ```
 
 ## Image Extraction
+
+Inline image extraction requires the `inline-images` Cargo feature:
+
+```toml
+[dependencies]
+fast_h2m = { version = "0.1", features = ["inline-images"] }
+```
 
 ```rust
 use fast_h2m::{convert, ConversionOptions};
@@ -181,7 +187,12 @@ let options = ConversionOptions::builder()
 let result = convert(html, Some(options))?;
 println!("{}", result.content.unwrap_or_default());
 for img in &result.images {
-    println!("Image: {} ({} bytes)", img.src, img.data.as_ref().map_or(0, |d| d.len()));
+    println!(
+        "Image: {:?} ({} bytes, format: {})",
+        img.filename,
+        img.data.len(),
+        img.format
+    );
 }
 ```
 
@@ -204,20 +215,35 @@ let result = convert(html, None)?;
 
 println!("{}", result.content.unwrap_or_default());
 for table in &result.tables {
-    println!("Table with {} rows:", table.cells.len());
-    for (i, row) in table.cells.iter().enumerate() {
-        let prefix = if table.is_header_row[i] { "Header" } else { "Row" };
-        println!("  {}: {:?}", prefix, row);
+    println!("Table with {} rows and {} columns:", table.grid.rows, table.grid.cols);
+    for cell in &table.grid.cells {
+        let prefix = if cell.is_header { "Header" } else { "Cell" };
+        println!(
+            "  {} ({}, {}): {}",
+            prefix,
+            cell.row,
+            cell.col,
+            cell.content
+        );
     }
 }
 ```
 
 ## Custom Visitors
 
+Custom visitors require the `visitor` Cargo feature:
+
+```toml
+[dependencies]
+fast_h2m = { version = "0.1", features = ["visitor"] }
+```
+
 ```rust
 use fast_h2m::{convert, ConversionOptions};
 use fast_h2m::visitor::{HtmlVisitor, NodeContext, VisitResult};
+use std::sync::{Arc, Mutex};
 
+#[derive(Debug)]
 struct NoImagesVisitor;
 
 impl HtmlVisitor for NoImagesVisitor {
@@ -233,7 +259,7 @@ impl HtmlVisitor for NoImagesVisitor {
 }
 
 let options = ConversionOptions::builder()
-    .visitor(Box::new(NoImagesVisitor))
+    .visitor(Some(Arc::new(Mutex::new(NoImagesVisitor))))
     .build();
 
 let result = convert(html, Some(options))?;
