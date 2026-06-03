@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for xml tables test.
 
 fn convert(
     html: &str,

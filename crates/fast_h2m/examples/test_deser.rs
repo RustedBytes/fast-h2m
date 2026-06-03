@@ -1,4 +1,5 @@
-#![allow(missing_docs)]
+//! Example program for test deser.
+
 use fast_h2m::ConversionOptions;
 
 fn main() {

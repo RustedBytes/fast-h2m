@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 399 md012 blank lines.
 
 //! Regression test for issue #399: spurious blank lines after the YAML
 //! frontmatter and after lists produced markdown that violates markdownlint

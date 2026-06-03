@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 339 regressions.
 
 //! Regression tests for issue #339: content after `<!-- ... --->` is silently dropped.
 //!

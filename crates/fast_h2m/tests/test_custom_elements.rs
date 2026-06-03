@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for test custom elements.
 
 fn convert(
     html: &str,

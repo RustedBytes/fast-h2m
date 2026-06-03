@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 397 strict autolink.
 
 //! Regression test for issue #397: bare filenames such as
 //! `<a href="foobar.png">foobar.png</a>` were being emitted as

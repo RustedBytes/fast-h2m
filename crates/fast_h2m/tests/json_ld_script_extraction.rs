@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for json ld script extraction.
 
 #[test]
 fn extracts_json_ld_from_head_script() {

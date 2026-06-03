@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for regression 380.
 
 //! Regression for #380: panic "byte index N is not a char boundary" when
 //! `include_document_structure = true` and an inline element contains a

@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 336 regressions.
 
 //! Regression tests for issue #336: content after a table is silently truncated when an
 //! unclosed `<p>` appears inside a `<td>` without a closing `</p>`.

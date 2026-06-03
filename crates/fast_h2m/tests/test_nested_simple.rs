@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for test nested simple.
 
 fn convert(
     html: &str,

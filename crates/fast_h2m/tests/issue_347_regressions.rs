@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 347 regressions.
 
 //! Regression tests for issue #347: inconsistent URL escaping between `<a href>` and `<img src>`.
 //!

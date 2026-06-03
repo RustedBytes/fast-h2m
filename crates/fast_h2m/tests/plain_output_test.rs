@@ -1,4 +1,5 @@
-#![allow(missing_docs)]
+//! Integration tests for plain output test.
+
 fn convert(
     html: &str,
     opts: Option<fast_h2m::ConversionOptions>,

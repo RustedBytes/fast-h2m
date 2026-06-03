@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 139 regressions.
 
 fn convert(
     html: &str,

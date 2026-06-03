@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for test script style stripping.
 
 use fast_h2m::ConversionOptions;
 

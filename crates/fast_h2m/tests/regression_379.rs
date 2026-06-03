@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for regression 379.
 
 //! Regression for #379: stack overflow on curl.se/changes.html.
 

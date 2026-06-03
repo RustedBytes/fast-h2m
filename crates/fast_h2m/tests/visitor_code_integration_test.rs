@@ -1,4 +1,5 @@
-#![allow(missing_docs)]
+//! Integration tests for visitor code integration test.
+
 #![cfg(feature = "visitor")]
 
 use fast_h2m::visitor::{HtmlVisitor, NodeContext, VisitResult, VisitorHandle};

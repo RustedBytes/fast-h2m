@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for br in inline test.
 
 fn convert(
     html: &str,

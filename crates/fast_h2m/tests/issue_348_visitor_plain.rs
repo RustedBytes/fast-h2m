@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 348 visitor plain.
 
 //! Regression test for issue #348: custom `HtmlVisitor` returning `VisitResult::Custom`
 //! from `visit_element_end` must be honoured when `OutputFormat::Plain`.

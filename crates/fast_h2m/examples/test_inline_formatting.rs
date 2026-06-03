@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Example program for test inline formatting.
 
 use fast_h2m::ConversionOptions;
 

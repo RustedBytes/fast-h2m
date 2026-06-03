@@ -26,8 +26,7 @@
     clippy::items_after_statements,
     clippy::use_self,
     clippy::missing_fields_in_debug,
-    clippy::semicolon_if_nothing_returned,
-    missing_docs
+    clippy::semicolon_if_nothing_returned
 )]
 
 //! A simple reference-counted DOM.

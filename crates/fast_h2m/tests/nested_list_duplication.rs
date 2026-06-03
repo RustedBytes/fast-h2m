@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for nested list duplication.
 
 //! Nested `ul > li > ul > li > ol` HTML must not produce duplicated content
 //! in the Markdown output or in the document structure collector.

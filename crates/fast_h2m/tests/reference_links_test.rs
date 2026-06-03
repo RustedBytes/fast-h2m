@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for reference links test.
 
 use fast_h2m::{ConversionOptions, LinkStyle};
 

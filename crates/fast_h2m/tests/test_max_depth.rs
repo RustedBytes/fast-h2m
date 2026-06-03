@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for test max depth.
 
 //! Tests for the `max_depth` recursion-safety option.
 

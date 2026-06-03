@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 391 xhtml self closing.
 
 //! Regression test for issue #391: XHTML-style self-closing tags like `<td/>`
 //! (no space before `/`) silently truncated tables and dropped the rest of the

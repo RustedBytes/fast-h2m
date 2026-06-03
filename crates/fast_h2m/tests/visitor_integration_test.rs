@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for visitor integration test.
 
 //! Integration tests for the visitor pattern
 //!

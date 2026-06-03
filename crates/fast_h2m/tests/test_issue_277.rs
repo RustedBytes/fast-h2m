@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for test issue 277.
 
 //! Regression test for issue #277: silent truncation on large HTML inputs.
 //!

@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 176 regressions.
 
 //! Regression tests for issue #176: Newlines not preserved with adjacent blockquotes
 

@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 145 regressions.
 
 use fast_h2m::ConversionOptions;
 

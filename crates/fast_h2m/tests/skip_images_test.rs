@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for skip images test.
 
 use fast_h2m::ConversionOptions;
 

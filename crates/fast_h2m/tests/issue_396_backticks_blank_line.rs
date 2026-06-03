@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for issue 396 backticks blank line.
 
 //! Regression test for issue #396: `CodeBlockStyle::Backticks` emitted a
 //! trailing `\n` inside the fence and omitted the blank line after the

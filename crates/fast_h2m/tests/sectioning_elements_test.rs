@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for sectioning elements test.
 
 fn convert(html: &str) -> String {
     fast_h2m::convert(html, None)

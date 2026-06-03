@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+//! Integration tests for preprocessing tests.
 
 fn convert(
     html: &str,
