@@ -55,7 +55,6 @@ impl TextDirection {
     /// assert_eq!(TextDirection::parse("invalid"), None);
     /// ```
     #[must_use]
-    
     pub fn parse(s: &str) -> Option<Self> {
         if s.eq_ignore_ascii_case("ltr") {
             return Some(Self::LeftToRight);
@@ -354,7 +353,6 @@ impl LinkMetadata {
     /// assert_eq!(LinkMetadata::classify_link("https://example.com"), LinkType::External);
     /// ```
     #[must_use]
-    
     pub fn classify_link(href: &str) -> LinkType {
         if href.starts_with('#') {
             LinkType::Anchor

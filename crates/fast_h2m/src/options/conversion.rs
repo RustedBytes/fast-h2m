@@ -466,7 +466,6 @@ impl ConversionOptions {
     /// assert_eq!(options.wrap_width, 100);
     /// ```
     #[must_use]
-    
     pub fn builder() -> ConversionOptionsBuilder {
         ConversionOptionsBuilder(Self::default())
     }
@@ -502,7 +501,6 @@ macro_rules! builder_setter_into {
         }
     };
 }
-
 
 impl ConversionOptionsBuilder {
     // Output control
@@ -724,7 +722,6 @@ pub struct ConversionOptionsUpdate {
 
 impl ConversionOptions {
     /// Apply a partial update to these conversion options.
-    
     pub fn apply_update(&mut self, update: ConversionOptionsUpdate) {
         macro_rules! apply {
             ($field:ident) => {
@@ -786,7 +783,6 @@ impl ConversionOptions {
 
     /// Create from a partial update, applying to defaults.
     #[must_use]
-    
     pub fn from_update(update: ConversionOptionsUpdate) -> Self {
         let mut options = Self::default();
         options.apply_update(update);

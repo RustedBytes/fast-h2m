@@ -31,7 +31,6 @@ impl PreprocessingPreset {
     /// Accepts "minimal", "aggressive", or defaults to Standard.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "minimal" => Self::Minimal,
@@ -130,7 +129,6 @@ impl PreprocessingOptions {
     ///
     /// * `update` - Partial preprocessing options update
     #[allow(clippy::needless_pass_by_value)]
-    
     pub const fn apply_update(&mut self, update: PreprocessingOptionsUpdate) {
         if let Some(enabled) = update.enabled {
             self.enabled = enabled;
@@ -159,7 +157,6 @@ impl PreprocessingOptions {
     ///
     /// New `PreprocessingOptions` with specified updates applied to defaults
     #[must_use]
-    
     pub fn from_update(update: PreprocessingOptionsUpdate) -> Self {
         let mut options = Self::default();
         options.apply_update(update);
