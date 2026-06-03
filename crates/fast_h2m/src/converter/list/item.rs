@@ -23,7 +23,6 @@ type DomContext = crate::converter::DomContext;
 ///
 /// Processes list item content with support for task lists (checkboxes),
 /// proper indentation, and block-level element detection.
-#[allow(clippy::too_many_arguments)]
 pub fn handle_li(
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag,
@@ -69,7 +68,6 @@ pub fn handle_li(
         }
     }
 
-    #[allow(clippy::trivially_copy_pass_by_ref)]
     fn find_checkbox<'a>(
         node_handle: &tl::NodeHandle,
         parser: &'a crate::tl_types::Parser<'a>,
@@ -118,7 +116,6 @@ pub fn handle_li(
         output.push(' ');
         output.push_str(if task_checked { "[x]" } else { "[ ]" });
 
-        #[allow(clippy::ref_option)]
         fn is_checkbox_node(
             node_handle: &tl::NodeHandle,
             checkbox: &Option<tl::NodeHandle>,
@@ -130,7 +127,6 @@ pub fn handle_li(
             }
         }
 
-        #[allow(clippy::ref_option)]
         fn contains_checkbox<'a>(
             node_handle: &tl::NodeHandle,
             parser: &'a crate::tl_types::Parser<'a>,
@@ -152,7 +148,6 @@ pub fn handle_li(
             false
         }
 
-        #[allow(clippy::too_many_arguments, clippy::ref_option)]
         fn render_li_content<'a>(
             node_handle: &tl::NodeHandle,
             parser: &'a crate::tl_types::Parser<'a>,

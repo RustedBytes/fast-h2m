@@ -120,7 +120,6 @@ pub fn attribute_matches_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&str]) -
 }
 
 /// Check if an attribute contains any of the given keywords (substring match).
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn attribute_contains_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&str]) -> bool {
     let Some(attr_value) = tag.attributes().get(attr) else {
         return false;
@@ -133,7 +132,6 @@ pub fn attribute_contains_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&str]) 
 }
 
 /// Check if a node has a semantic content ancestor (main, article, section).
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn has_semantic_content_ancestor(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,

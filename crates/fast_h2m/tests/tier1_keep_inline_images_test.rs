@@ -109,7 +109,7 @@ fn image_in_deeply_nested_heading_preserved() {
 
 // ── 6. Byte-equality with Tier-2 ─────────────────────────────────────────────
 
-#[cfg(feature = "testkit")]
+#[cfg(all(feature = "testkit", feature = "inline-images"))]
 mod tier_parity {
     use fast_h2m::{ConversionOptions, TierStrategy, convert};
 

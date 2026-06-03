@@ -219,7 +219,6 @@ fn collect_table_grid(
 }
 
 /// Process a single table row for grid collection.
-#[allow(clippy::too_many_arguments)]
 fn collect_grid_row(
     row_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,

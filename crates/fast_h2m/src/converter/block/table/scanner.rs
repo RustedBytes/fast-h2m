@@ -42,7 +42,6 @@ pub struct TableScan {
 /// * `node_handle` - Handle to the table element
 /// * `parser` - HTML parser instance
 /// * `dom_ctx` - DOM context for tag name resolution
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn scan_table(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,
@@ -63,7 +62,6 @@ pub fn scan_table(
 /// * `dom_ctx` - DOM context for tag name resolution
 /// * `is_root` - Whether this is the root table element
 /// * `scan` - Mutable scan results to accumulate
-#[allow(clippy::trivially_copy_pass_by_ref)]
 fn scan_table_node(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,

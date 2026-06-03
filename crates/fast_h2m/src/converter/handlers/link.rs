@@ -40,8 +40,6 @@ use crate::converter::utility::serialization::serialize_node;
 /// - Invoking visitor callbacks when the visitor feature is enabled
 /// - Collecting link metadata when the metadata feature is enabled
 /// - Generating appropriate markdown link output
-#[allow(clippy::too_many_arguments)]
-#[allow(clippy::too_many_lines)]
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 pub fn handle_link(
     node_handle: &tl::NodeHandle,

@@ -25,7 +25,6 @@ type DomContext = crate::converter::DomContext;
 ///
 /// Detects loose/tight list format, handles nested bullets,
 /// and processes list items with proper indentation.
-#[allow(clippy::too_many_arguments)]
 pub fn handle_ul(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,

@@ -29,8 +29,6 @@ use crate::converter::utility::serialization::serialize_node;
 /// - Handling backticks in content by using multiple delimiters
 /// - Invoking visitor callbacks when the visitor feature is enabled
 /// - Generating appropriate markdown output with proper escaping
-#[allow(clippy::too_many_arguments)]
-#[allow(clippy::too_many_lines)]
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 pub fn handle_code(
     node_handle: &tl::NodeHandle,
@@ -145,8 +143,6 @@ pub fn handle_code(
 /// - Supporting multiple code block styles (indented, backticks, tildes)
 /// - Invoking visitor callbacks when the visitor feature is enabled
 /// - Generating appropriate markdown output
-#[allow(clippy::too_many_arguments)]
-#[allow(clippy::too_many_lines)]
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 pub fn handle_pre(
     node_handle: &tl::NodeHandle,

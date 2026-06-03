@@ -446,7 +446,6 @@ fn walk(
 }
 
 /// Decide how to handle a given tag, creating nodes and recursing as needed.
-#[allow(clippy::too_many_lines)]
 fn process_tag(
     state: &mut BuilderState,
     tag_name: &str,

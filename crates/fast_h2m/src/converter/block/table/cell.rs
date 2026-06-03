@@ -19,7 +19,6 @@ const MAX_TABLE_COLS: usize = 1000;
 ///
 /// # Returns
 /// The colspan value (minimum 1, maximum MAX_TABLE_COLS)
-#[allow(clippy::trivially_copy_pass_by_ref)]
 #[inline]
 pub fn get_colspan(node_handle: &tl::NodeHandle, parser: &crate::tl_types::Parser) -> usize {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
@@ -42,7 +41,6 @@ pub fn get_colspan(node_handle: &tl::NodeHandle, parser: &crate::tl_types::Parse
 ///
 /// # Returns
 /// A tuple of (colspan, rowspan), both minimum 1 and maximum MAX_TABLE_COLS
-#[allow(clippy::trivially_copy_pass_by_ref)]
 #[inline]
 pub fn get_colspan_rowspan(
     node_handle: &tl::NodeHandle,
@@ -87,7 +85,6 @@ fn clamp_table_span(value: usize) -> usize {
 /// * `parser` - HTML parser instance
 /// * `dom_ctx` - DOM context for tag name resolution
 /// * `cells` - Mutable vector to populate with cell handles
-#[allow(clippy::trivially_copy_pass_by_ref)]
 #[inline]
 pub fn collect_table_cells(
     node_handle: &tl::NodeHandle,
@@ -120,7 +117,6 @@ pub fn collect_table_cells(
 /// * `options` - Conversion options
 /// * `ctx` - Conversion context
 /// * `dom_ctx` - DOM context
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn cell_text_content(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,
@@ -219,7 +215,6 @@ fn escape_cell_text(text: &str, options: &crate::options::ConversionOptions) -> 
 /// * `_tag_name` - Tag name (for consistency, not used)
 /// * `dom_ctx` - DOM context for content extraction
 /// * `col_width` - Optional target width for padding (None = no padding)
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn convert_table_cell(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,

@@ -1,9 +1,3 @@
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_sign_loss,
-    clippy::unused_self
-)]
-
 //! HTML preprocessing configuration options.
 //!
 //! This module provides configuration for document cleanup before conversion,
@@ -128,7 +122,6 @@ impl PreprocessingOptions {
     /// # Arguments
     ///
     /// * `update` - Partial preprocessing options update
-    #[allow(clippy::needless_pass_by_value)]
     pub const fn apply_update(&mut self, update: PreprocessingOptionsUpdate) {
         if let Some(enabled) = update.enabled {
             self.enabled = enabled;

@@ -1,5 +1,3 @@
-#![allow(clippy::significant_drop_tightening)]
-
 //! Test to reproduce issue #187: `visit_div` is not executed
 //!
 //! This test demonstrates that:

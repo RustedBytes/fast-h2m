@@ -123,7 +123,6 @@ impl Context {
     }
 
     /// Create a new conversion context from options and optional collectors.
-    #[allow(clippy::too_many_arguments)]
     #[cfg_attr(
         any(
             not(feature = "inline-images"),

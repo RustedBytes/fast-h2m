@@ -1,8 +1,3 @@
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_sign_loss,
-    clippy::unused_self
-)]
 //! Text processing utilities for Markdown conversion.
 
 use std::borrow::Cow;
@@ -20,7 +15,6 @@ use std::borrow::Cow;
 /// # Returns
 ///
 /// Escaped text
-#[allow(clippy::fn_params_excessive_bools)]
 #[inline]
 pub fn escape(
     text: &str,

@@ -286,7 +286,6 @@ pub fn is_list_item(
 ///
 /// This is used to determine proper spacing between list items.
 /// Returns true if the last processed item had block children.
-#[allow(clippy::too_many_arguments)]
 pub fn process_list_children(
     node_handle: tl::NodeHandle,
     parser: &crate::tl_types::Parser,

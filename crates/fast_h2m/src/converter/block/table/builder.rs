@@ -27,7 +27,6 @@ const MAX_TABLE_COLS: usize = 1000;
 ///
 /// # Returns
 /// Maximum column count (minimum 1, maximum MAX_TABLE_COLS)
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn table_total_columns(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,
@@ -86,7 +85,6 @@ pub fn table_total_columns(
 /// * `ctx` - Conversion context (visitor, etc)
 /// * `dom_ctx` - DOM context
 /// * `depth` - Nesting depth
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn handle_table(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,

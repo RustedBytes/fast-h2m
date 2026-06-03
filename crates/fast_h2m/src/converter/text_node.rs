@@ -28,7 +28,6 @@ type Context = crate::converter::Context;
 /// - Text escaping with configurable escape modes
 /// - Visitor callbacks (when feature enabled)
 /// - List item indentation
-#[allow(clippy::too_many_lines)]
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 pub fn process_text_node(
     raw: &str,

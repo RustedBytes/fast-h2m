@@ -28,8 +28,6 @@ use crate::converter::utility::serialization::serialize_node_to_html;
 /// - Processing citation URLs from cite attribute
 /// - Invoking visitor callbacks when the visitor feature is enabled
 /// - Adding proper spacing and blockquote prefix formatting
-#[allow(clippy::too_many_arguments)]
-#[allow(clippy::too_many_lines)]
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 pub fn handle_blockquote(
     node_handle: &tl::NodeHandle,

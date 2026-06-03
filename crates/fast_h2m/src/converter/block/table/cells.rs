@@ -30,7 +30,6 @@ pub type CellTextCache = HashMap<u32, String>;
 /// * `options` - Conversion options
 /// * `ctx` - Conversion context
 /// * `dom_ctx` - DOM context
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn append_layout_row(
     row_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,
@@ -101,7 +100,6 @@ pub fn append_layout_row(
 /// `rowspan_tracker` mirrors the tracker in `convert_table_row` so that spanned
 /// columns are skipped in the width pre-pass just as they are skipped in rendering.
 /// Pass a shared tracker across all row calls to correctly handle multi-row spans.
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn collect_row_cell_widths(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,
@@ -196,9 +194,7 @@ const MIN_SEPARATOR_DASHES: usize = 3;
 /// * `depth` - Nesting depth
 /// * `is_header` - Whether this is a header row
 /// * `col_widths` - Per-column max content widths for padding (empty = no padding)
-#[allow(clippy::too_many_arguments)]
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn convert_table_row(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,

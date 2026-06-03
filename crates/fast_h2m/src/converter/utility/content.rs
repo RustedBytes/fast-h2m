@@ -71,7 +71,6 @@ pub fn chomp_inline(text: &str) -> (&str, &str, &str) {
 }
 
 /// Get the text content of a node and its children.
-#[allow(clippy::trivially_copy_pass_by_ref)]
 #[inline]
 pub fn get_text_content(
     node_handle: &tl::NodeHandle,
@@ -82,7 +81,6 @@ pub fn get_text_content(
 }
 
 /// Collect inline text for link labels, skipping block-level descendants.
-#[allow(clippy::match_wildcard_for_single_variants)]
 pub fn collect_link_label_text(
     children: &[tl::NodeHandle],
     parser: &crate::tl_types::Parser,
@@ -135,7 +133,6 @@ pub fn collect_link_label_text(
 }
 
 /// Normalize a link label by collapsing newlines and normalizing whitespace.
-#[allow(clippy::trivially_copy_pass_by_ref)]
 #[inline]
 pub fn normalize_link_label(label: &str) -> String {
     let mut needs_collapse = false;

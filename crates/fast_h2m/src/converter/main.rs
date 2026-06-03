@@ -104,7 +104,6 @@ where
     ),
     allow(unused_variables)
 )]
-#[allow(clippy::too_many_lines)]
 pub fn convert_html_impl(
     html: &str,
     options: &ConversionOptions,
@@ -367,9 +366,6 @@ fn finish_structure_collector(
 // is_inline_element available from utility::content
 
 /// Recursively walk DOM nodes and convert to Markdown.
-#[allow(clippy::only_used_in_recursion)]
-#[allow(clippy::trivially_copy_pass_by_ref)]
-#[allow(clippy::cast_possible_truncation)]
 pub fn walk_node(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,

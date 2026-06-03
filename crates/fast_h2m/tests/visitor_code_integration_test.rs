@@ -1,5 +1,4 @@
 #![allow(missing_docs)]
-#![allow(clippy::significant_drop_tightening)]
 #![cfg(feature = "visitor")]
 
 use fast_h2m::visitor::{HtmlVisitor, NodeContext, VisitResult, VisitorHandle};

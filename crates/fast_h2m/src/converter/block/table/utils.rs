@@ -17,7 +17,6 @@ pub(super) use crate::converter::utility::content::normalized_tag_name;
 ///
 /// # Returns
 /// True if node has the specified tag name
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub(super) fn is_tag_name(
     node_handle: &tl::NodeHandle,
     parser: &crate::tl_types::Parser,

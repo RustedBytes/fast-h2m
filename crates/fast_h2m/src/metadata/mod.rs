@@ -1,8 +1,3 @@
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_sign_loss,
-    clippy::unused_self
-)]
 //! Metadata extraction for HTML to Markdown conversion.
 //!
 //! This module provides comprehensive, type-safe metadata extraction during fast_h2m

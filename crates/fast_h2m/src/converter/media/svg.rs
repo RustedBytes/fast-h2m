@@ -21,9 +21,6 @@ type InlineCollectorHandle = std::rc::Rc<std::cell::RefCell<InlineImageCollector
 /// - Base64 encoding for data URI
 /// - Metadata extraction (aria-label, title, dimensions)
 #[cfg(feature = "inline-images")]
-#[allow(clippy::trivially_copy_pass_by_ref)]
-#[allow(clippy::needless_pass_by_value)]
-#[allow(clippy::option_if_let_else)]
 pub fn handle_inline_svg(
     collector_ref: &InlineCollectorHandle,
     node_handle: &NodeHandle,
@@ -96,7 +93,6 @@ pub fn handle_inline_svg(
 ///
 /// Attributes are sorted by name to guarantee deterministic output across
 /// process invocations (the underlying parser stores them in a `HashMap`).
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn serialize_element(node_handle: &NodeHandle, parser: &Parser) -> String {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let tag_name = normalized_tag_name(tag.name().as_utf8_str());
@@ -137,7 +133,6 @@ pub fn serialize_element(node_handle: &NodeHandle, parser: &Parser) -> String {
 }
 
 /// Serialize a node to HTML string.
-#[allow(clippy::trivially_copy_pass_by_ref)]
 pub fn serialize_node(node_handle: &NodeHandle, parser: &Parser) -> String {
     if let Some(node) = node_handle.get(parser) {
         match node {
@@ -165,7 +160,6 @@ fn non_empty_trimmed(value: &str) -> Option<String> {
 ///
 /// Extracts title from child elements, handles inline image collection,
 /// and outputs either the title text (in inline mode) or a base64-encoded image.
-#[allow(clippy::too_many_arguments)]
 pub fn handle_svg(
     node_handle: &NodeHandle,
     tag: &tl::HTMLTag,
@@ -243,7 +237,6 @@ pub fn handle_svg(
 /// Handle MathML element conversion to Markdown.
 ///
 /// Serializes MathML to HTML comment and outputs text content with escaping.
-#[allow(clippy::too_many_arguments)]
 pub fn handle_math(
     node_handle: &NodeHandle,
     tag: &tl::HTMLTag,

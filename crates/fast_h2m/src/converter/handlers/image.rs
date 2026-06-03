@@ -34,8 +34,6 @@ type ImageMetadataPayload = (BTreeMap<String, String>, Option<u32>, Option<u32>)
 /// - Handling inline data URIs when the inline-images feature is enabled
 /// - Invoking visitor callbacks when the visitor feature is enabled
 /// - Generating appropriate markdown output
-#[allow(clippy::too_many_arguments)]
-#[allow(clippy::too_many_lines)]
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 pub fn handle_img(
     node_handle: &tl::NodeHandle,
@@ -70,7 +68,6 @@ pub fn handle_img(
 
     // Collect metadata payload if metadata feature is enabled
     #[cfg(feature = "metadata")]
-    #[allow(clippy::useless_let_if_seq)]
     let mut metadata_payload: Option<ImageMetadataPayload> = None;
     #[cfg(feature = "metadata")]
     if ctx.metadata_wants_images {

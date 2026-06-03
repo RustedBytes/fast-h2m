@@ -17,8 +17,6 @@ type InlineCollectorHandle = std::rc::Rc<std::cell::RefCell<InlineImageCollector
 /// - Metadata extraction (width, height, alt text)
 /// - Format detection (PNG, JPEG, GIF, BMP, WebP, SVG)
 #[cfg(feature = "inline-images")]
-#[allow(clippy::items_after_statements)]
-#[allow(clippy::manual_let_else)]
 pub fn handle_inline_data_image(
     collector_ref: &InlineCollectorHandle,
     src: &str,

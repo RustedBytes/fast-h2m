@@ -34,7 +34,6 @@ pub enum Utf16Encoding {
 ///
 /// Returns `ConversionError::InvalidInput` if the input is detected as binary,
 /// compressed, or contains too many control characters.
-#[allow(clippy::cast_precision_loss)]
 pub fn validate_input(html: &str) -> Result<()> {
     let bytes = html.as_bytes();
     if bytes.is_empty() {
@@ -97,7 +96,6 @@ fn detect_binary_magic(bytes: &[u8]) -> Option<&'static str> {
     None
 }
 
-#[allow(clippy::cast_precision_loss)]
 pub fn detect_utf16_encoding(bytes: &[u8]) -> Option<Utf16Encoding> {
     if bytes.len() >= 2 {
         if bytes.starts_with(b"\xFF\xFE") {

@@ -6,7 +6,6 @@
 use crate::converter::utility::content::normalized_tag_name;
 
 /// Serialize an element to HTML string (for SVG and Math elements).
-#[allow(clippy::trivially_copy_pass_by_ref)]
 #[allow(dead_code)] // used with visitor feature
 pub fn serialize_element(node_handle: &tl::NodeHandle, parser: &crate::tl_types::Parser) -> String {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
@@ -46,7 +45,6 @@ pub fn serialize_element(node_handle: &tl::NodeHandle, parser: &crate::tl_types:
 }
 
 /// Serialize a node to HTML string.
-#[allow(clippy::trivially_copy_pass_by_ref)]
 #[allow(dead_code)] // used with visitor feature
 pub fn serialize_node(node_handle: &tl::NodeHandle, parser: &crate::tl_types::Parser) -> String {
     if let Some(node) = node_handle.get(parser) {
@@ -68,7 +66,6 @@ pub fn serialize_tag_to_html(handle: &tl::NodeHandle, parser: &crate::tl_types::
 }
 
 /// Recursively serialize a node to HTML.
-#[allow(clippy::trivially_copy_pass_by_ref)]
 #[allow(dead_code)] // used with visitor feature
 pub fn serialize_node_to_html(
     handle: &tl::NodeHandle,

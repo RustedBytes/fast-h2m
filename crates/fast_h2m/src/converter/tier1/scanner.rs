@@ -445,7 +445,6 @@ fn open_list_item(state: &mut Tier1State) {
         let index = start.saturating_sub(1) + counter;
         state.output.push_str(indent);
         // measured: write! is slower on this workload (Stage 5c)
-        #[allow(clippy::format_push_string)]
         state.output.push_str(&format!("{index}. "));
     } else {
         state.output.push_str(indent);
@@ -573,11 +572,9 @@ fn emit_void(
                 if let Some(title_bytes) = title {
                     let title_str = decode_attr(title_bytes)?;
                     // measured: write! is slower on this workload (Stage 5c)
-                    #[allow(clippy::format_push_string)]
                     dest.push_str(&format!("![{alt}]({src} \"{title_str}\")"));
                 } else {
                     // measured: write! is slower on this workload (Stage 5c)
-                    #[allow(clippy::format_push_string)]
                     dest.push_str(&format!("![{alt}]({src})"));
                 }
             } else {
@@ -901,11 +898,9 @@ fn close_link(state: &mut Tier1State, frame: &OpenTag) {
     if let Some(href) = &frame.link_href {
         if let Some(title) = &frame.link_title {
             // measured: write! is slower on this workload (Stage 5c)
-            #[allow(clippy::format_push_string)]
             dest.push_str(&format!("]({href} \"{title}\")"));
         } else {
             // measured: write! is slower on this workload (Stage 5c)
-            #[allow(clippy::format_push_string)]
             dest.push_str(&format!("]({href})"));
         }
     } else {

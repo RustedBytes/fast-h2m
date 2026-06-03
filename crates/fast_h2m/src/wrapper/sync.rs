@@ -14,7 +14,6 @@ use crate::options::ConversionOptions;
 /// - Preserves Markdown formatting (links, bold, etc.)
 /// - Only wraps paragraph content, not headers, lists, code blocks, etc.
 #[must_use]
-#[allow(clippy::too_many_lines)]
 pub fn wrap_markdown(markdown: &str, options: &ConversionOptions) -> String {
     if !options.wrap {
         return markdown.to_string();

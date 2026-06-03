@@ -86,7 +86,6 @@ mod rcdom;
 pub(crate) mod text;
 mod validation;
 #[cfg(feature = "visitor")]
-#[allow(clippy::ref_option)]
 pub(crate) mod visitor_helpers;
 pub(crate) mod wrapper;
 
