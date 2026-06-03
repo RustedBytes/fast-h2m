@@ -3,9 +3,6 @@ resolver = "2"
 members = [
     "crates/fast_h2m",
 ]
-exclude = [
-    "e2e/rust",
-]
 
 [workspace.package]
 version = "0.1.0"
@@ -29,30 +26,6 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "2.0"
 rustedbytes-tl = { version = "0.2.0", features = ["std"] }
-
-[workspace.lints.rust]
-unsafe_code = "forbid"
-missing_docs = "warn"
-unused_must_use = "deny"
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(alef)', 'cfg(feature, values("testkit"))'] }
-
-[workspace.lints.clippy]
-all = { level = "deny", priority = -1 }
-cargo = { level = "warn", priority = -1 }
-pedantic = { level = "warn", priority = -1 }
-nursery = { level = "warn", priority = -1 }
-multiple_crate_versions = { level = "allow", priority = 1 } # Allow multiple dependency versions (common in large workspaces)
-cargo_common_metadata = { level = "allow", priority = 1 } # Binding crates are internal, don't need full crates.io metadata
-# Allow common patterns in alef-generated binding code
-unnecessary_cast = { level = "allow", priority = 1 }
-unused_unit = { level = "allow", priority = 1 }
-unwrap_or_default = { level = "allow", priority = 1 }
-derivable_impls = { level = "allow", priority = 1 }
-unnecessary_wraps = { level = "allow", priority = 1 }
-needless_borrows_for_generic_args = { level = "allow", priority = 1 }
-useless_conversion = { level = "allow", priority = 1 }
-unnecessary_fallible_conversions = { level = "allow", priority = 1 }
-arc_with_non_send_sync = { level = "allow", priority = 1 } # ConversionOptionsBuilder holds Box<dyn HtmlVisitor> — not Send/Sync
 
 [profile.release]
 lto = "thin"

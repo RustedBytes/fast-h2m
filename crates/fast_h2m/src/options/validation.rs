@@ -23,7 +23,6 @@ impl HeadingStyle {
     /// Accepts "atx", "atxclosed", or defaults to Underlined.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    #[cfg_attr(alef, alef(skip))]
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "atx" => Self::Atx,
@@ -51,7 +50,6 @@ impl ListIndentType {
     /// Accepts "tabs" or defaults to Spaces.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    #[cfg_attr(alef, alef(skip))]
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "tabs" => Self::Tabs,
@@ -78,7 +76,6 @@ impl WhitespaceMode {
     /// Accepts "strict" or defaults to Normalized.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    #[cfg_attr(alef, alef(skip))]
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "strict" => Self::Strict,
@@ -105,7 +102,6 @@ impl NewlineStyle {
     /// Accepts "backslash" or defaults to Spaces.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    #[cfg_attr(alef, alef(skip))]
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "backslash" => Self::Backslash,
@@ -134,7 +130,6 @@ impl CodeBlockStyle {
     /// Accepts "backticks", "tildes", or defaults to Indented.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    #[cfg_attr(alef, alef(skip))]
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "backticks" => Self::Backticks,
@@ -166,7 +161,6 @@ impl HighlightStyle {
     /// Accepts "doubleequal", "html", "bold", "none", or defaults to None.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    #[cfg_attr(alef, alef(skip))]
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "doubleequal" => Self::DoubleEqual,
@@ -197,7 +191,6 @@ impl LinkStyle {
     /// Accepts "reference" or defaults to Inline.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    #[cfg_attr(alef, alef(skip))]
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "reference" => Self::Reference,
@@ -233,7 +226,6 @@ impl UrlEscapeStyle {
     /// Accepts "percent" or defaults to Angle.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    #[cfg_attr(alef, alef(skip))]
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "percent" => Self::Percent,
@@ -262,7 +254,6 @@ impl OutputFormat {
     /// Accepts "djot" or defaults to Markdown.
     /// Input is normalized (lowercased, alphanumeric only).
     #[must_use]
-    #[cfg_attr(alef, alef(skip))]
     pub fn parse(value: &str) -> Self {
         match normalize_token(value).as_str() {
             "djot" => Self::Djot,

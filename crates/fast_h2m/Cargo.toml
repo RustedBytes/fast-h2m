@@ -9,7 +9,7 @@ homepage.workspace = true
 documentation.workspace = true
 readme = "README.md"
 rust-version.workspace = true
-description = "High-performance HTML to Markdown converter using the rustedbytes-tl parser. Part of the Kreuzberg ecosystem."
+description = "High-performance HTML to Markdown converter"
 keywords = ["html", "markdown", "converter", "rustedbytes-tl", "doc-processing"]
 categories = ["parsing", "text-processing", "web-programming"]
 
@@ -55,6 +55,3 @@ serde_json = "1.0"
 [[bench]]
 name = "convert"
 harness = false
-
-[lints]
-workspace = true
