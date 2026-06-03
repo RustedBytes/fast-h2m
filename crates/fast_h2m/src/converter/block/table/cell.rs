@@ -242,7 +242,7 @@ pub fn convert_table_cell(
     let colspan = get_colspan(node_handle, parser);
 
     output.push(' ');
-    output.push_str(&text);
+    output.push_str(text);
     if let Some(width) = col_width {
         let text_len = text.chars().count();
         if text_len < width {

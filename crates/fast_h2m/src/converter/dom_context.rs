@@ -12,9 +12,9 @@ use crate::converter::utility::content::{is_block_level_name, normalized_tag_nam
 use crate::text;
 
 #[derive(Clone, Copy)]
-pub(crate) struct ChildRange {
-    pub(crate) start: u32,
-    pub(crate) len: u32,
+pub struct ChildRange {
+    pub start: u32,
+    pub len: u32,
 }
 
 pub enum TagName {
