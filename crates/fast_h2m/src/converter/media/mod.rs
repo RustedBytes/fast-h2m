@@ -33,6 +33,7 @@ pub use image::handle_inline_data_image;
 /// | `video` | embedded | Video elements |
 /// | `audio` | embedded | Audio elements |
 /// | `picture` | embedded | Responsive image containers |
+/// | `graphic` | graphic | Publishing-format graphic elements |
 /// | `svg` | svg | SVG image elements |
 /// | `math` | svg | MathML elements |
 ///
@@ -90,6 +91,19 @@ pub fn dispatch_media_handler(
         }
         "picture" => {
             embedded::handle_picture(
+                node_handle,
+                tag,
+                parser,
+                output,
+                options,
+                ctx,
+                depth,
+                dom_ctx,
+            );
+            true
+        }
+        "graphic" => {
+            graphic::handle_graphic(
                 node_handle,
                 tag,
                 parser,
