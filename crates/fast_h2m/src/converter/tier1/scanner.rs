@@ -317,25 +317,11 @@ pub fn scan(html: &str, options: &ConversionOptions) -> Result<String, BailReaso
     Ok(state.output)
 }
 
-#[cfg(all(feature = "simd", nightly))]
-#[inline]
-fn find_next_lt(bytes: &[u8], start: usize) -> Option<usize> {
-    crate::simd_scan::find_byte(&bytes[start..], b'<').map(|pos| start + pos)
-}
-
-#[cfg(not(all(feature = "simd", nightly)))]
 #[inline]
 fn find_next_lt(bytes: &[u8], start: usize) -> Option<usize> {
     memchr::memchr(b'<', &bytes[start..]).map(|pos| start + pos)
 }
 
-#[cfg(all(feature = "simd", nightly))]
-#[inline]
-fn contains_byte(bytes: &[u8], needle: u8) -> bool {
-    crate::simd_scan::find_byte(bytes, needle).is_some()
-}
-
-#[cfg(not(all(feature = "simd", nightly)))]
 #[inline]
 fn contains_byte(bytes: &[u8], needle: u8) -> bool {
     bytes.contains(&needle)
@@ -353,13 +339,6 @@ fn contains_triple_newline(bytes: &[u8]) -> bool {
     false
 }
 
-#[cfg(all(feature = "simd", nightly))]
-#[inline]
-fn find_newline(bytes: &[u8], start: usize) -> Option<usize> {
-    crate::simd_scan::find_byte(&bytes[start..], b'\n').map(|pos| start + pos)
-}
-
-#[cfg(not(all(feature = "simd", nightly)))]
 #[inline]
 fn find_newline(bytes: &[u8], start: usize) -> Option<usize> {
     memchr::memchr(b'\n', &bytes[start..]).map(|pos| start + pos)

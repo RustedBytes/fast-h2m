@@ -365,25 +365,11 @@ fn find_closing_tag(bytes: &[u8], mut idx: usize, tag: &[u8]) -> Option<usize> {
     None
 }
 
-#[cfg(all(feature = "simd", nightly))]
-#[inline]
-fn find_quote_or_close(bytes: &[u8], start: usize) -> Option<usize> {
-    crate::simd_scan::find_any3(&bytes[start..], b'"', b'\'', b'>').map(|pos| start + pos)
-}
-
-#[cfg(not(all(feature = "simd", nightly)))]
 #[inline]
 fn find_quote_or_close(bytes: &[u8], start: usize) -> Option<usize> {
     memchr::memchr3(b'"', b'\'', b'>', &bytes[start..]).map(|pos| start + pos)
 }
 
-#[cfg(all(feature = "simd", nightly))]
-#[inline]
-fn find_lt(bytes: &[u8], start: usize) -> Option<usize> {
-    crate::simd_scan::find_byte(&bytes[start..], b'<').map(|pos| start + pos)
-}
-
-#[cfg(not(all(feature = "simd", nightly)))]
 #[inline]
 fn find_lt(bytes: &[u8], start: usize) -> Option<usize> {
     memchr(b'<', &bytes[start..]).map(|pos| start + pos)

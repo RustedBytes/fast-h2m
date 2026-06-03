@@ -31,29 +31,16 @@ pub fn escape(
         return Cow::Borrowed(text);
     }
 
-    if escape_ascii && !contains_ascii_punctuation(text.as_bytes()) {
-        return Cow::Borrowed(text);
-    }
-
-    if !escape_ascii && escape_misc && !escape_asterisks && !escape_underscores {
-        let needs_misc = contains_misc_markdown(text.as_bytes());
-        let needs_numbered = contains_numbered_marker_punctuation(text.as_bytes());
-        if !needs_misc && !needs_numbered {
-            return Cow::Borrowed(text);
-        }
-    }
-
     let mut result: Cow<'_, str> = Cow::Borrowed(text);
 
     if escape_ascii {
-        return escape_chars(text, is_ascii_punctuation).map_or(Cow::Borrowed(text), Cow::Owned);
+        return find_ascii_punctuation(text.as_bytes()).map_or(Cow::Borrowed(text), |first| {
+            Cow::Owned(escape_chars_from(text, first, is_ascii_punctuation))
+        });
     }
 
     if escape_misc {
-        if let Some(escaped) = escape_chars(result.as_ref(), is_misc_markdown_char) {
-            result = Cow::Owned(escaped);
-        }
-        if let Some(escaped) = escape_numbered_list_markers(result.as_ref()) {
+        if let Some(escaped) = escape_misc_and_numbered_markers(result.as_ref()) {
             result = Cow::Owned(escaped);
         }
     }
@@ -69,88 +56,45 @@ pub fn escape(
     result
 }
 
-#[cfg(all(feature = "simd", nightly))]
 #[inline]
-fn contains_ascii_punctuation(bytes: &[u8]) -> bool {
-    crate::simd_scan::contains_ascii_punctuation(bytes)
+fn find_ascii_punctuation(bytes: &[u8]) -> Option<usize> {
+    bytes.iter().position(|byte| byte.is_ascii_punctuation())
 }
 
-#[cfg(not(all(feature = "simd", nightly)))]
-#[inline]
-fn contains_ascii_punctuation(bytes: &[u8]) -> bool {
-    bytes.iter().any(|byte| byte.is_ascii_punctuation())
-}
-
-#[cfg(all(feature = "simd", nightly))]
-#[inline]
-fn contains_misc_markdown(bytes: &[u8]) -> bool {
-    crate::simd_scan::contains_misc_markdown(bytes)
-}
-
-#[cfg(not(all(feature = "simd", nightly)))]
-#[inline]
-fn contains_misc_markdown(bytes: &[u8]) -> bool {
-    bytes.iter().any(|b| {
-        matches!(
-            b,
-            b'\\'
-                | b'&'
-                | b'<'
-                | b'`'
-                | b'['
-                | b']'
-                | b'>'
-                | b'~'
-                | b'#'
-                | b'='
-                | b'+'
-                | b'|'
-                | b'-'
-        )
-    })
-}
-
-#[cfg(all(feature = "simd", nightly))]
-#[inline]
-fn contains_numbered_marker_punctuation(bytes: &[u8]) -> bool {
-    crate::simd_scan::find_any2(bytes, b'.', b')').is_some()
-}
-
-#[cfg(not(all(feature = "simd", nightly)))]
-#[inline]
-fn contains_numbered_marker_punctuation(bytes: &[u8]) -> bool {
-    bytes.iter().any(|b| matches!(b, b'.' | b')'))
-}
-
-fn escape_chars(text: &str, should_escape: fn(char) -> bool) -> Option<String> {
-    if !text.chars().any(should_escape) {
-        return None;
-    }
-
-    let mut escaped = String::with_capacity(text.len());
-    for ch in text.chars() {
+fn escape_chars_from(text: &str, first_escape: usize, should_escape: fn(char) -> bool) -> String {
+    let mut escaped = String::with_capacity(text.len() + 1);
+    escaped.push_str(&text[..first_escape]);
+    for ch in text[first_escape..].chars() {
         if should_escape(ch) {
             escaped.push('\\');
         }
         escaped.push(ch);
     }
-    Some(escaped)
+    escaped
 }
 
-fn escape_numbered_list_markers(text: &str) -> Option<String> {
+fn escape_misc_and_numbered_markers(text: &str) -> Option<String> {
+    let mut first_escape = None;
     let mut prev_was_digit = false;
-    if !text.chars().any(|ch| {
-        let should_escape = prev_was_digit && matches!(ch, '.' | ')');
+
+    for (idx, ch) in text.char_indices() {
+        if is_misc_markdown_char(ch) || (prev_was_digit && matches!(ch, '.' | ')')) {
+            first_escape = Some(idx);
+            break;
+        }
         prev_was_digit = ch.is_ascii_digit();
-        should_escape
-    }) {
-        return None;
     }
 
-    let mut escaped = String::with_capacity(text.len());
-    let mut prev_was_digit = false;
-    for ch in text.chars() {
-        if prev_was_digit && matches!(ch, '.' | ')') {
+    let first_escape = first_escape?;
+    let mut escaped = String::with_capacity(text.len() + 1);
+    escaped.push_str(&text[..first_escape]);
+
+    prev_was_digit = text[..first_escape]
+        .chars()
+        .next_back()
+        .is_some_and(|ch| ch.is_ascii_digit());
+    for ch in text[first_escape..].chars() {
+        if is_misc_markdown_char(ch) || (prev_was_digit && matches!(ch, '.' | ')')) {
             escaped.push('\\');
         }
         escaped.push(ch);

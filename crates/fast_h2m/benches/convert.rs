@@ -178,6 +178,67 @@ fn bench_public_focused_cases(c: &mut Criterion) {
     });
 }
 
+fn make_escape_threshold_text(len: usize, marker: &str) -> String {
+    match marker {
+        "no_marker" => "a".repeat(len),
+        "first_marker" => {
+            if len == 0 {
+                String::new()
+            } else {
+                let mut text = String::with_capacity(len);
+                text.push('*');
+                text.push_str(&"a".repeat(len - 1));
+                text
+            }
+        }
+        "late_marker" => {
+            if len == 0 {
+                String::new()
+            } else {
+                let mut text = "a".repeat(len);
+                text.replace_range(len - 1..len, "*");
+                text
+            }
+        }
+        "many_markers" => (0..len)
+            .map(|idx| if idx % 4 == 0 { '*' } else { 'a' })
+            .collect(),
+        _ => unreachable!("unknown escape threshold marker case"),
+    }
+}
+
+fn bench_escape_threshold_cases(c: &mut Criterion) {
+    let escape_options = ConversionOptions {
+        escape_ascii: true,
+        ..ConversionOptions::default()
+    };
+    let cases: Vec<_> = [0usize, 8, 24, 64, 128, 512, 4096]
+        .into_iter()
+        .flat_map(|len| {
+            ["no_marker", "first_marker", "late_marker", "many_markers"]
+                .into_iter()
+                .map(move |marker| (len, marker, make_escape_threshold_text(len, marker)))
+        })
+        .collect();
+
+    let mut group = c.benchmark_group("text_escape_thresholds_via_convert");
+    for (len, marker, text) in &cases {
+        group.throughput(Throughput::Bytes(text.len() as u64));
+        group.bench_with_input(
+            BenchmarkId::new(*marker, len),
+            &(text.as_str(), &escape_options),
+            |b, (text, options)| {
+                b.iter(|| {
+                    let result =
+                        convert(black_box(*text), Some((*options).clone())).expect("convert");
+                    black_box(result);
+                });
+            },
+        );
+    }
+    group.finish();
+}
+
 #[cfg(feature = "testkit")]
 fn bench_internal_focused_cases(c: &mut Criterion) {
     let prescan_cases = [
@@ -234,8 +295,14 @@ criterion_group!(
     benches,
     bench_convert_cases,
     bench_public_focused_cases,
+    bench_escape_threshold_cases,
     bench_internal_focused_cases
 );
 #[cfg(not(feature = "testkit"))]
-criterion_group!(benches, bench_convert_cases, bench_public_focused_cases);
+criterion_group!(
+    benches,
+    bench_convert_cases,
+    bench_public_focused_cases,
+    bench_escape_threshold_cases
+);
 criterion_main!(benches);
