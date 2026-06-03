@@ -3,6 +3,8 @@
 use std::hint::black_box;
 
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
+#[cfg(feature = "testkit")]
+use fast_h2m::testkit::{prescan, tier1};
 use fast_h2m::{ConversionOptions, TierStrategy, convert};
 
 const SIMPLE_HTML: &str = r#"
@@ -82,6 +84,18 @@ const HACKER_NEWS_FIXTURE: &str =
 const WIKIPEDIA_SMALL_FIXTURE: &str =
     include_str!("../../../fixtures/test_documents/html/wikipedia/small_html.html");
 
+#[cfg(feature = "testkit")]
+const WIKIPEDIA_MEDIUM_FIXTURE: &str =
+    include_str!("../../../fixtures/test_documents/html/wikipedia/medium_python.html");
+
+const ESCAPE_FREE_TEXT: &str =
+    "This paragraph has ordinary words and spaces with no markdown punctuation to escape.";
+
+const ESCAPE_HEAVY_TEXT: &str =
+    r##"Escape ! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~ repeatedly."##;
+
+const BINARY_LIKE_INPUT: &str = "\0\0\0\0\0\0\0\0\0\0\0\0\0binary";
+
 fn options_for(strategy: TierStrategy) -> ConversionOptions {
     ConversionOptions {
         tier_strategy: strategy,
@@ -131,5 +145,97 @@ fn bench_convert_cases(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, bench_convert_cases);
+fn bench_public_focused_cases(c: &mut Criterion) {
+    let mut escape_group = c.benchmark_group("text_escape_via_convert");
+    let escape_options = ConversionOptions {
+        escape_ascii: true,
+        ..ConversionOptions::default()
+    };
+    for (case_name, text) in [
+        ("escape_free", ESCAPE_FREE_TEXT),
+        ("escape_heavy", ESCAPE_HEAVY_TEXT),
+    ] {
+        escape_group.throughput(Throughput::Bytes(text.len() as u64));
+        escape_group.bench_with_input(
+            BenchmarkId::new("plain_text", case_name),
+            &(text, &escape_options),
+            |b, (text, options)| {
+                b.iter(|| {
+                    let result =
+                        convert(black_box(*text), Some((*options).clone())).expect("convert");
+                    black_box(result);
+                });
+            },
+        );
+    }
+    escape_group.finish();
+
+    c.bench_function("validation/binary_reject", |b| {
+        b.iter(|| {
+            let result = convert(black_box(BINARY_LIKE_INPUT), None);
+            let _ = black_box(result);
+        });
+    });
+}
+
+#[cfg(feature = "testkit")]
+fn bench_internal_focused_cases(c: &mut Criterion) {
+    let prescan_cases = [
+        ("simple_html", SIMPLE_HTML),
+        ("wikipedia_small", WIKIPEDIA_SMALL_FIXTURE),
+        ("wikipedia_medium", WIKIPEDIA_MEDIUM_FIXTURE),
+    ];
+    let mut prescan_group = c.benchmark_group("prescan");
+    for (case_name, html) in prescan_cases {
+        prescan_group.throughput(Throughput::Bytes(html.len() as u64));
+        prescan_group.bench_with_input(BenchmarkId::from_parameter(case_name), html, |b, html| {
+            b.iter(|| {
+                let result = prescan::run(black_box(html));
+                black_box(result);
+            });
+        });
+    }
+    prescan_group.finish();
+
+    let tier1_cases = [
+        ("simple_html", SIMPLE_HTML),
+        ("table_html", TABLE_HTML),
+        ("entity_heavy_html", ENTITY_HEAVY_HTML),
+        ("wikipedia_small", WIKIPEDIA_SMALL_FIXTURE),
+    ];
+    let options = ConversionOptions {
+        tier_strategy: TierStrategy::Tier1,
+        ..ConversionOptions::default()
+    };
+    let mut tier1_group = c.benchmark_group("tier1_scanner");
+    for (case_name, html) in tier1_cases {
+        let (cleaned, report) = prescan::run(html);
+        tier1_group.throughput(Throughput::Bytes(html.len() as u64));
+        tier1_group.bench_with_input(
+            BenchmarkId::from_parameter(case_name),
+            &(cleaned.into_owned(), report.clone(), options.clone()),
+            |b, (cleaned, report, options)| {
+                b.iter(|| {
+                    let result = tier1::run(
+                        black_box(cleaned.as_str()),
+                        black_box(report),
+                        black_box(options),
+                    );
+                    let _ = black_box(result);
+                });
+            },
+        );
+    }
+    tier1_group.finish();
+}
+
+#[cfg(feature = "testkit")]
+criterion_group!(
+    benches,
+    bench_convert_cases,
+    bench_public_focused_cases,
+    bench_internal_focused_cases
+);
+#[cfg(not(feature = "testkit"))]
+criterion_group!(benches, bench_convert_cases, bench_public_focused_cases);
 criterion_main!(benches);

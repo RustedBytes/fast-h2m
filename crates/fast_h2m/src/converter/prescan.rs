@@ -316,6 +316,8 @@ fn find_tag_end(bytes: &[u8], mut idx: usize) -> Option<usize> {
     let len = bytes.len();
     let mut in_quote: Option<u8> = None;
     while idx < len {
+        let next = find_quote_or_close(bytes, idx)?;
+        idx = next;
         match bytes[idx] {
             b'"' | b'\'' => {
                 if let Some(current) = in_quote {
@@ -338,25 +340,51 @@ fn find_closing_tag(bytes: &[u8], mut idx: usize, tag: &[u8]) -> Option<usize> {
     let len = bytes.len();
     let mut depth = 1usize;
     while idx < len {
-        if bytes[idx] == b'<' {
-            if matches_tag_start(bytes, idx + 1, tag) {
-                if let Some(next) = find_tag_end(bytes, idx + 1 + tag.len()) {
-                    depth += 1;
-                    idx = next;
-                    continue;
-                }
-            } else if matches_end_tag_start(bytes, idx + 1, tag)
-                && let Some(close) = find_tag_end(bytes, idx + 2 + tag.len())
-            {
-                depth -= 1;
-                if depth == 0 {
-                    return Some(close);
-                }
-                idx = close;
+        let Some(next_lt) = find_lt(bytes, idx) else {
+            break;
+        };
+        idx = next_lt;
+        if matches_tag_start(bytes, idx + 1, tag) {
+            if let Some(next) = find_tag_end(bytes, idx + 1 + tag.len()) {
+                depth += 1;
+                idx = next;
                 continue;
             }
+        } else if matches_end_tag_start(bytes, idx + 1, tag)
+            && let Some(close) = find_tag_end(bytes, idx + 2 + tag.len())
+        {
+            depth -= 1;
+            if depth == 0 {
+                return Some(close);
+            }
+            idx = close;
+            continue;
         }
         idx += 1;
     }
     None
+}
+
+#[cfg(feature = "simd")]
+#[inline]
+fn find_quote_or_close(bytes: &[u8], start: usize) -> Option<usize> {
+    crate::simd_scan::find_any3(&bytes[start..], b'"', b'\'', b'>').map(|pos| start + pos)
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline]
+fn find_quote_or_close(bytes: &[u8], start: usize) -> Option<usize> {
+    memchr::memchr3(b'"', b'\'', b'>', &bytes[start..]).map(|pos| start + pos)
+}
+
+#[cfg(feature = "simd")]
+#[inline]
+fn find_lt(bytes: &[u8], start: usize) -> Option<usize> {
+    crate::simd_scan::find_byte(&bytes[start..], b'<').map(|pos| start + pos)
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline]
+fn find_lt(bytes: &[u8], start: usize) -> Option<usize> {
+    memchr(b'<', &bytes[start..]).map(|pos| start + pos)
 }

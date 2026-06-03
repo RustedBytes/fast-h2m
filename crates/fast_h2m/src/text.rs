@@ -31,67 +31,13 @@ pub fn escape(
         return Cow::Borrowed(text);
     }
 
-    if escape_ascii
-        && !text.as_bytes().iter().any(|b| {
-            matches!(
-                b,
-                b'!' | b'"'
-                    | b'#'
-                    | b'$'
-                    | b'%'
-                    | b'&'
-                    | b'\''
-                    | b'('
-                    | b')'
-                    | b'*'
-                    | b'+'
-                    | b','
-                    | b'-'
-                    | b'.'
-                    | b'/'
-                    | b':'
-                    | b';'
-                    | b'<'
-                    | b'='
-                    | b'>'
-                    | b'?'
-                    | b'@'
-                    | b'['
-                    | b'\\'
-                    | b']'
-                    | b'^'
-                    | b'_'
-                    | b'`'
-                    | b'{'
-                    | b'|'
-                    | b'}'
-                    | b'~'
-            )
-        })
-    {
+    if escape_ascii && !contains_ascii_punctuation(text.as_bytes()) {
         return Cow::Borrowed(text);
     }
 
     if !escape_ascii && escape_misc && !escape_asterisks && !escape_underscores {
-        let needs_misc = text.as_bytes().iter().any(|b| {
-            matches!(
-                b,
-                b'\\'
-                    | b'&'
-                    | b'<'
-                    | b'`'
-                    | b'['
-                    | b']'
-                    | b'>'
-                    | b'~'
-                    | b'#'
-                    | b'='
-                    | b'+'
-                    | b'|'
-                    | b'-'
-            )
-        });
-        let needs_numbered = text.as_bytes().iter().any(|b| matches!(b, b'.' | b')'));
+        let needs_misc = contains_misc_markdown(text.as_bytes());
+        let needs_numbered = contains_numbered_marker_punctuation(text.as_bytes());
         if !needs_misc && !needs_numbered {
             return Cow::Borrowed(text);
         }
@@ -121,6 +67,59 @@ pub fn escape(
     }
 
     result
+}
+
+#[cfg(feature = "simd")]
+#[inline]
+fn contains_ascii_punctuation(bytes: &[u8]) -> bool {
+    crate::simd_scan::contains_ascii_punctuation(bytes)
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline]
+fn contains_ascii_punctuation(bytes: &[u8]) -> bool {
+    bytes.iter().any(|byte| byte.is_ascii_punctuation())
+}
+
+#[cfg(feature = "simd")]
+#[inline]
+fn contains_misc_markdown(bytes: &[u8]) -> bool {
+    crate::simd_scan::contains_misc_markdown(bytes)
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline]
+fn contains_misc_markdown(bytes: &[u8]) -> bool {
+    bytes.iter().any(|b| {
+        matches!(
+            b,
+            b'\\'
+                | b'&'
+                | b'<'
+                | b'`'
+                | b'['
+                | b']'
+                | b'>'
+                | b'~'
+                | b'#'
+                | b'='
+                | b'+'
+                | b'|'
+                | b'-'
+        )
+    })
+}
+
+#[cfg(feature = "simd")]
+#[inline]
+fn contains_numbered_marker_punctuation(bytes: &[u8]) -> bool {
+    crate::simd_scan::find_any2(bytes, b'.', b')').is_some()
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline]
+fn contains_numbered_marker_punctuation(bytes: &[u8]) -> bool {
+    bytes.iter().any(|b| matches!(b, b'.' | b')'))
 }
 
 fn escape_chars(text: &str, should_escape: fn(char) -> bool) -> Option<String> {

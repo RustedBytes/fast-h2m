@@ -68,201 +68,206 @@ pub fn scan(html: &str, options: &ConversionOptions) -> Result<String, BailReaso
     let mut text_start = 0usize;
 
     while pos < bytes.len() {
-        match bytes[pos] {
-            b'<' => {
-                // Flush pending text before we process this tag.
-                if text_start < pos {
-                    flush_text(&mut state, &html[text_start..pos], text_start)?;
+        if bytes[pos] != b'<' {
+            match find_next_lt(bytes, pos + 1) {
+                Some(next) => pos = next,
+                None => {
+                    pos = bytes.len();
+                    break;
                 }
-
-                let next = bytes.get(pos + 1).copied().unwrap_or(0);
-
-                // `<!` — comment, DOCTYPE, or CDATA
-                if next == b'!' {
-                    if html[pos..].starts_with("<![CDATA[") {
-                        return Err(BailReason::Cdata { offset: pos });
-                    }
-                    // Skip `<!-- ... -->` or `<!DOCTYPE ...>` etc.
-                    pos = skip_bang(bytes, pos)?;
-                    text_start = pos;
-                    continue;
-                }
-
-                // `</` — closing tag
-                if next == b'/' {
-                    let name_start = pos + 2;
-                    let name_end = parse::scan_tag_name(bytes, name_start);
-                    if name_end == name_start {
-                        // `</>` or similar — bail
-                        return Err(BailReason::LiteralLt { offset: pos });
-                    }
-                    let close_bracket = parse::find_tag_close(bytes, name_end)
-                        .ok_or(BailReason::LiteralLt { offset: pos })?;
-
-                    let tag_name_bytes = &bytes[name_start..name_end];
-                    emit_close(&mut state, tag_name_bytes)?;
-
-                    pos = close_bracket.0 + 1;
-                    text_start = pos;
-                    continue;
-                }
-
-                // Not a tag-name-start byte → literal `<`
-                if !parse::is_tag_name_start(next) {
-                    return Err(BailReason::LiteralLt { offset: pos });
-                }
-
-                // Opening tag
-                let name_start = pos + 1;
-                let name_end = parse::scan_tag_name(bytes, name_start);
-                let tag_name_bytes = &bytes[name_start..name_end];
-
-                // Lowercase the tag name into a stack buffer (max 32 bytes)
-                let mut name_buf = [0u8; MAX_TAG_NAME_BYTES];
-                let name_lower = lowercase_into(tag_name_bytes, &mut name_buf);
-
-                // Custom elements (contain `-`) → bail
-                if name_lower.contains(&b'-') {
-                    return Err(BailReason::UnknownCustomElement {
-                        name: bytes_to_string(tag_name_bytes).into(),
-                        offset: pos,
-                    });
-                }
-
-                // Unknown tag → bail
-                let spec =
-                    tier1::lookup(name_lower).ok_or_else(|| BailReason::UnknownCustomElement {
-                        name: bytes_to_string(tag_name_bytes).into(),
-                        offset: pos,
-                    })?;
-
-                // Bail on unsupported tag kinds for M3c
-                bail_unsupported(spec, pos)?;
-
-                // Bail on <pre> when code_block_style is not Indented.
-                // Tier-1 only implements 4-space indented code blocks; other styles
-                // (Backticks, Tildes) require Tier-2's fenced-block logic.
-                if matches!(spec.kind, TagKind::Pre)
-                    && options.code_block_style != crate::options::CodeBlockStyle::Indented
-                {
-                    return Err(BailReason::Classifier);
-                }
-
-                // Bail on nested lists: Tier-2 cycles bullet characters by depth
-                // (-, *, +) but Tier-1 always uses "-". Nesting requires Tier-2.
-                if matches!(
-                    spec.kind,
-                    TagKind::List(ListKind::Unordered | ListKind::Ordered)
-                ) && state.list_depth > 0
-                {
-                    return Err(BailReason::Classifier);
-                }
-
-                // Find end of tag (handles quoted attribute values)
-                let close = parse::find_tag_close(bytes, name_end)
-                    .ok_or(BailReason::LiteralLt { offset: pos })?;
-
-                // Collect attributes (from after name_end to before `>` / `/>`)
-                let attrs_end = if close.1 {
-                    // Self-closing `/>` — back up one past the `/`
-                    close.0.saturating_sub(1)
-                } else {
-                    close.0
-                };
-                // Most tag kinds (headings, paragraphs, emphasis, code, etc.) do
-                // not read attributes during emit.  Skip the allocation in the
-                // common case; only collect for the kinds whose emit paths
-                // actually consult attributes.
-                let attrs: Vec<(&[u8], Option<&[u8]>)> = match spec.kind {
-                    TagKind::Link
-                    | TagKind::Image
-                    | TagKind::List(ListKind::Ordered)
-                    | TagKind::TableCell { .. } => parse::collect_attrs(bytes, name_end, attrs_end),
-                    _ => Vec::new(),
-                };
-
-                pos = close.0 + 1;
-
-                // Void or self-closing: emit immediately, don't push stack
-                if spec.is_void || close.1 {
-                    emit_void(&mut state, spec, &attrs, html, options)?;
-                    text_start = pos;
-                    continue;
-                }
-
-                // Non-void open tag: emit opening markdown + push stack frame
-
-                // M9: Nested-table bail — must come before the block-in-cell
-                // check because <table> is a block element, and TableNestedTable
-                // is a more specific reason than TableBlockChildInCell.
-                if matches!(spec.kind, TagKind::Table) && !state.table_stack.is_empty() {
-                    return Err(BailReason::TableNestedTable);
-                }
-
-                // M9: Block-in-cell bail.
-                // If we are inside a table cell and the new tag is a block-level
-                // element, bail immediately.  This check must come before the
-                // implicit-close loop so that the bail fires before we try to pop
-                // the cell frame.
-                if state.in_table_cell() && spec.is_block {
-                    return Err(BailReason::TableBlockChildInCell);
-                }
-
-                // M4: HTML5 implicit-close transitions.
-                // Before pushing the new tag, check whether any open tag at the
-                // top of the stack should be implicitly closed per the HTML5
-                // optional-tag rules.  Repeat until no more implicit closes fire
-                // (handles e.g. <li><li><li> or <p><p>).
-                while let Some(top) = state.stack.last() {
-                    if !spec_rules::should_close_for_new_tag(top.spec, spec) {
-                        break;
-                    }
-                    emit_close_for_implicit(&mut state)?;
-                }
-
-                let prev_ctx = state.escape_ctx;
-                let ol_start = if matches!(spec.kind, TagKind::List(ListKind::Ordered)) {
-                    extract_ol_start(&attrs)
-                } else {
-                    1
-                };
-                let (link_href, link_title) = if matches!(spec.kind, TagKind::Link) {
-                    extract_link_attrs(&attrs)?
-                } else {
-                    (None, None)
-                };
-
-                emit_open(&mut state, spec, &attrs)?;
-
-                // Record the content-start position AFTER emit_open so that
-                // close-side post-processing operates on the correct slice.
-                // When inside a table cell the position is in the cell buffer;
-                // otherwise it is in the main output buffer.
-                let output_content_start = state.cell_or_output_mut().len();
-
-                // list_index is initialised to 0 for lists (counter starts at 0,
-                // incremented on each <li>).  For non-lists, unused.
-                let list_index = 0u16;
-
-                state.stack.push(OpenTag {
-                    spec,
-                    content_start: output_content_start,
-                    prev_escape_ctx: prev_ctx,
-                    list_index,
-                    link_href,
-                    link_title,
-                    ol_start,
-                    name_range: name_start..name_end,
-                });
-
-                // Update escape context after pushing so the frame records the
-                // pre-tag ctx correctly.
-                apply_open_escape_ctx(&mut state, spec);
-
-                text_start = pos;
             }
-            _ => pos += 1,
+            continue;
         }
+
+        // Flush pending text before we process this tag.
+        if text_start < pos {
+            flush_text(&mut state, &html[text_start..pos], text_start)?;
+        }
+
+        let next = bytes.get(pos + 1).copied().unwrap_or(0);
+
+        // `<!` — comment, DOCTYPE, or CDATA
+        if next == b'!' {
+            if html[pos..].starts_with("<![CDATA[") {
+                return Err(BailReason::Cdata { offset: pos });
+            }
+            // Skip `<!-- ... -->` or `<!DOCTYPE ...>` etc.
+            pos = skip_bang(bytes, pos)?;
+            text_start = pos;
+            continue;
+        }
+
+        // `</` — closing tag
+        if next == b'/' {
+            let name_start = pos + 2;
+            let name_end = parse::scan_tag_name(bytes, name_start);
+            if name_end == name_start {
+                // `</>` or similar — bail
+                return Err(BailReason::LiteralLt { offset: pos });
+            }
+            let close_bracket = parse::find_tag_close(bytes, name_end)
+                .ok_or(BailReason::LiteralLt { offset: pos })?;
+
+            let tag_name_bytes = &bytes[name_start..name_end];
+            emit_close(&mut state, tag_name_bytes)?;
+
+            pos = close_bracket.0 + 1;
+            text_start = pos;
+            continue;
+        }
+
+        // Not a tag-name-start byte → literal `<`
+        if !parse::is_tag_name_start(next) {
+            return Err(BailReason::LiteralLt { offset: pos });
+        }
+
+        // Opening tag
+        let name_start = pos + 1;
+        let name_end = parse::scan_tag_name(bytes, name_start);
+        let tag_name_bytes = &bytes[name_start..name_end];
+
+        // Lowercase the tag name into a stack buffer (max 32 bytes)
+        let mut name_buf = [0u8; MAX_TAG_NAME_BYTES];
+        let name_lower = lowercase_into(tag_name_bytes, &mut name_buf);
+
+        // Custom elements (contain `-`) → bail
+        if name_lower.contains(&b'-') {
+            return Err(BailReason::UnknownCustomElement {
+                name: bytes_to_string(tag_name_bytes).into(),
+                offset: pos,
+            });
+        }
+
+        // Unknown tag → bail
+        let spec = tier1::lookup(name_lower).ok_or_else(|| BailReason::UnknownCustomElement {
+            name: bytes_to_string(tag_name_bytes).into(),
+            offset: pos,
+        })?;
+
+        // Bail on unsupported tag kinds for M3c
+        bail_unsupported(spec, pos)?;
+
+        // Bail on <pre> when code_block_style is not Indented.
+        // Tier-1 only implements 4-space indented code blocks; other styles
+        // (Backticks, Tildes) require Tier-2's fenced-block logic.
+        if matches!(spec.kind, TagKind::Pre)
+            && options.code_block_style != crate::options::CodeBlockStyle::Indented
+        {
+            return Err(BailReason::Classifier);
+        }
+
+        // Bail on nested lists: Tier-2 cycles bullet characters by depth
+        // (-, *, +) but Tier-1 always uses "-". Nesting requires Tier-2.
+        if matches!(
+            spec.kind,
+            TagKind::List(ListKind::Unordered | ListKind::Ordered)
+        ) && state.list_depth > 0
+        {
+            return Err(BailReason::Classifier);
+        }
+
+        // Find end of tag (handles quoted attribute values)
+        let close =
+            parse::find_tag_close(bytes, name_end).ok_or(BailReason::LiteralLt { offset: pos })?;
+
+        // Collect attributes (from after name_end to before `>` / `/>`)
+        let attrs_end = if close.1 {
+            // Self-closing `/>` — back up one past the `/`
+            close.0.saturating_sub(1)
+        } else {
+            close.0
+        };
+        // Most tag kinds (headings, paragraphs, emphasis, code, etc.) do
+        // not read attributes during emit.  Skip the allocation in the
+        // common case; only collect for the kinds whose emit paths
+        // actually consult attributes.
+        let attrs: Vec<(&[u8], Option<&[u8]>)> = match spec.kind {
+            TagKind::Link
+            | TagKind::Image
+            | TagKind::List(ListKind::Ordered)
+            | TagKind::TableCell { .. } => parse::collect_attrs(bytes, name_end, attrs_end),
+            _ => Vec::new(),
+        };
+
+        pos = close.0 + 1;
+
+        // Void or self-closing: emit immediately, don't push stack
+        if spec.is_void || close.1 {
+            emit_void(&mut state, spec, &attrs, html, options)?;
+            text_start = pos;
+            continue;
+        }
+
+        // Non-void open tag: emit opening markdown + push stack frame
+
+        // M9: Nested-table bail — must come before the block-in-cell
+        // check because <table> is a block element, and TableNestedTable
+        // is a more specific reason than TableBlockChildInCell.
+        if matches!(spec.kind, TagKind::Table) && !state.table_stack.is_empty() {
+            return Err(BailReason::TableNestedTable);
+        }
+
+        // M9: Block-in-cell bail.
+        // If we are inside a table cell and the new tag is a block-level
+        // element, bail immediately.  This check must come before the
+        // implicit-close loop so that the bail fires before we try to pop
+        // the cell frame.
+        if state.in_table_cell() && spec.is_block {
+            return Err(BailReason::TableBlockChildInCell);
+        }
+
+        // M4: HTML5 implicit-close transitions.
+        // Before pushing the new tag, check whether any open tag at the
+        // top of the stack should be implicitly closed per the HTML5
+        // optional-tag rules.  Repeat until no more implicit closes fire
+        // (handles e.g. <li><li><li> or <p><p>).
+        while let Some(top) = state.stack.last() {
+            if !spec_rules::should_close_for_new_tag(top.spec, spec) {
+                break;
+            }
+            emit_close_for_implicit(&mut state)?;
+        }
+
+        let prev_ctx = state.escape_ctx;
+        let ol_start = if matches!(spec.kind, TagKind::List(ListKind::Ordered)) {
+            extract_ol_start(&attrs)
+        } else {
+            1
+        };
+        let (link_href, link_title) = if matches!(spec.kind, TagKind::Link) {
+            extract_link_attrs(&attrs)?
+        } else {
+            (None, None)
+        };
+
+        emit_open(&mut state, spec, &attrs)?;
+
+        // Record the content-start position AFTER emit_open so that
+        // close-side post-processing operates on the correct slice.
+        // When inside a table cell the position is in the cell buffer;
+        // otherwise it is in the main output buffer.
+        let output_content_start = state.cell_or_output_mut().len();
+
+        // list_index is initialised to 0 for lists (counter starts at 0,
+        // incremented on each <li>).  For non-lists, unused.
+        let list_index = 0u16;
+
+        state.stack.push(OpenTag {
+            spec,
+            content_start: output_content_start,
+            prev_escape_ctx: prev_ctx,
+            list_index,
+            link_href,
+            link_title,
+            ol_start,
+            name_range: name_start..name_end,
+        });
+
+        // Update escape context after pushing so the frame records the
+        // pre-tag ctx correctly.
+        apply_open_escape_ctx(&mut state, spec);
+
+        text_start = pos;
     }
 
     // Flush any trailing text after the last tag.
@@ -289,7 +294,7 @@ pub fn scan(html: &str, options: &ConversionOptions) -> Result<String, BailReaso
 
     // Collapse runs of 3+ consecutive newlines to exactly 2, matching Tier-2's
     // `collapse_excess_blank_lines` post-processing step.
-    if state.output.contains("\n\n\n") {
+    if contains_triple_newline(state.output.as_bytes()) {
         collapse_excess_blank_lines(&mut state.output);
     }
 
@@ -310,6 +315,54 @@ pub fn scan(html: &str, options: &ConversionOptions) -> Result<String, BailReaso
     }
 
     Ok(state.output)
+}
+
+#[cfg(feature = "simd")]
+#[inline]
+fn find_next_lt(bytes: &[u8], start: usize) -> Option<usize> {
+    crate::simd_scan::find_byte(&bytes[start..], b'<').map(|pos| start + pos)
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline]
+fn find_next_lt(bytes: &[u8], start: usize) -> Option<usize> {
+    memchr::memchr(b'<', &bytes[start..]).map(|pos| start + pos)
+}
+
+#[cfg(feature = "simd")]
+#[inline]
+fn contains_byte(bytes: &[u8], needle: u8) -> bool {
+    crate::simd_scan::find_byte(bytes, needle).is_some()
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline]
+fn contains_byte(bytes: &[u8], needle: u8) -> bool {
+    bytes.contains(&needle)
+}
+
+#[inline]
+fn contains_triple_newline(bytes: &[u8]) -> bool {
+    let mut start = 0usize;
+    while let Some(pos) = find_newline(bytes, start) {
+        if bytes.get(pos + 1) == Some(&b'\n') && bytes.get(pos + 2) == Some(&b'\n') {
+            return true;
+        }
+        start = pos + 1;
+    }
+    false
+}
+
+#[cfg(feature = "simd")]
+#[inline]
+fn find_newline(bytes: &[u8], start: usize) -> Option<usize> {
+    crate::simd_scan::find_byte(&bytes[start..], b'\n').map(|pos| start + pos)
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline]
+fn find_newline(bytes: &[u8], start: usize) -> Option<usize> {
+    memchr::memchr(b'\n', &bytes[start..]).map(|pos| start + pos)
 }
 
 // ── Bail guard ────────────────────────────────────────────────────────────────
@@ -1015,14 +1068,14 @@ fn close_table_cell(state: &mut Tier1State, is_implicit: bool) -> Result<(), Bai
     // Trim the accumulated cell text (matches Tier-2 `text.trim()`).
     let cell_text = ts.current_cell.trim().to_owned();
     // Bail if the cell contains a newline (multi-line content).
-    if cell_text.contains('\n') {
+    if contains_byte(cell_text.as_bytes(), b'\n') {
         return Err(BailReason::TableBlockChildInCell);
     }
     // Bail if the cell contains a pipe: Tier-2 escapes `|` → `\|`
     // which changes the cell width computation; Tier-1 does not
     // implement pipe escaping.  Implicit closes skip this check because
     // they are triggered during structural teardown, not fresh cell data.
-    if !is_implicit && cell_text.contains('|') {
+    if !is_implicit && contains_byte(cell_text.as_bytes(), b'|') {
         return Err(BailReason::TableBlockChildInCell);
     }
     ts.current_row.push(cell_text);

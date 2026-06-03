@@ -49,6 +49,8 @@ pub fn find_tag_close(bytes: &[u8], start: usize) -> Option<(usize, bool)> {
     let mut in_quote: Option<u8> = None;
 
     while pos < len {
+        let next = find_quote_or_close(bytes, pos)?;
+        pos = next;
         match bytes[pos] {
             b'"' | b'\'' => {
                 if let Some(q) = in_quote {
@@ -68,6 +70,18 @@ pub fn find_tag_close(bytes: &[u8], start: usize) -> Option<(usize, bool)> {
         pos += 1;
     }
     None
+}
+
+#[cfg(feature = "simd")]
+#[inline]
+fn find_quote_or_close(bytes: &[u8], start: usize) -> Option<usize> {
+    crate::simd_scan::find_any3(&bytes[start..], b'"', b'\'', b'>').map(|pos| start + pos)
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline]
+fn find_quote_or_close(bytes: &[u8], start: usize) -> Option<usize> {
+    memchr::memchr3(b'"', b'\'', b'>', &bytes[start..]).map(|pos| start + pos)
 }
 
 /// Parse a single attribute starting at `pos` (after skipping any preceding
