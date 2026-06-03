@@ -1,5 +1,11 @@
 # fast_h2m
 
+[![Crates.io Version](https://img.shields.io/crates/v/fast-h2m)](https://crates.io/crates/fast-h2m)
+[![PyPI - Version](https://img.shields.io/pypi/v/fast-h2m)](https://pypi.org/project/fast-h2m/)
+[![CI](https://github.com/RustedBytes/fast-h2m/actions/workflows/ci.yml/badge.svg)](https://github.com/RustedBytes/fast-h2m/actions/workflows/ci.yml)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/fast-h2m?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/fast-h2m)
+
+
 High-performance HTML to Markdown converter written in Rust.
 
 ## Install
