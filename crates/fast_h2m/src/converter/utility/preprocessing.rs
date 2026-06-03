@@ -6,7 +6,8 @@
 use std::borrow::Cow;
 use std::str;
 
-use memchr::{memchr, memmem};
+use memchr::memchr;
+use memchr::memmem;
 
 /// Strip script and style tags and their content from HTML.
 pub fn strip_script_and_style_tags(input: &str) -> Cow<'_, str> {
@@ -23,7 +24,7 @@ pub fn strip_script_and_style_tags(input: &str) -> Cow<'_, str> {
     let mut svg_depth = 0usize;
 
     // Fast-path: check if there are any < characters at all
-    if memchr(b'<', bytes).is_none() {
+    if !bytes_contain_byte(bytes, b'<') {
         return Cow::Borrowed(input);
     }
 
@@ -256,7 +257,7 @@ pub fn normalize_bogus_comment_endings(input: &str) -> Cow<'_, str> {
     // Fast path: the input must contain at least "<!--" and "--->".
     // Without "<!--" there are no comments; without "---" there cannot be a
     // bogus closing.
-    if len < 7 || memmem::find(bytes, b"<!--").is_none() {
+    if len < 7 || !bytes_contain_comment_open(bytes) {
         return Cow::Borrowed(input);
     }
 
@@ -333,6 +334,16 @@ pub fn normalize_bogus_comment_endings(input: &str) -> Cow<'_, str> {
         }
         None => Cow::Borrowed(input),
     }
+}
+
+#[inline]
+fn bytes_contain_byte(bytes: &[u8], needle: u8) -> bool {
+    memchr(needle, bytes).is_some()
+}
+
+#[inline]
+fn bytes_contain_comment_open(bytes: &[u8]) -> bool {
+    memmem::find(bytes, b"<!--").is_some()
 }
 
 /// Normalize closing tags whose `>` appears on a subsequent line.

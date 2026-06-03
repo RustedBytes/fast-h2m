@@ -33,6 +33,7 @@
     clippy::assigning_clones,
     clippy::uninlined_format_args
 )]
+#![cfg_attr(feature = "simd", feature(portable_simd))]
 
 //! High-performance HTML to Markdown converter.
 //!
@@ -83,6 +84,8 @@ pub use converter::tier1;
 mod inline_images;
 pub(crate) mod prelude;
 mod rcdom;
+#[cfg(feature = "simd")]
+mod simd_scan;
 pub(crate) mod text;
 mod validation;
 #[cfg(feature = "visitor")]

@@ -365,7 +365,7 @@ fn normalize_input(html: &str) -> Result<Cow<'_, str>> {
 /// syntax correctly. EPUB/XHTML-derived HTML uses this form heavily for empty
 /// table cells; see issue #391.
 fn fix_xhtml_self_closing(html: Cow<'_, str>) -> Cow<'_, str> {
-    if memmem::find(html.as_ref().as_bytes(), b"/>").is_none() {
+    if !bytes_contain_pair(html.as_ref().as_bytes(), b'/', b'>') {
         return html;
     }
 
@@ -421,7 +421,7 @@ const fn is_html_tag_name_byte(byte: u8) -> bool {
 /// recover the original HTML instead of rejecting it as binary data.
 fn decode_utf16_if_needed(html: &str) -> Cow<'_, str> {
     let bytes = html.as_bytes();
-    if memchr(0, bytes).is_none() {
+    if !bytes_contain_byte(bytes, 0) {
         return Cow::Borrowed(html);
     }
 
@@ -464,7 +464,7 @@ fn decode_utf16_bytes(bytes: &[u8], encoding: Utf16Encoding) -> String {
 
 /// Strip NUL bytes that can appear in malformed HTML inputs.
 fn strip_nul_bytes(html: &str) -> Cow<'_, str> {
-    if memchr(0, html.as_bytes()).is_some() {
+    if bytes_contain_byte(html.as_bytes(), 0) {
         Cow::Owned(html.replace('\0', ""))
     } else {
         Cow::Borrowed(html)
@@ -475,7 +475,7 @@ fn strip_nul_bytes(html: &str) -> Cow<'_, str> {
 ///
 /// Converts CRLF and CR line endings to LF for consistent processing.
 fn normalize_line_endings(html: &str) -> Cow<'_, str> {
-    if memchr(b'\r', html.as_bytes()).is_some() {
+    if bytes_contain_byte(html.as_bytes(), b'\r') {
         Cow::Owned(html.replace("\r\n", "\n").replace('\r', "\n"))
     } else {
         Cow::Borrowed(html)
@@ -487,15 +487,14 @@ fn normalize_line_endings(html: &str) -> Cow<'_, str> {
 /// Inputs containing CR or NUL need `normalize_input` first for line-ending
 /// normalization, NUL stripping, or UTF-16 recovery.
 fn can_fast_text_only_before_normalize(html: &str) -> bool {
-    let bytes = html.as_bytes();
-    memchr3(b'<', b'&', b'\r', bytes).is_none() && memchr(0, bytes).is_none()
+    !bytes_contain_any4(html.as_bytes(), b'<', b'&', b'\r', 0)
 }
 
 /// Fast path for plain text (no HTML) conversion.
 ///
 /// Skips HTML parsing if no angle brackets are present.
 fn fast_text_only(html: &str, options: &ConversionOptions) -> Option<String> {
-    if memchr(b'<', html.as_bytes()).is_some() {
+    if bytes_contain_byte(html.as_bytes(), b'<') {
         return None;
     }
 
@@ -552,4 +551,19 @@ fn fast_text_only_unchecked(
     }
     output.push('\n');
     output
+}
+
+#[inline]
+fn bytes_contain_byte(bytes: &[u8], needle: u8) -> bool {
+    memchr(needle, bytes).is_some()
+}
+
+#[inline]
+fn bytes_contain_any4(bytes: &[u8], a: u8, b: u8, c: u8, d: u8) -> bool {
+    memchr3(a, b, c, bytes).is_some() || memchr(d, bytes).is_some()
+}
+
+#[inline]
+fn bytes_contain_pair(bytes: &[u8], first: u8, second: u8) -> bool {
+    memmem::find(bytes, &[first, second]).is_some()
 }

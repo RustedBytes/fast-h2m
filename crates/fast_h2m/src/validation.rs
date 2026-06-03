@@ -10,6 +10,8 @@ const BINARY_CONTROL_RATIO: f64 = 0.3;
 const BINARY_UTF16_NULL_RATIO: f64 = 0.2;
 const BINARY_NUL_RATIO: f64 = 0.01;
 const BINARY_NUL_MAX: usize = 8;
+#[cfg(feature = "simd")]
+const SIMD_VALIDATION_THRESHOLD: usize = BINARY_SCAN_LIMIT;
 
 const BINARY_MAGIC_PREFIXES: &[(&[u8], &str)] = &[
     (b"\x1F\x8B", "gzip-compressed data"),
@@ -47,18 +49,7 @@ pub fn validate_input(html: &str) -> Result<()> {
     }
 
     let sample_len = bytes.len().min(BINARY_SCAN_LIMIT);
-    let mut control_count = 0usize;
-    let mut nul_count = 0usize;
-
-    for &byte in &bytes[..sample_len] {
-        if byte == 0 {
-            nul_count += 1;
-        }
-        let is_control = (byte < 0x09) || (0x0E..0x20).contains(&byte);
-        if is_control {
-            control_count += 1;
-        }
-    }
+    let (control_count, nul_count) = count_binary_markers(&bytes[..sample_len]);
 
     if nul_count > 0 {
         if let Some(encoding) = detect_utf16_encoding(bytes) {
@@ -85,6 +76,40 @@ pub fn validate_input(html: &str) -> Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(feature = "simd")]
+#[inline(always)]
+fn count_binary_markers(bytes: &[u8]) -> (usize, usize) {
+    if bytes.len() >= SIMD_VALIDATION_THRESHOLD {
+        crate::simd_scan::count_binary_markers(bytes)
+    } else {
+        count_binary_markers_scalar(bytes)
+    }
+}
+
+#[cfg(not(feature = "simd"))]
+#[inline(always)]
+fn count_binary_markers(bytes: &[u8]) -> (usize, usize) {
+    count_binary_markers_scalar(bytes)
+}
+
+#[inline(always)]
+fn count_binary_markers_scalar(bytes: &[u8]) -> (usize, usize) {
+    let mut control_count = 0usize;
+    let mut nul_count = 0usize;
+
+    for &byte in bytes {
+        if byte == 0 {
+            nul_count += 1;
+        }
+        let is_control = (byte < 0x09) || (0x0E..0x20).contains(&byte);
+        if is_control {
+            control_count += 1;
+        }
+    }
+
+    (control_count, nul_count)
 }
 
 fn detect_binary_magic(bytes: &[u8]) -> Option<&'static str> {
