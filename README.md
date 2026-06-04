@@ -101,6 +101,34 @@ let result = convert(html, Some(options))?;
 println!("{}", result.content.unwrap_or_default());
 ```
 
+### Fast DOM Mode
+
+For throughput-oriented conversion of common HTML, use the lean DOM strategy:
+
+```rust
+use fast_h2m::{convert, ConversionOptions, TierStrategy};
+
+let html = r#"
+<article>
+    <h1>Hello</h1>
+    <p>This path keeps common Markdown conversion fast.</p>
+    <ul><li>Headings</li><li>Links</li><li>Tables</li></ul>
+</article>
+"#;
+
+let options = ConversionOptions {
+    tier_strategy: TierStrategy::FastDom,
+    ..Default::default()
+};
+
+let result = convert(html, Some(options))?;
+println!("{}", result.content.unwrap_or_default());
+```
+
+`FastDom` skips the richer metadata, structure, visitor, selector, and repair
+machinery used by the full Tier-2 converter. Prefer it when raw Markdown
+throughput matters more than the full structured `ConversionResult`.
+
 ### Preserving HTML Tags
 
 The `preserve_tags` option allows you to keep specific HTML tags in their original form instead of converting them to Markdown:
