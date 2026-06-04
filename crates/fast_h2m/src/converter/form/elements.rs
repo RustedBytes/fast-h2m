@@ -60,7 +60,7 @@ pub fn handle_form(
                 .map(|v| v.as_utf8_str().into_owned());
             let node_ctx = NodeContext {
                 node_type: NodeType::Form,
-                tag_name: "form".to_string(),
+                tag_name: "form".into(),
                 attributes,
                 depth,
                 index_in_parent,
@@ -353,7 +353,7 @@ pub fn handle_input(
                 .map(|v| v.as_utf8_str().into_owned());
             let node_ctx = NodeContext {
                 node_type: NodeType::Input,
-                tag_name: "input".to_string(),
+                tag_name: "input".into(),
                 attributes,
                 depth,
                 index_in_parent,
@@ -611,7 +611,7 @@ pub fn handle_button(
             let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
             let node_ctx = NodeContext {
                 node_type: NodeType::Button,
-                tag_name: "button".to_string(),
+                tag_name: "button".into(),
                 attributes,
                 depth,
                 index_in_parent,

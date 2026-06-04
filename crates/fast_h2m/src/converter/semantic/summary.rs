@@ -47,7 +47,7 @@ pub fn handle_details(
             let open = tag.attributes().get("open").is_some();
             let node_ctx = NodeContext {
                 node_type: NodeType::Details,
-                tag_name: "details".to_string(),
+                tag_name: "details".into(),
                 attributes,
                 depth,
                 index_in_parent,
@@ -193,7 +193,7 @@ pub fn handle_summary(
             let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
             let node_ctx = NodeContext {
                 node_type: NodeType::Summary,
-                tag_name: "summary".to_string(),
+                tag_name: "summary".into(),
                 attributes,
                 depth,
                 index_in_parent,

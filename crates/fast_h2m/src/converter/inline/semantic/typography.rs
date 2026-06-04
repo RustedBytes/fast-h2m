@@ -11,8 +11,6 @@
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::{ConversionOptions, OutputFormat};
 use crate::tl_types::Parser;
-#[cfg(feature = "visitor")]
-use std::collections::BTreeMap;
 use tl::NodeHandle;
 
 type Context = crate::converter::Context;
@@ -105,7 +103,7 @@ pub fn handle_subscript(
         use crate::visitor::{NodeContext, NodeType, VisitResult};
 
         let text_content = get_text_content(node_handle, parser, dom_ctx);
-        let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+        let attributes = collect_tag_attributes(tag);
 
         let node_id = node_handle.get_inner();
         let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -113,7 +111,7 @@ pub fn handle_subscript(
 
         let node_ctx = NodeContext {
             node_type: NodeType::Subscript,
-            tag_name: tag.name().as_utf8_str().to_string(),
+            tag_name: tag.name().as_utf8_str().into(),
             attributes,
             depth,
             index_in_parent,
@@ -226,7 +224,7 @@ pub fn handle_superscript(
         use crate::visitor::{NodeContext, NodeType, VisitResult};
 
         let text_content = get_text_content(node_handle, parser, dom_ctx);
-        let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+        let attributes = collect_tag_attributes(tag);
 
         let node_id = node_handle.get_inner();
         let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -234,7 +232,7 @@ pub fn handle_superscript(
 
         let node_ctx = NodeContext {
             node_type: NodeType::Superscript,
-            tag_name: tag.name().as_utf8_str().to_string(),
+            tag_name: tag.name().as_utf8_str().into(),
             attributes,
             depth,
             index_in_parent,

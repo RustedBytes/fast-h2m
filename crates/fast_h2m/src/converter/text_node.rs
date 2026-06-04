@@ -235,7 +235,7 @@ pub fn process_text_node(
 
         let node_ctx = NodeContext {
             node_type: NodeType::Text,
-            tag_name: String::new(),
+            tag_name: String::new().into(),
             attributes: BTreeMap::new(),
             depth,
             index_in_parent,

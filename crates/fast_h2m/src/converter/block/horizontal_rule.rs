@@ -30,19 +30,18 @@ pub fn handle(
     if let Some(ref visitor_handle) = ctx.visitor {
         use crate::converter::utility::content::collect_tag_attributes;
         use crate::visitor::{NodeContext, NodeType, VisitResult};
-        use std::collections::BTreeMap;
 
         let tag = match node_handle.get(parser) {
             Some(tl::Node::Tag(t)) => t,
             _ => return,
         };
-        let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+        let attributes = collect_tag_attributes(tag);
         let node_id = node_handle.get_inner();
         let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
         let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
         let node_ctx = NodeContext {
             node_type: NodeType::Hr,
-            tag_name: "hr".to_string(),
+            tag_name: "hr".into(),
             attributes,
             depth,
             index_in_parent,

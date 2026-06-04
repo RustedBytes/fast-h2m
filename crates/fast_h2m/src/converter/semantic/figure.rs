@@ -62,7 +62,7 @@ pub fn handle_figure(
             let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
             let node_ctx = NodeContext {
                 node_type: NodeType::Figure,
-                tag_name: "figure".to_string(),
+                tag_name: "figure".into(),
                 attributes,
                 depth,
                 index_in_parent,
@@ -188,7 +188,7 @@ pub fn handle_figure(
             let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
             let node_ctx = NodeContext {
                 node_type: NodeType::Figure,
-                tag_name: "figure".to_string(),
+                tag_name: "figure".into(),
                 attributes,
                 depth,
                 index_in_parent,
@@ -291,7 +291,7 @@ pub fn handle_figcaption(
             let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
             let node_ctx = NodeContext {
                 node_type: NodeType::Figcaption,
-                tag_name: "figcaption".to_string(),
+                tag_name: "figcaption".into(),
                 attributes,
                 depth,
                 index_in_parent,

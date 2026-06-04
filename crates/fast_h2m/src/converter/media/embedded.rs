@@ -99,7 +99,7 @@ pub fn handle_audio(
         let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
         let node_ctx = NodeContext {
             node_type: NodeType::Element,
-            tag_name: "audio".to_string(),
+            tag_name: "audio".into(),
             attributes,
             depth,
             index_in_parent,
@@ -223,7 +223,7 @@ pub fn handle_video(
         let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
         let node_ctx = NodeContext {
             node_type: NodeType::Element,
-            tag_name: "video".to_string(),
+            tag_name: "video".into(),
             attributes,
             depth,
             index_in_parent,
@@ -368,7 +368,7 @@ pub fn handle_iframe(
         let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
         let node_ctx = NodeContext {
             node_type: NodeType::Element,
-            tag_name: "iframe".to_string(),
+            tag_name: "iframe".into(),
             attributes,
             depth,
             index_in_parent,

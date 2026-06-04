@@ -251,7 +251,7 @@ pub fn handle(
         let link_output = if let Some(ref visitor_handle) = ctx.visitor {
             use crate::visitor::{NodeContext, NodeType, VisitResult};
 
-            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            let attributes = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -259,7 +259,7 @@ pub fn handle(
 
             let node_ctx = NodeContext {
                 node_type: NodeType::Link,
-                tag_name: "a".to_string(),
+                tag_name: "a".into(),
                 attributes,
                 depth,
                 index_in_parent,

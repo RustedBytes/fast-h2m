@@ -68,7 +68,7 @@ pub fn handle(
         let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
         let node_ctx = NodeContext {
             node_type: NodeType::Custom,
-            tag_name: tag_name.clone(),
+            tag_name: tag_name.clone().into(),
             attributes,
             depth,
             index_in_parent,

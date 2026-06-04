@@ -14,7 +14,6 @@ use super::utils::{
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::ConversionOptions;
 #[cfg(feature = "visitor")]
-use std::collections::BTreeMap;
 use tl;
 
 // Type aliases for Context and DomContext to avoid circular imports
@@ -55,18 +54,17 @@ pub fn handle_ul(
     if let Some(ref visitor_handle) = ctx.visitor {
         use crate::visitor::{NodeContext, NodeType, VisitResult};
 
-        let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+        let attributes = collect_tag_attributes(tag);
 
         let parent_tag = dom_ctx
             .parent_of(node_handle.get_inner())
-            .and_then(|pid| dom_ctx.tag_name_for(dom_ctx.node_handle(pid).copied()?, parser))
-            .map(|s| s.to_string());
+            .and_then(|pid| dom_ctx.tag_name_for(dom_ctx.node_handle(pid).copied()?, parser));
 
         let index = dom_ctx.sibling_index(node_handle.get_inner()).unwrap_or(0);
 
         let node_ctx = NodeContext {
             node_type: NodeType::List,
-            tag_name: "ul".to_string(),
+            tag_name: "ul".into(),
             attributes,
             depth,
             index_in_parent: index,
@@ -132,18 +130,17 @@ pub fn handle_ul(
     if let Some(ref visitor_handle) = ctx.visitor {
         use crate::visitor::{NodeContext, NodeType, VisitResult};
 
-        let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+        let attributes = collect_tag_attributes(tag);
 
         let parent_tag = dom_ctx
             .parent_of(node_handle.get_inner())
-            .and_then(|pid| dom_ctx.tag_name_for(dom_ctx.node_handle(pid).copied()?, parser))
-            .map(|s| s.to_string());
+            .and_then(|pid| dom_ctx.tag_name_for(dom_ctx.node_handle(pid).copied()?, parser));
 
         let index = dom_ctx.sibling_index(node_handle.get_inner()).unwrap_or(0);
 
         let node_ctx = NodeContext {
             node_type: NodeType::List,
-            tag_name: "ul".to_string(),
+            tag_name: "ul".into(),
             attributes,
             depth,
             index_in_parent: index,

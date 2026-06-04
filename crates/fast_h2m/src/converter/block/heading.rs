@@ -324,7 +324,7 @@ fn visitor_heading_output(
                 .flatten()
                 .map(|v| v.as_utf8_str().to_string());
 
-            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            let attributes = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -332,7 +332,7 @@ fn visitor_heading_output(
 
             let node_ctx = NodeContext {
                 node_type: NodeType::Heading,
-                tag_name: tag_name.to_string(),
+                tag_name: tag_name.into(),
                 attributes,
                 depth,
                 index_in_parent,

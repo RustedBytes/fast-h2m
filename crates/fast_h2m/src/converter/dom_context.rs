@@ -572,21 +572,21 @@ impl DomContext {
     /// Returns the tag name of the parent element if it exists and is a tag,
     /// otherwise returns None.
     #[cfg_attr(not(feature = "visitor"), allow(dead_code))]
-    pub(crate) fn parent_tag_name(
-        &self,
+    pub(crate) fn parent_tag_name<'a>(
+        &'a self,
         node_id: u32,
-        parser: &crate::tl_types::Parser,
-    ) -> Option<String> {
+        parser: &'a crate::tl_types::Parser<'a>,
+    ) -> Option<std::borrow::Cow<'a, str>> {
         let parent_id = self.parent_of(node_id)?;
         let parent_handle = self.node_handle(parent_id)?;
 
         if let Some(info) = self.tag_info(parent_id, parser) {
-            return Some(info.name.as_str().to_string());
+            return Some(std::borrow::Cow::Borrowed(info.name.as_str()));
         }
 
         if let Some(tl::Node::Tag(tag)) = parent_handle.get(parser) {
             let name = normalized_tag_name(tag.name().as_utf8_str());
-            return Some(name.into_owned());
+            return Some(name);
         }
 
         None

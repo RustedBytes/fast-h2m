@@ -104,9 +104,8 @@ pub fn handle_table(
         #[cfg(feature = "visitor")]
         if let Some(ref visitor_handle) = ctx.visitor {
             use crate::visitor::{NodeContext, NodeType, VisitResult};
-            use std::collections::BTreeMap;
 
-            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            let attributes = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -114,7 +113,7 @@ pub fn handle_table(
 
             let node_ctx = NodeContext {
                 node_type: NodeType::Table,
-                tag_name: "table".to_string(),
+                tag_name: "table".into(),
                 attributes,
                 depth,
                 index_in_parent,
@@ -424,9 +423,8 @@ pub fn handle_table(
         #[cfg(feature = "visitor")]
         if let Some(ref visitor_handle) = ctx.visitor {
             use crate::visitor::{NodeContext, NodeType, VisitResult};
-            use std::collections::BTreeMap;
 
-            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            let attributes = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -434,7 +432,7 @@ pub fn handle_table(
 
             let node_ctx = NodeContext {
                 node_type: NodeType::Table,
-                tag_name: "table".to_string(),
+                tag_name: "table".into(),
                 attributes,
                 depth,
                 index_in_parent,

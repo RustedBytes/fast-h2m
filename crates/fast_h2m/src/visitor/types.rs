@@ -5,6 +5,7 @@
 //! - `NodeContext`: Metadata about the current node being visited
 //! - `VisitResult`: Control flow signals from visitor methods
 
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 
 /// Node type enumeration covering all HTML element types.
@@ -209,15 +210,15 @@ pub enum NodeType {
 /// including its type, attributes, position in the DOM tree, and parent context.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NodeContext {
+pub struct NodeContext<'a> {
     /// Coarse-grained node type classification
     pub node_type: NodeType,
 
     /// Raw HTML tag name (e.g., "div", "h1", "custom-element")
-    pub tag_name: String,
+    pub tag_name: Cow<'a, str>,
 
     /// All HTML attributes as key-value pairs
-    pub attributes: BTreeMap<String, String>,
+    pub attributes: BTreeMap<Cow<'a, str>, Cow<'a, str>>,
 
     /// Depth in the DOM tree (0 = root)
     pub depth: usize,
@@ -226,7 +227,7 @@ pub struct NodeContext {
     pub index_in_parent: usize,
 
     /// Parent element's tag name (None if root)
-    pub parent_tag: Option<String>,
+    pub parent_tag: Option<Cow<'a, str>>,
 
     /// Whether this element is treated as inline vs block
     pub is_inline: bool,
@@ -281,11 +282,11 @@ mod tests {
     fn test_node_context_creation() {
         let ctx = NodeContext {
             node_type: NodeType::Heading,
-            tag_name: "h1".to_string(),
+            tag_name: "h1".into(),
             attributes: BTreeMap::new(),
             depth: 1,
             index_in_parent: 0,
-            parent_tag: Some("body".to_string()),
+            parent_tag: Some("body".into()),
             is_inline: false,
         };
 

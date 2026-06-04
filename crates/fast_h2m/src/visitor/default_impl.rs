@@ -49,11 +49,11 @@ mod tests {
             let mut v = handle.lock().expect("visitor mutex poisoned");
             let ctx = NodeContext {
                 node_type: NodeType::Text,
-                tag_name: "p".to_string(),
+                tag_name: "p".into(),
                 attributes: BTreeMap::new(),
                 depth: 1,
                 index_in_parent: 0,
-                parent_tag: Some("div".to_string()),
+                parent_tag: Some("div".into()),
                 is_inline: false,
             };
             v.visit_text(&ctx, "test");

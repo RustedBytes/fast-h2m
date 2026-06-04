@@ -3,6 +3,7 @@
 //! This module handles construction of `NodeContext` objects that represent
 //! the state of DOM nodes during traversal.
 
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 
 use crate::visitor::NodeContext;
@@ -33,10 +34,8 @@ use crate::visitor::NodeType;
 ///
 /// # Performance
 ///
-/// This function performs minimal allocations:
-/// - Clones `tag_name` (typically 2-10 bytes)
-/// - Clones `parent_tag` if present (typically 2-10 bytes)
-/// - Clones the attributes `BTreeMap` (heap allocation if non-empty)
+/// This synthetic helper owns its context data so the returned `NodeContext`
+/// does not borrow from the caller.
 ///
 /// For text nodes and simple elements without attributes, allocations are minimal.
 ///
@@ -63,14 +62,17 @@ pub fn build_node_context(
     index_in_parent: usize,
     parent_tag: Option<&str>,
     is_inline: bool,
-) -> NodeContext {
+) -> NodeContext<'static> {
     NodeContext {
         node_type,
-        tag_name: tag_name.to_string(),
-        attributes: attributes.clone(),
+        tag_name: Cow::Owned(tag_name.to_string()),
+        attributes: attributes
+            .iter()
+            .map(|(key, value)| (Cow::Owned(key.clone()), Cow::Owned(value.clone())))
+            .collect(),
         depth,
         index_in_parent,
-        parent_tag: parent_tag.map(String::from),
+        parent_tag: parent_tag.map(|tag| Cow::Owned(tag.to_string())),
         is_inline,
     }
 }
@@ -91,10 +93,10 @@ mod tests {
         assert_eq!(ctx.tag_name, "div");
         assert_eq!(ctx.depth, 2);
         assert_eq!(ctx.index_in_parent, 3);
-        assert_eq!(ctx.parent_tag, Some("body".to_string()));
+        assert_eq!(ctx.parent_tag.as_deref(), Some("body"));
         assert!(!ctx.is_inline);
         assert_eq!(ctx.attributes.len(), 2);
-        assert_eq!(ctx.attributes.get("id"), Some(&"main".to_string()));
+        assert_eq!(ctx.attributes.get("id").map(|value| value.as_ref()), Some("main"));
     }
 
     #[test]

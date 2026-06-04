@@ -121,7 +121,7 @@ fn handle_strong(
             use crate::visitor::{NodeContext, NodeType, VisitResult};
 
             let text_content = get_text_content(node_handle, parser, dom_ctx);
-            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            let attributes = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -129,7 +129,7 @@ fn handle_strong(
 
             let node_ctx = NodeContext {
                 node_type: NodeType::Strong,
-                tag_name: tag.name().as_utf8_str().to_string(),
+                tag_name: tag.name().as_utf8_str().into(),
                 attributes,
                 depth,
                 index_in_parent,
@@ -291,7 +291,7 @@ fn handle_emphasis(
             use crate::visitor::{NodeContext, NodeType, VisitResult};
 
             let text_content = get_text_content(node_handle, parser, dom_ctx);
-            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            let attributes = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -299,7 +299,7 @@ fn handle_emphasis(
 
             let node_ctx = NodeContext {
                 node_type: NodeType::Em,
-                tag_name: tag.name().as_utf8_str().to_string(),
+                tag_name: tag.name().as_utf8_str().into(),
                 attributes,
                 depth,
                 index_in_parent,

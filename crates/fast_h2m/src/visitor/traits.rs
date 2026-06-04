@@ -376,7 +376,7 @@ mod tests {
 
         let ctx = NodeContext {
             node_type: super::super::types::NodeType::Text,
-            tag_name: String::new(),
+            tag_name: String::new().into(),
             attributes: BTreeMap::new(),
             depth: 0,
             index_in_parent: 0,
@@ -443,11 +443,11 @@ mod tests {
 
         let ctx = NodeContext {
             node_type: super::super::types::NodeType::Link,
-            tag_name: "a".to_string(),
+            tag_name: "a".into(),
             attributes: BTreeMap::new(),
             depth: 1,
             index_in_parent: 0,
-            parent_tag: Some("p".to_string()),
+            parent_tag: Some("p".into()),
             is_inline: true,
         };
 

@@ -252,18 +252,17 @@ pub fn convert_table_row(
     #[cfg(feature = "visitor")]
     if let Some(ref visitor_handle) = ctx.visitor {
         use crate::visitor::{NodeContext, NodeType, VisitResult};
-        use std::collections::BTreeMap;
 
         if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            let attributes = collect_tag_attributes(tag);
 
             let node_ctx = NodeContext {
                 node_type: NodeType::TableRow,
-                tag_name: "tr".to_string(),
+                tag_name: "tr".into(),
                 attributes,
                 depth,
                 index_in_parent: row_index,
-                parent_tag: Some("table".to_string()),
+                parent_tag: Some("table".into()),
                 is_inline: false,
             };
 

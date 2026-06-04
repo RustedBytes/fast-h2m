@@ -97,7 +97,7 @@ pub fn handle_pre(
                 if let Some(node) = node_handle.get(parser)
                     && let tl::Node::Tag(tag) = node
                 {
-                    let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+                    let attributes = collect_tag_attributes(tag);
 
                     let node_id = node_handle.get_inner();
                     let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -105,7 +105,7 @@ pub fn handle_pre(
 
                     let node_ctx = NodeContext {
                         node_type: NodeType::Pre,
-                        tag_name: "pre".to_string(),
+                        tag_name: "pre".into(),
                         attributes,
                         depth,
                         index_in_parent,

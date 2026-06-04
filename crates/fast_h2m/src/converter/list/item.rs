@@ -277,20 +277,18 @@ pub fn handle_li(
         #[cfg(feature = "visitor")]
         if let Some(ref visitor_handle) = ctx.visitor {
             use crate::visitor::{NodeContext, NodeType, VisitResult};
-            use std::collections::BTreeMap;
 
-            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+            let attributes = collect_tag_attributes(tag);
 
             let parent_tag = dom_ctx
                 .parent_of(node_handle.get_inner())
-                .and_then(|pid| dom_ctx.tag_name_for(dom_ctx.node_handle(pid).copied()?, parser))
-                .map(|s| s.to_string());
+                .and_then(|pid| dom_ctx.tag_name_for(dom_ctx.node_handle(pid).copied()?, parser));
 
             let index = dom_ctx.sibling_index(node_handle.get_inner()).unwrap_or(0);
 
             let node_ctx = NodeContext {
                 node_type: NodeType::ListItem,
-                tag_name: "li".to_string(),
+                tag_name: "li".into(),
                 attributes,
                 depth,
                 index_in_parent: index,

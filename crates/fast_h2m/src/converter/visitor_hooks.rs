@@ -4,7 +4,7 @@
 //! before and after element processing during the HTML to Markdown conversion tree walk.
 //! These hooks enable custom processing, analysis, or modification of elements during conversion.
 
-use std::collections::BTreeMap;
+use std::borrow::Cow;
 
 #[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
@@ -50,7 +50,7 @@ pub fn handle_visitor_element_start(
     depth: usize,
     dom_ctx: &crate::converter::DomContext,
 ) -> VisitAction {
-    let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+    let attributes = collect_tag_attributes(tag);
 
     let node_id = node_handle.get_inner();
     let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -58,7 +58,7 @@ pub fn handle_visitor_element_start(
 
     let node_ctx = NodeContext {
         node_type: NodeType::Element,
-        tag_name: tag_name.to_string(),
+        tag_name: Cow::Borrowed(tag_name),
         attributes,
         depth,
         index_in_parent,
@@ -129,7 +129,7 @@ pub fn handle_visitor_element_end(
         return;
     }
 
-    let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+    let attributes = collect_tag_attributes(tag);
 
     let node_id = node_handle.get_inner();
     let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -137,7 +137,7 @@ pub fn handle_visitor_element_end(
 
     let node_ctx = NodeContext {
         node_type: NodeType::Element,
-        tag_name: tag_name.to_string(),
+        tag_name: Cow::Borrowed(tag_name),
         attributes,
         depth,
         index_in_parent,

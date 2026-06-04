@@ -123,7 +123,7 @@ mod tests {
         let result = dispatch_visitor(&visitor, |v| {
             let ctx = NodeContext {
                 node_type: NodeType::Text,
-                tag_name: String::new(),
+                tag_name: String::new().into(),
                 attributes: BTreeMap::new(),
                 depth: 0,
                 index_in_parent: 0,
@@ -146,7 +146,7 @@ mod tests {
 
         let ctx = NodeContext {
             node_type: NodeType::Text,
-            tag_name: String::new(),
+            tag_name: String::new().into(),
             attributes: BTreeMap::new(),
             depth: 0,
             index_in_parent: 0,
@@ -166,7 +166,7 @@ mod tests {
 
         let ctx = NodeContext {
             node_type: NodeType::Text,
-            tag_name: String::new(),
+            tag_name: String::new().into(),
             attributes: BTreeMap::new(),
             depth: 0,
             index_in_parent: 0,
@@ -187,7 +187,7 @@ mod tests {
 
         let ctx = NodeContext {
             node_type: NodeType::Text,
-            tag_name: String::new(),
+            tag_name: String::new().into(),
             attributes: BTreeMap::new(),
             depth: 0,
             index_in_parent: 0,
@@ -209,7 +209,7 @@ mod tests {
 
         let ctx = NodeContext {
             node_type: NodeType::Text,
-            tag_name: String::new(),
+            tag_name: String::new().into(),
             attributes: BTreeMap::new(),
             depth: 0,
             index_in_parent: 0,
@@ -229,7 +229,7 @@ mod tests {
 
         let ctx = NodeContext {
             node_type: NodeType::Text,
-            tag_name: String::new(),
+            tag_name: String::new().into(),
             attributes: BTreeMap::new(),
             depth: 0,
             index_in_parent: 0,

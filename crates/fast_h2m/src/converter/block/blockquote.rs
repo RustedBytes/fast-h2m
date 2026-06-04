@@ -96,7 +96,7 @@ pub fn handle(
             if let Some(node) = node_handle.get(parser)
                 && let tl::Node::Tag(tag) = node
             {
-                let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+                let attributes = collect_tag_attributes(tag);
 
                 let node_id = node_handle.get_inner();
                 let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -104,7 +104,7 @@ pub fn handle(
 
                 let node_ctx = NodeContext {
                     node_type: NodeType::Blockquote,
-                    tag_name: "blockquote".to_string(),
+                    tag_name: "blockquote".into(),
                     attributes,
                     depth,
                     index_in_parent,

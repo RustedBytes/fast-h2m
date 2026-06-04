@@ -115,7 +115,7 @@ pub fn handle_dt(
         let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
         let node_ctx = NodeContext {
             node_type: NodeType::DefinitionTerm,
-            tag_name: "dt".to_string(),
+            tag_name: "dt".into(),
             attributes,
             depth,
             index_in_parent,
@@ -208,7 +208,7 @@ pub fn handle_dd(
         let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
         let node_ctx = NodeContext {
             node_type: NodeType::DefinitionDescription,
-            tag_name: "dd".to_string(),
+            tag_name: "dd".into(),
             attributes,
             depth,
             index_in_parent,

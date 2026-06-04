@@ -42,7 +42,7 @@ pub fn handle(
         let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
         let node_ctx = NodeContext {
             node_type: NodeType::Br,
-            tag_name: "br".to_string(),
+            tag_name: "br".into(),
             attributes,
             depth,
             index_in_parent,

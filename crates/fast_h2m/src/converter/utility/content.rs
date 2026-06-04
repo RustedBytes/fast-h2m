@@ -3,24 +3,25 @@
 //! Functions for extracting and processing element content, including text collection
 //! and empty element detection.
 
-use crate::text;
 use std::borrow::Cow;
 #[cfg(feature = "visitor")]
 use std::collections::BTreeMap;
 
+use crate::text;
+
 // Forward declare DomContext from parent module to avoid circular imports
 pub use crate::converter::DomContext;
 
-/// Collect all attributes from an HTML tag as a `BTreeMap<String, String>`.
+/// Collect all attributes from an HTML tag as a borrowed `BTreeMap`.
 ///
 /// Boolean attributes (those with `None` as the value) are skipped; only
 /// attributes that carry an explicit value are included.
 #[cfg(feature = "visitor")]
 #[inline]
-pub fn collect_tag_attributes(tag: &tl::HTMLTag) -> BTreeMap<String, String> {
+pub fn collect_tag_attributes<'a>(tag: &'a tl::HTMLTag) -> BTreeMap<Cow<'a, str>, Cow<'a, str>> {
     tag.attributes()
         .iter()
-        .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
+        .filter_map(|(k, v)| v.map(|val| (k, val)))
         .collect()
 }
 

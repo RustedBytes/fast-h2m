@@ -131,7 +131,7 @@ pub fn handle_img(
     let image_output = if let Some(ref visitor_handle) = ctx.visitor {
         use crate::visitor::{NodeContext, NodeType, VisitResult};
 
-        let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
+        let attributes = collect_tag_attributes(tag);
 
         let node_id = node_handle.get_inner();
         let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -139,7 +139,7 @@ pub fn handle_img(
 
         let node_ctx = NodeContext {
             node_type: NodeType::Image,
-            tag_name: "img".to_string(),
+            tag_name: "img".into(),
             attributes,
             depth,
             index_in_parent,

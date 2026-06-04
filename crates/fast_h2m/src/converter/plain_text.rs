@@ -161,7 +161,7 @@ fn walk_plain(
                 let text_str: &str = &decoded;
                 let node_ctx = NodeContext {
                     node_type: NodeType::Text,
-                    tag_name: String::new(),
+                    tag_name: String::new().into(),
                     attributes: BTreeMap::new(),
                     depth: state.depth,
                     index_in_parent: 0,
@@ -223,7 +223,7 @@ fn walk_plain(
                 let attributes = collect_tag_attributes(tag);
                 let node_ctx = NodeContext {
                     node_type: NodeType::Element,
-                    tag_name: tag_str.to_string(),
+                    tag_name: tag_str.into(),
                     attributes,
                     depth: state.depth,
                     index_in_parent: 0,
@@ -348,7 +348,7 @@ fn walk_plain(
                 let attributes = collect_tag_attributes(tag);
                 let node_ctx = NodeContext {
                     node_type: NodeType::Element,
-                    tag_name: tag_str.to_string(),
+                    tag_name: tag_str.into(),
                     attributes,
                     depth: state.depth,
                     index_in_parent: 0,

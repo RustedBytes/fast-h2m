@@ -59,7 +59,7 @@ struct ContentFilter {
 impl HtmlVisitor for ContentFilter {
     /// Use `visit_element_start` to filter ANY element by tag name
     fn visit_element_start(&mut self, ctx: &NodeContext) -> VisitResult {
-        let tag_name = ctx.tag_name.as_str();
+        let tag_name = ctx.tag_name.as_ref();
 
         match tag_name {
             "div" => {
@@ -67,7 +67,7 @@ impl HtmlVisitor for ContentFilter {
                 let classes = ctx
                     .attributes
                     .get("class")
-                    .map_or("", std::string::String::as_str);
+                    .map_or("", |value| value.as_ref());
                 if classes.contains("ad")
                     || classes.contains("advertisement")
                     || classes.contains("tracking")
@@ -108,11 +108,11 @@ impl HtmlVisitor for ContentFilter {
         let width = ctx
             .attributes
             .get("width")
-            .map_or("", std::string::String::as_str);
+            .map_or("", |value| value.as_ref());
         let height = ctx
             .attributes
             .get("height")
-            .map_or("", std::string::String::as_str);
+            .map_or("", |value| value.as_ref());
 
         if width == "1" && height == "1" {
             self.skipped_elements
