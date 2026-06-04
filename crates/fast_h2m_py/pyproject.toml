@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "fast-h2m"
 version = "0.4.1"
-description = "Python bindings for fast_h2m, a high-performance HTML to Markdown converter"
+description = "Python bindings for fast_h2m, a high-performance HTML to Markdown converter written in Rust."
 authors = [
     { name = "Yehor Smoliakov", email = "egorsmkv@gmail.com" },
 ]
@@ -27,7 +27,7 @@ classifiers = [
     "Programming Language :: Rust",
     "Typing :: Typed",
 ]
-urls = { Homepage = "https://github.com/RustedBytes/fast_h2m", Documentation = "https://github.com/RustedBytes/fast_h2m#readme", Repository = "https://github.com/RustedBytes/fast_h2m", Issues = "https://github.com/RustedBytes/fast_h2m/issues" }
+urls = { Homepage = "https://github.com/RustedBytes/fast-h2m", Documentation = "https://github.com/RustedBytes/fast-h2m#readme", Repository = "https://github.com/RustedBytes/fast-h2m", Issues = "https://github.com/RustedBytes/fast-h2m/issues" }
 
 [project.optional-dependencies]
 dev = ["maturin", "pytest"]
