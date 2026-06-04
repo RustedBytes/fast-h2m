@@ -68,3 +68,24 @@ def test_fast_dom_tier_strategy_accepts_camel_case_alias():
 
     assert "# Hello" in markdown
     assert "World" in markdown
+
+
+def test_mdream_tier_strategy_is_available():
+    markdown = fast_h2m.convert_to_markdown(
+        "<h1>Hello</h1><p>World</p>",
+        {"tier_strategy": "mdream"},
+    )
+
+    assert "# Hello" in markdown
+    assert "World" in markdown
+
+
+def test_mdream_stream_processor_converts_chunks():
+    stream = fast_h2m.MarkdownStreamProcessor()
+    markdown = ""
+    markdown += stream.process_chunk("<h1>Hello</h1>")
+    markdown += stream.process_chunk("<p>World</p>")
+    markdown += stream.finish()
+
+    assert "# Hello" in markdown
+    assert "World" in markdown

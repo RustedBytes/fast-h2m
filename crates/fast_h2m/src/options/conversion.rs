@@ -45,6 +45,12 @@ pub enum TierStrategy {
     /// and repair machinery. It is intended for callers that prefer throughput over
     /// the richer compatibility behavior of [`TierStrategy::Tier2`].
     FastDom,
+    /// Use mdream's streaming-capable converter.
+    ///
+    /// This is a lean mode intended for high-throughput Markdown output. It does
+    /// not populate rich side channels such as metadata, structure, tables, or
+    /// inline image extraction.
+    Mdream,
     /// Force the Tier-1 byte scanner; if it bails, fall back to Tier-2.
     /// Testkit-only; not stable API.
     #[cfg(any(test, feature = "testkit"))]
@@ -372,6 +378,7 @@ pub struct ConversionOptions {
     ///
     /// - [`TierStrategy::Auto`] (default) — automatically choose the best path.
     /// - [`TierStrategy::Tier2`] — always use the Tier-2 DOM-walk path.
+    /// - [`TierStrategy::Mdream`] — use mdream's lean streaming-capable converter.
     /// - `TierStrategy::Tier1` — always attempt Tier-1 (testkit only).
     #[cfg_attr(
         any(feature = "serde", feature = "metadata"),

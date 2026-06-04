@@ -129,6 +129,37 @@ println!("{}", result.content.unwrap_or_default());
 machinery used by the full Tier-2 converter. Prefer it when raw Markdown
 throughput matters more than the full structured `ConversionResult`.
 
+### mdream Mode
+
+For mdream-backed lean conversion, use the `Mdream` strategy:
+
+```rust
+use fast_h2m::{convert, ConversionOptions, TierStrategy};
+
+let options = ConversionOptions {
+    tier_strategy: TierStrategy::Mdream,
+    ..Default::default()
+};
+
+let result = convert("<h1>Hello</h1><p>World</p>", Some(options))?;
+println!("{}", result.content.unwrap_or_default());
+```
+
+For chunked streaming conversion:
+
+```rust
+use fast_h2m::MarkdownStreamProcessor;
+
+let mut stream = MarkdownStreamProcessor::new(None);
+let mut markdown = String::new();
+markdown.push_str(&stream.process_chunk("<h1>Hello</h1>"));
+markdown.push_str(&stream.process_chunk("<p>World</p>"));
+markdown.push_str(&stream.finish());
+```
+
+`Mdream` is a lean mode and does not populate rich side channels such as
+metadata, document structure, tables, visitor output, or inline images.
+
 ### Preserving HTML Tags
 
 The `preserve_tags` option allows you to keep specific HTML tags in their original form instead of converting them to Markdown:

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
 __version__: str
 
-TierStrategy = Literal["auto", "tier2", "fast_dom"]
+TierStrategy = Literal["auto", "tier2", "fast_dom", "mdream"]
 
 class ConversionOptions(TypedDict, total=False):
     tier_strategy: TierStrategy
@@ -58,3 +58,10 @@ def convert(
 def convert_to_markdown(
     html: str, options: Optional[Union[ConversionOptions, Dict[str, Any]]] = None
 ) -> str: ...
+
+class MarkdownStreamProcessor:
+    def __init__(
+        self, options: Optional[Union[ConversionOptions, Dict[str, Any]]] = None
+    ) -> None: ...
+    def process_chunk(self, chunk: str) -> str: ...
+    def finish(self) -> str: ...

@@ -5,6 +5,31 @@ use pyo3::types::PyAny;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+#[pyclass]
+struct MarkdownStreamProcessor {
+    inner: fast_h2m_core::MarkdownStreamProcessor,
+}
+
+#[pymethods]
+impl MarkdownStreamProcessor {
+    #[new]
+    #[pyo3(signature = (options = None))]
+    fn new(py: Python<'_>, options: Option<Py<PyAny>>) -> PyResult<Self> {
+        let options = parse_options(py, options)?;
+        Ok(Self {
+            inner: fast_h2m_core::MarkdownStreamProcessor::new(options),
+        })
+    }
+
+    fn process_chunk(&mut self, chunk: &str) -> String {
+        self.inner.process_chunk(chunk)
+    }
+
+    fn finish(&mut self) -> String {
+        self.inner.finish()
+    }
+}
+
 #[pyfunction]
 #[pyo3(signature = (html, options = None))]
 fn convert(py: Python<'_>, html: &str, options: Option<Py<PyAny>>) -> PyResult<Py<PyAny>> {
@@ -29,6 +54,7 @@ fn fast_h2m(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", VERSION)?;
     m.add_function(wrap_pyfunction!(convert, m)?)?;
     m.add_function(wrap_pyfunction!(convert_to_markdown, m)?)?;
+    m.add_class::<MarkdownStreamProcessor>()?;
     Ok(())
 }
 

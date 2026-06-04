@@ -24,3 +24,5 @@ pub use crate::options::{
     PreprocessingOptions, PreprocessingOptionsUpdate, PreprocessingPreset, TierStrategy,
     WhitespaceMode,
 };
+
+pub use crate::mdream_adapter::MarkdownStreamProcessor;

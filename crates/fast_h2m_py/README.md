@@ -21,4 +21,23 @@ markdown = fast_h2m.convert_to_markdown(
 `fast_dom` skips the richer metadata, structure, visitor, selector, and repair
 machinery used by the full converter.
 
+For mdream-backed lean conversion:
+
+```python
+markdown = fast_h2m.convert_to_markdown(
+    html,
+    {"tier_strategy": "mdream"},
+)
+```
+
+For chunked streaming conversion:
+
+```python
+stream = fast_h2m.MarkdownStreamProcessor()
+markdown = ""
+markdown += stream.process_chunk("<h1>Hello</h1>")
+markdown += stream.process_chunk("<p>World</p>")
+markdown += stream.finish()
+```
+
 The package targets Python 3.8+ and exposes the Rust converter through PyO3.

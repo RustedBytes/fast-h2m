@@ -27,6 +27,7 @@ mod convert_api;
 #[allow(dead_code)]
 pub(crate) mod converter;
 mod exports;
+mod mdream_adapter;
 pub(crate) mod tl_types;
 
 // Re-export internal test/benchmark modules when the testkit feature is active.

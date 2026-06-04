@@ -100,6 +100,11 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
             let markdown = crate::converter::fast_dom::convert(normalized.as_ref(), &options)?;
             return Ok(conversion_result_from_content(markdown));
         }
+        crate::options::TierStrategy::Mdream => {
+            let normalized = normalize_input_for_fast_dom(html)?;
+            let markdown = crate::mdream_adapter::convert(normalized.as_ref(), &options);
+            return Ok(conversion_result_from_content(markdown));
+        }
         crate::options::TierStrategy::Tier2 => {
             // Skip Tier-1 entirely; fall through to the Tier-2 path below.
         }

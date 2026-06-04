@@ -5,7 +5,7 @@ use std::hint::black_box;
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 #[cfg(feature = "testkit")]
 use fast_h2m::testkit::{prescan, tier1};
-use fast_h2m::{ConversionOptions, TierStrategy, convert};
+use fast_h2m::{ConversionOptions, MarkdownStreamProcessor, TierStrategy, convert};
 
 const SIMPLE_HTML: &str = r#"
 <article>
@@ -105,6 +105,31 @@ fn options_for(strategy: TierStrategy) -> ConversionOptions {
     }
 }
 
+fn valid_utf8_chunks(input: &str, max_bytes: usize) -> Vec<&str> {
+    if input.is_empty() {
+        return vec![""];
+    }
+
+    let mut chunks = Vec::new();
+    let mut start = 0;
+    while start < input.len() {
+        let mut end = (start + max_bytes).min(input.len());
+        while end > start && !input.is_char_boundary(end) {
+            end -= 1;
+        }
+        if end == start {
+            end = input[start..]
+                .char_indices()
+                .nth(1)
+                .map_or(input.len(), |(idx, _)| start + idx);
+        }
+        chunks.push(&input[start..end]);
+        start = end;
+    }
+
+    chunks
+}
+
 fn bench_convert_cases(c: &mut Criterion) {
     let cases = [
         ("elon_musk_wiki", ELON_MUSK_WIKI_FIXTURE),
@@ -126,6 +151,7 @@ fn bench_convert_cases(c: &mut Criterion) {
         ("auto", options_for(TierStrategy::Auto)),
         ("tier2", options_for(TierStrategy::Tier2)),
         ("fast_dom", options_for(TierStrategy::FastDom)),
+        ("mdream", options_for(TierStrategy::Mdream)),
     ];
 
     let mut group = c.benchmark_group("convert");
@@ -141,6 +167,43 @@ fn bench_convert_cases(c: &mut Criterion) {
                         let result =
                             convert(black_box(*html), Some((*options).clone())).expect("convert");
                         black_box(result);
+                    });
+                },
+            );
+        }
+    }
+    group.finish();
+}
+
+fn bench_mdream_streaming_cases(c: &mut Criterion) {
+    let cases = [
+        ("simple_html", SIMPLE_HTML),
+        ("table_html", TABLE_HTML),
+        ("hacker_news_fixture", HACKER_NEWS_FIXTURE),
+        ("wikipedia_small_fixture", WIKIPEDIA_SMALL_FIXTURE),
+    ];
+    let chunk_sizes = [64usize, 1024, 16 * 1024];
+
+    let mut group = c.benchmark_group("mdream_streaming");
+    for (case_name, html) in cases {
+        group.throughput(Throughput::Bytes(html.len() as u64));
+
+        for chunk_size in chunk_sizes {
+            let chunks = valid_utf8_chunks(html, chunk_size);
+            group.bench_with_input(
+                BenchmarkId::new(format!("{chunk_size}_byte_chunks"), case_name),
+                &chunks,
+                |b, chunks| {
+                    b.iter(|| {
+                        let mut stream = MarkdownStreamProcessor::new(None);
+                        let mut markdown = String::new();
+
+                        for chunk in black_box(chunks) {
+                            markdown.push_str(&stream.process_chunk(chunk));
+                        }
+                        markdown.push_str(&stream.finish());
+
+                        black_box(markdown);
                     });
                 },
             );
@@ -298,6 +361,7 @@ fn bench_internal_focused_cases(c: &mut Criterion) {
 criterion_group!(
     benches,
     bench_convert_cases,
+    bench_mdream_streaming_cases,
     bench_public_focused_cases,
     bench_escape_threshold_cases,
     bench_internal_focused_cases
@@ -306,6 +370,7 @@ criterion_group!(
 criterion_group!(
     benches,
     bench_convert_cases,
+    bench_mdream_streaming_cases,
     bench_public_focused_cases,
     bench_escape_threshold_cases
 );

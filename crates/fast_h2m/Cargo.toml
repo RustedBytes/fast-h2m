@@ -40,6 +40,7 @@ image = { version = "0.25", default-features = false, features = [
     "bmp",
     "webp",
 ], optional = true }
+mdream.workspace = true
 memchr = "2"
 phf = { version = "0.13", features = ["macros"] }
 serde = { version = "1.0", features = ["derive"], optional = true }
