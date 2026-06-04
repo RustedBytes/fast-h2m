@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "fast-h2m"
-version = "0.2.0"
+version = "0.3.0"
 description = "Python bindings for fast_h2m, a high-performance HTML to Markdown converter"
 authors = [
     { name = "Na'aman Hirschfeld", email = "naaman@kreuzberg.dev" },

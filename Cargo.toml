@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 authors = ["Na'aman Hirschfeld <naaman@kreuzberg.dev>", "Yehor Smoliakov <egorsmkv@gmail.com>"]
 description = "High-performance HTML to Markdown converter"
@@ -36,4 +36,4 @@ strip = true
 debug = 1
 
 [patch.crates-io]
-fast_h2m = { path = "crates/fast_h2m", version = "0.2.0" }
+fast_h2m = { path = "crates/fast_h2m", version = "0.3.0" }
