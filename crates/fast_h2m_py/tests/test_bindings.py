@@ -41,3 +41,30 @@ def test_metadata_is_included_by_default():
     )
 
     assert result["metadata"]["document"]["title"] == "Page title"
+
+
+def test_fast_dom_tier_strategy_is_available():
+    html = """
+    <article>
+      <h1>Hello</h1>
+      <p>A <strong>fast</strong> path with <a href="https://example.com">a link</a>.</p>
+      <script>ignored()</script>
+    </article>
+    """
+
+    markdown = fast_h2m.convert_to_markdown(html, {"tier_strategy": "fast_dom"})
+
+    assert "# Hello" in markdown
+    assert "**fast**" in markdown
+    assert "[a link](https://example.com)" in markdown
+    assert "ignored" not in markdown
+
+
+def test_fast_dom_tier_strategy_accepts_camel_case_alias():
+    markdown = fast_h2m.convert_to_markdown(
+        "<h1>Hello</h1><p>World</p>",
+        {"tierStrategy": "fast_dom"},
+    )
+
+    assert "# Hello" in markdown
+    assert "World" in markdown
