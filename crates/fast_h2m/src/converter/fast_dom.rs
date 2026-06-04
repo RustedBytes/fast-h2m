@@ -151,6 +151,7 @@ fn walk_node(
     }
 }
 
+#[inline]
 fn walk_children(
     tag: &tl::HTMLTag,
     parser: &crate::tl_types::Parser,
@@ -163,6 +164,7 @@ fn walk_children(
     }
 }
 
+#[inline]
 fn classify_tag(name: &str) -> TagKind {
     let bytes = name.as_bytes();
     match bytes.len() {
@@ -735,6 +737,7 @@ fn collapse_whitespace(text: &str) -> String {
     output
 }
 
+#[inline]
 fn push_collapsed(output: &mut String, text: &str) {
     if text.is_empty() {
         return;
@@ -747,6 +750,7 @@ fn push_collapsed(output: &mut String, text: &str) {
     output.push_str(text);
 }
 
+#[inline]
 fn decode_attr_text(value: &str) -> Cow<'_, str> {
     if contains_byte(value.as_bytes(), b'&') {
         text::decode_html_entities_cow(value)
@@ -786,6 +790,7 @@ fn escape_link_label(label: &str) -> String {
     out
 }
 
+#[inline]
 fn format_destination(url: &str) -> Cow<'_, str> {
     if url.as_bytes().iter().any(|b| b.is_ascii_whitespace()) {
         Cow::Owned(format!("<{}>", url.replace('\n', "%0A")))
@@ -794,6 +799,7 @@ fn format_destination(url: &str) -> Cow<'_, str> {
     }
 }
 
+#[inline]
 fn ensure_block_start(output: &mut String, state: FastState) {
     if state.inline || output.is_empty() {
         return;
@@ -808,6 +814,7 @@ fn ensure_block_start(output: &mut String, state: FastState) {
     }
 }
 
+#[inline]
 fn push_block_end(output: &mut String, state: FastState) {
     if state.inline {
         return;
@@ -822,12 +829,14 @@ fn push_block_end(output: &mut String, state: FastState) {
     }
 }
 
+#[inline]
 fn trim_trailing_spaces(output: &mut String) {
     while output.ends_with([' ', '\t']) {
         output.pop();
     }
 }
 
+#[inline]
 fn trim_document_end(output: &mut String) {
     let len = output.trim_end_matches(|ch: char| ch.is_whitespace()).len();
     output.truncate(len);
@@ -868,6 +877,7 @@ fn may_need_text_normalization(bytes: &[u8]) -> bool {
     bytes.iter().any(|byte| *byte <= b' ' || *byte >= 0x80)
 }
 
+#[inline]
 fn trim_code_span(output: &mut String, start: usize) {
     let end = output.len();
     if start >= end {
