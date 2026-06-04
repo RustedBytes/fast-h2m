@@ -41,6 +41,62 @@ pub(crate) fn count_binary_markers(bytes: &[u8]) -> (usize, usize) {
     (control_count, nul_count)
 }
 
+#[inline]
+pub(crate) fn contains_byte(bytes: &[u8], needle: u8) -> bool {
+    let needle_byte = needle;
+    let needle = Simd::<u8, LANES>::splat(needle_byte);
+    let mut chunks = bytes.chunks_exact(LANES);
+
+    for chunk in &mut chunks {
+        let vector = Simd::<u8, LANES>::from_slice(chunk);
+        if vector.simd_eq(needle).any() {
+            return true;
+        }
+    }
+
+    chunks.remainder().contains(&needle_byte)
+}
+
+#[inline]
+pub(crate) fn contains_any2(bytes: &[u8], first: u8, second: u8) -> bool {
+    let first_byte = first;
+    let second_byte = second;
+    let first = Simd::<u8, LANES>::splat(first_byte);
+    let second = Simd::<u8, LANES>::splat(second_byte);
+    let mut chunks = bytes.chunks_exact(LANES);
+
+    for chunk in &mut chunks {
+        let vector = Simd::<u8, LANES>::from_slice(chunk);
+        if (vector.simd_eq(first) | vector.simd_eq(second)).any() {
+            return true;
+        }
+    }
+
+    chunks
+        .remainder()
+        .iter()
+        .any(|byte| *byte == first_byte || *byte == second_byte)
+}
+
+#[inline]
+pub(crate) fn contains_ascii_whitespace_or_non_ascii(bytes: &[u8]) -> bool {
+    let space = Simd::<u8, LANES>::splat(b' ');
+    let ascii_limit = Simd::<u8, LANES>::splat(0x80);
+    let mut chunks = bytes.chunks_exact(LANES);
+
+    for chunk in &mut chunks {
+        let vector = Simd::<u8, LANES>::from_slice(chunk);
+        if (vector.simd_le(space) | vector.simd_ge(ascii_limit)).any() {
+            return true;
+        }
+    }
+
+    chunks
+        .remainder()
+        .iter()
+        .any(|byte| *byte <= b' ' || *byte >= 0x80)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -53,6 +109,8 @@ mod tests {
             b"abcdefghijklmnopqrstuvwxyzABCDE<".to_vec(),
             b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>".to_vec(),
             b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".to_vec(),
+            b"\0\0\0abc\x01\x02\x1F".to_vec(),
+            "hello\u{a0}world".as_bytes().to_vec(),
         ]
     }
 
@@ -65,6 +123,39 @@ mod tests {
                 .count();
             let nul = bytes.iter().filter(|&&byte| byte == 0).count();
             assert_eq!(count_binary_markers(&bytes), (control, nul));
+        }
+    }
+
+    #[test]
+    fn contains_byte_matches_scalar() {
+        for bytes in cases() {
+            for needle in [0, b'<', b'>', b'z'] {
+                assert_eq!(
+                    contains_byte(&bytes, needle),
+                    bytes.contains(&needle),
+                    "bytes={bytes:?} needle={needle}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn contains_any2_matches_scalar() {
+        for bytes in cases() {
+            assert_eq!(
+                contains_any2(&bytes, b'<', b'>'),
+                bytes.iter().any(|byte| matches!(*byte, b'<' | b'>'))
+            );
+        }
+    }
+
+    #[test]
+    fn contains_ascii_whitespace_or_non_ascii_matches_scalar() {
+        for bytes in cases() {
+            assert_eq!(
+                contains_ascii_whitespace_or_non_ascii(&bytes),
+                bytes.iter().any(|byte| *byte <= b' ' || *byte >= 0x80)
+            );
         }
     }
 }

@@ -4,7 +4,7 @@
 
 use std::borrow::Cow;
 
-use memchr::{memchr, memchr2, memchr3, memmem};
+use memchr::{memchr, memchr3, memmem};
 
 #[cfg(any(feature = "metadata", feature = "inline-images"))]
 use crate::ConversionError;
@@ -365,12 +365,24 @@ fn normalize_input(html: &str) -> Result<Cow<'_, str>> {
 /// the XHTML self-closing repair scan, which is part of the compatibility-rich
 /// Tier-2 path and not needed for the lean fast path.
 fn normalize_input_for_fast_dom(html: &str) -> Result<Cow<'_, str>> {
-    if memchr2(0, b'\r', html.as_bytes()).is_none() {
+    if !fast_dom_needs_full_normalize(html.as_bytes()) {
         validate_input(html)?;
         return Ok(Cow::Borrowed(html));
     }
 
     normalize_input(html)
+}
+
+#[cfg(all(feature = "simd", nightly))]
+#[inline]
+fn fast_dom_needs_full_normalize(bytes: &[u8]) -> bool {
+    crate::simd_scan::contains_any2(bytes, 0, b'\r')
+}
+
+#[cfg(not(all(feature = "simd", nightly)))]
+#[inline]
+fn fast_dom_needs_full_normalize(bytes: &[u8]) -> bool {
+    memchr::memchr2(0, b'\r', bytes).is_some()
 }
 
 /// Insert a space before `/>` in XHTML-style self-closing tags so the underlying

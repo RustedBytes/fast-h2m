@@ -685,7 +685,7 @@ fn push_text(raw: &str, output: &mut String, options: &ConversionOptions, state:
         return;
     }
 
-    let decoded = if raw.as_bytes().contains(&b'&') {
+    let decoded = if contains_byte(raw.as_bytes(), b'&') {
         text::decode_html_entities_cow(raw)
     } else {
         Cow::Borrowed(raw)
@@ -702,6 +702,10 @@ fn push_text(raw: &str, output: &mut String, options: &ConversionOptions, state:
 }
 
 fn normalize_text(text: &str) -> Cow<'_, str> {
+    if !may_need_text_normalization(text.as_bytes()) {
+        return Cow::Borrowed(text);
+    }
+
     let mut previous_was_space = false;
     for ch in text.chars() {
         if ch.is_whitespace() {
@@ -746,7 +750,7 @@ fn push_collapsed(output: &mut String, text: &str) {
 }
 
 fn decode_attr_text(value: &str) -> Cow<'_, str> {
-    if value.as_bytes().contains(&b'&') {
+    if contains_byte(value.as_bytes(), b'&') {
         text::decode_html_entities_cow(value)
     } else {
         Cow::Borrowed(value)
@@ -840,6 +844,30 @@ fn trim_document_boundaries(output: &mut String) {
     if start > 0 {
         output.drain(..start);
     }
+}
+
+#[cfg(all(feature = "simd", nightly))]
+#[inline]
+fn contains_byte(bytes: &[u8], needle: u8) -> bool {
+    crate::simd_scan::contains_byte(bytes, needle)
+}
+
+#[cfg(not(all(feature = "simd", nightly)))]
+#[inline]
+fn contains_byte(bytes: &[u8], needle: u8) -> bool {
+    bytes.contains(&needle)
+}
+
+#[cfg(all(feature = "simd", nightly))]
+#[inline]
+fn may_need_text_normalization(bytes: &[u8]) -> bool {
+    crate::simd_scan::contains_ascii_whitespace_or_non_ascii(bytes)
+}
+
+#[cfg(not(all(feature = "simd", nightly)))]
+#[inline]
+fn may_need_text_normalization(bytes: &[u8]) -> bool {
+    bytes.iter().any(|byte| *byte <= b' ' || *byte >= 0x80)
 }
 
 fn trim_code_span(output: &mut String, start: usize) {
