@@ -1551,36 +1551,31 @@ fn collapse_excess_blank_lines(output: &mut String) {
         return;
     };
 
-    let len = output.len();
+    let mut bytes = std::mem::take(output).into_bytes();
+    let len = bytes.len();
+    let mut read = first_excess_run + 2;
+    let mut write = first_excess_run + 2;
+    let mut consecutive_newlines = 2usize;
 
-    // SAFETY: The loop only removes ASCII newline bytes and otherwise copies
-    // bytes from the original valid UTF-8 string in order, so the final byte
-    // vector remains valid UTF-8.
-    unsafe {
-        let bytes = output.as_mut_vec();
-        let mut read = first_excess_run + 2;
-        let mut write = first_excess_run + 2;
-        let mut consecutive_newlines = 2usize;
+    while read < len {
+        let byte = bytes[read];
+        read += 1;
 
-        while read < len {
-            let byte = bytes[read];
-            read += 1;
-
-            if byte == b'\n' {
-                consecutive_newlines += 1;
-                if consecutive_newlines > 2 {
-                    continue;
-                }
-            } else {
-                consecutive_newlines = 0;
+        if byte == b'\n' {
+            consecutive_newlines += 1;
+            if consecutive_newlines > 2 {
+                continue;
             }
-
-            bytes[write] = byte;
-            write += 1;
+        } else {
+            consecutive_newlines = 0;
         }
 
-        bytes.truncate(write);
+        bytes[write] = byte;
+        write += 1;
     }
+
+    bytes.truncate(write);
+    *output = String::from_utf8(bytes).expect("removing newline bytes preserves UTF-8");
 }
 
 // ── HTML entity decoding ──────────────────────────────────────────────────────
