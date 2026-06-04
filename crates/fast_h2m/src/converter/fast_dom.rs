@@ -20,6 +20,30 @@ struct FastState {
     ordered_list: bool,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum TagKind {
+    Passthrough,
+    Skip,
+    Heading(usize),
+    Paragraph,
+    Break,
+    Strong,
+    Emphasis,
+    Code,
+    Pre,
+    Link,
+    Image,
+    UnorderedList,
+    OrderedList,
+    ListItem,
+    Blockquote,
+    HorizontalRule,
+    Table,
+    TableSection,
+    TableRow,
+    TableCell,
+}
+
 pub fn convert(html: &str, options: &ConversionOptions) -> Result<String> {
     let dom = tl::parse(html, tl::ParserOptions::default())
         .map_err(|_| ConversionError::ParseError("Failed to parse HTML".to_string()))?;
@@ -54,16 +78,15 @@ fn walk_node(
         tl::Node::Comment(_) => {}
         tl::Node::Tag(tag) => {
             let name = tag.name().as_utf8_str();
-            let name = name.as_ref().to_ascii_lowercase();
-            match name.as_str() {
-                "html" | "body" | "main" | "article" | "section" | "div" | "span" => {
+            match classify_tag(name.as_ref()) {
+                TagKind::Passthrough => {
                     walk_children(tag, parser, output, options, state);
                 }
-                "head" | "script" | "style" | "template" | "noscript" => {}
-                "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => {
-                    handle_heading(&name, tag, parser, output, options, state);
+                TagKind::Skip => {}
+                TagKind::Heading(level) => {
+                    handle_heading(level, tag, parser, output, options, state);
                 }
-                "p" => {
+                TagKind::Paragraph => {
                     ensure_block_start(output, state);
                     let start = output.len();
                     walk_children(tag, parser, output, options, state);
@@ -72,13 +95,13 @@ fn walk_node(
                         push_block_end(output, state);
                     }
                 }
-                "br" => match options.newline_style {
+                TagKind::Break => match options.newline_style {
                     NewlineStyle::Backslash => output.push_str("\\\n"),
                     NewlineStyle::Spaces => output.push_str("  \n"),
                 },
-                "strong" | "b" => handle_wrapped(tag, parser, output, options, state, "**"),
-                "em" | "i" => handle_wrapped(tag, parser, output, options, state, "*"),
-                "code" => {
+                TagKind::Strong => handle_wrapped(tag, parser, output, options, state, "**"),
+                TagKind::Emphasis => handle_wrapped(tag, parser, output, options, state, "*"),
+                TagKind::Code => {
                     if state.in_pre {
                         walk_children(
                             tag,
@@ -108,27 +131,21 @@ fn walk_node(
                         output.push('`');
                     }
                 }
-                "pre" => handle_pre(tag, parser, output, options, state),
-                "a" => handle_link(tag, parser, output, options, state),
-                "img" => handle_img(tag, output, options, state),
-                "ul" => handle_list(tag, parser, output, options, state, false),
-                "ol" => handle_list(tag, parser, output, options, state, true),
-                "li" => handle_list_item(tag, parser, output, options, state),
-                "blockquote" => handle_blockquote(tag, parser, output, options, state),
-                "hr" => {
+                TagKind::Pre => handle_pre(tag, parser, output, options, state),
+                TagKind::Link => handle_link(tag, parser, output, options, state),
+                TagKind::Image => handle_img(tag, output, options, state),
+                TagKind::UnorderedList => handle_list(tag, parser, output, options, state, false),
+                TagKind::OrderedList => handle_list(tag, parser, output, options, state, true),
+                TagKind::ListItem => handle_list_item(tag, parser, output, options, state),
+                TagKind::Blockquote => handle_blockquote(tag, parser, output, options, state),
+                TagKind::HorizontalRule => {
                     ensure_block_start(output, state);
                     output.push_str("---\n\n");
                 }
-                "table" => handle_table(tag, parser, output, options, state),
-                "thead" | "tbody" | "tfoot" | "tr" | "td" | "th" | "caption" => {
+                TagKind::Table => handle_table(tag, parser, output, options, state),
+                TagKind::TableSection | TagKind::TableRow | TagKind::TableCell => {
                     walk_children(tag, parser, output, options, state);
                 }
-                "sub" | "sup" | "mark" | "small" | "del" | "s" | "ins" | "u" | "abbr" | "dfn"
-                | "kbd" | "samp" | "var" | "time" | "data" | "figure" | "figcaption" | "header"
-                | "footer" | "nav" | "aside" => {
-                    walk_children(tag, parser, output, options, state);
-                }
-                _ => walk_children(tag, parser, output, options, state),
             }
         }
     }
@@ -146,20 +163,124 @@ fn walk_children(
     }
 }
 
+fn classify_tag(name: &str) -> TagKind {
+    let bytes = name.as_bytes();
+    match bytes.len() {
+        1 => {
+            if eq_tag(bytes, b"a") {
+                TagKind::Link
+            } else if eq_tag(bytes, b"b") {
+                TagKind::Strong
+            } else if eq_tag(bytes, b"i") {
+                TagKind::Emphasis
+            } else if eq_tag(bytes, b"p") {
+                TagKind::Paragraph
+            } else {
+                TagKind::Passthrough
+            }
+        }
+        2 => {
+            if (bytes[0] == b'h' || bytes[0] == b'H') && matches!(bytes[1], b'1'..=b'6') {
+                TagKind::Heading((bytes[1] - b'0') as usize)
+            } else if eq_tag(bytes, b"br") {
+                TagKind::Break
+            } else if eq_tag(bytes, b"em") {
+                TagKind::Emphasis
+            } else if eq_tag(bytes, b"hr") {
+                TagKind::HorizontalRule
+            } else if eq_tag(bytes, b"li") {
+                TagKind::ListItem
+            } else if eq_tag(bytes, b"ol") {
+                TagKind::OrderedList
+            } else if eq_tag(bytes, b"td") || eq_tag(bytes, b"th") {
+                TagKind::TableCell
+            } else if eq_tag(bytes, b"tr") {
+                TagKind::TableRow
+            } else if eq_tag(bytes, b"ul") {
+                TagKind::UnorderedList
+            } else {
+                TagKind::Passthrough
+            }
+        }
+        3 => {
+            if eq_tag(bytes, b"img") {
+                TagKind::Image
+            } else if eq_tag(bytes, b"pre") {
+                TagKind::Pre
+            } else {
+                TagKind::Passthrough
+            }
+        }
+        4 => {
+            if eq_tag(bytes, b"code") {
+                TagKind::Code
+            } else if eq_tag(bytes, b"head") {
+                TagKind::Skip
+            } else {
+                TagKind::Passthrough
+            }
+        }
+        5 => {
+            if eq_tag(bytes, b"style") {
+                TagKind::Skip
+            } else if eq_tag(bytes, b"table") {
+                TagKind::Table
+            } else if eq_tag(bytes, b"tbody") || eq_tag(bytes, b"thead") || eq_tag(bytes, b"tfoot")
+            {
+                TagKind::TableSection
+            } else {
+                TagKind::Passthrough
+            }
+        }
+        6 => {
+            if eq_tag(bytes, b"script") {
+                TagKind::Skip
+            } else if eq_tag(bytes, b"strong") {
+                TagKind::Strong
+            } else {
+                TagKind::Passthrough
+            }
+        }
+        7 => {
+            if eq_tag(bytes, b"caption") {
+                TagKind::TableCell
+            } else {
+                TagKind::Passthrough
+            }
+        }
+        8 => {
+            if eq_tag(bytes, b"template") || eq_tag(bytes, b"noscript") {
+                TagKind::Skip
+            } else {
+                TagKind::Passthrough
+            }
+        }
+        10 => {
+            if eq_tag(bytes, b"blockquote") {
+                TagKind::Blockquote
+            } else if eq_tag(bytes, b"figcaption") {
+                TagKind::Passthrough
+            } else {
+                TagKind::Passthrough
+            }
+        }
+        _ => TagKind::Passthrough,
+    }
+}
+
+#[inline]
+fn eq_tag(left: &[u8], right: &[u8]) -> bool {
+    left.eq_ignore_ascii_case(right)
+}
+
 fn handle_heading(
-    name: &str,
+    level: usize,
     tag: &tl::HTMLTag,
     parser: &crate::tl_types::Parser,
     output: &mut String,
     options: &ConversionOptions,
     state: FastState,
 ) {
-    let level = name
-        .as_bytes()
-        .get(1)
-        .and_then(|b| b.checked_sub(b'0'))
-        .filter(|level| (1..=6).contains(level))
-        .unwrap_or(1) as usize;
     let mut content = String::new();
     walk_children(
         tag,
@@ -287,11 +408,16 @@ fn handle_link(
     options: &ConversionOptions,
     state: FastState,
 ) {
-    let href = attr(tag, "href");
-    let Some(href) = href.filter(|href| !href.is_empty()) else {
+    let Some(href_value) = tag.attributes().get("href").flatten() else {
         walk_children(tag, parser, output, options, state);
         return;
     };
+    let href_raw = href_value.as_utf8_str();
+    let href = decode_attr_text(href_raw.as_ref());
+    if href.is_empty() {
+        walk_children(tag, parser, output, options, state);
+        return;
+    }
 
     let mut label = String::new();
     walk_children(
@@ -314,10 +440,10 @@ fn handle_link(
     output.push_str(&escape_link_label(label));
     output.push_str("](");
     output.push_str(&format_destination(href.as_ref()));
-    if let Some(title) = attr(tag, "title").filter(|title| !title.is_empty()) {
-        output.push_str(" \"");
-        output.push_str(&title.replace('"', "\\\""));
-        output.push('"');
+    if let Some(title_value) = tag.attributes().get("title").flatten() {
+        let title_raw = title_value.as_utf8_str();
+        let title = decode_attr_text(title_raw.as_ref());
+        push_optional_title(output, title.as_ref());
     }
     output.push(')');
 }
@@ -329,23 +455,38 @@ fn handle_img(
     state: FastState,
 ) {
     if state.inline || state.in_code {
-        if let Some(alt) = attr(tag, "alt") {
+        if let Some(alt_value) = tag.attributes().get("alt").flatten() {
+            let alt_raw = alt_value.as_utf8_str();
+            let alt = decode_attr_text(alt_raw.as_ref());
             output.push_str(alt.as_ref());
         }
         return;
     }
-    let Some(src) = attr(tag, "src").filter(|src| !src.is_empty()) else {
+    let Some(src_value) = tag.attributes().get("src").flatten() else {
         return;
     };
-    let alt = attr(tag, "alt").unwrap_or(Cow::Borrowed(""));
+    let src_raw = src_value.as_utf8_str();
+    let src = decode_attr_text(src_raw.as_ref());
+    if src.is_empty() {
+        return;
+    }
+
+    let alt_raw = tag
+        .attributes()
+        .get("alt")
+        .flatten()
+        .map(|value| value.as_utf8_str());
+    let alt = alt_raw
+        .as_ref()
+        .map_or(Cow::Borrowed(""), |raw| decode_attr_text(raw.as_ref()));
     output.push_str("![");
     output.push_str(&escape_link_label(alt.as_ref()));
     output.push_str("](");
     output.push_str(&format_destination(src.as_ref()));
-    if let Some(title) = attr(tag, "title").filter(|title| !title.is_empty()) {
-        output.push_str(" \"");
-        output.push_str(&title.replace('"', "\\\""));
-        output.push('"');
+    if let Some(title_value) = tag.attributes().get("title").flatten() {
+        let title_raw = title_value.as_utf8_str();
+        let title = decode_attr_text(title_raw.as_ref());
+        push_optional_title(output, title.as_ref());
     }
     output.push(')');
 }
@@ -482,10 +623,10 @@ fn collect_rows_from_children(
         let Some(tl::Node::Tag(child_tag)) = child.get(parser) else {
             continue;
         };
-        let name = child_tag.name().as_utf8_str().as_ref().to_ascii_lowercase();
-        match name.as_str() {
-            "tr" => rows.push(collect_cells(&child_tag, parser, options, state)),
-            "thead" | "tbody" | "tfoot" => {
+        let name = child_tag.name().as_utf8_str();
+        match classify_tag(name.as_ref()) {
+            TagKind::TableRow => rows.push(collect_cells(&child_tag, parser, options, state)),
+            TagKind::TableSection => {
                 collect_rows_from_children(&child_tag, parser, options, state, rows);
             }
             _ => {}
@@ -504,8 +645,8 @@ fn collect_cells(
         let Some(tl::Node::Tag(cell_tag)) = child.get(parser) else {
             continue;
         };
-        let name = cell_tag.name().as_utf8_str().as_ref().to_ascii_lowercase();
-        if matches!(name.as_str(), "td" | "th") {
+        let name = cell_tag.name().as_utf8_str();
+        if classify_tag(name.as_ref()) == TagKind::TableCell {
             let mut content = String::new();
             walk_children(
                 &cell_tag,
@@ -604,11 +745,25 @@ fn push_collapsed(output: &mut String, text: &str) {
     output.push_str(text);
 }
 
-fn attr(tag: &tl::HTMLTag, name: &str) -> Option<Cow<'static, str>> {
-    tag.attributes()
-        .get(name)
-        .flatten()
-        .map(|value| Cow::Owned(text::decode_html_entities(value.as_utf8_str().as_ref())))
+fn decode_attr_text(value: &str) -> Cow<'_, str> {
+    if value.as_bytes().contains(&b'&') {
+        text::decode_html_entities_cow(value)
+    } else {
+        Cow::Borrowed(value)
+    }
+}
+
+fn push_optional_title(output: &mut String, title: &str) {
+    if title.is_empty() {
+        return;
+    }
+    output.push_str(" \"");
+    if title.as_bytes().contains(&b'"') {
+        output.push_str(&title.replace('"', "\\\""));
+    } else {
+        output.push_str(title);
+    }
+    output.push('"');
 }
 
 fn escape_link_label(label: &str) -> String {

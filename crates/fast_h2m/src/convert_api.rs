@@ -4,7 +4,7 @@
 
 use std::borrow::Cow;
 
-use memchr::{memchr, memchr3, memmem};
+use memchr::{memchr, memchr2, memchr3, memmem};
 
 #[cfg(any(feature = "metadata", feature = "inline-images"))]
 use crate::ConversionError;
@@ -96,7 +96,7 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
 
     match options.tier_strategy {
         crate::options::TierStrategy::FastDom => {
-            let normalized = normalize_input(html)?;
+            let normalized = normalize_input_for_fast_dom(html)?;
             let markdown = crate::converter::fast_dom::convert(normalized.as_ref(), &options)?;
             return Ok(conversion_result_from_content(markdown));
         }
@@ -358,6 +358,19 @@ fn normalize_input(html: &str) -> Result<Cow<'_, str>> {
             Ok(fix_xhtml_self_closing(Cow::Owned(owned)))
         }
     }
+}
+
+/// FastDom keeps the public input validation contract but skips the full Tier-2
+/// normalization work for already-plain UTF-8 input. In particular, it avoids
+/// the XHTML self-closing repair scan, which is part of the compatibility-rich
+/// Tier-2 path and not needed for the lean fast path.
+fn normalize_input_for_fast_dom(html: &str) -> Result<Cow<'_, str>> {
+    if memchr2(0, b'\r', html.as_bytes()).is_none() {
+        validate_input(html)?;
+        return Ok(Cow::Borrowed(html));
+    }
+
+    normalize_input(html)
 }
 
 /// Insert a space before `/>` in XHTML-style self-closing tags so the underlying
