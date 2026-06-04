@@ -84,6 +84,9 @@ const HACKER_NEWS_FIXTURE: &str =
 const WIKIPEDIA_SMALL_FIXTURE: &str =
     include_str!("../../../fixtures/test_documents/html/wikipedia/small_html.html");
 
+const ELON_MUSK_WIKI_FIXTURE: &str =
+    include_str!("../../../fixtures/elon-musk.html");
+
 #[cfg(feature = "testkit")]
 const WIKIPEDIA_MEDIUM_FIXTURE: &str =
     include_str!("../../../fixtures/test_documents/html/wikipedia/medium_python.html");
@@ -105,6 +108,7 @@ fn options_for(strategy: TierStrategy) -> ConversionOptions {
 
 fn bench_convert_cases(c: &mut Criterion) {
     let cases = [
+        ("elon_musk_wiki", ELON_MUSK_WIKI_FIXTURE),
         ("plain_text", "Just text with no HTML tags."),
         ("text_with_newlines", TEXT_WITH_NEWLINES),
         ("simple_html", SIMPLE_HTML),
