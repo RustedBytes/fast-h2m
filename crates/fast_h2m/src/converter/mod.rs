@@ -92,6 +92,7 @@
 pub mod block;
 pub mod context;
 pub mod dom_context;
+pub mod fast_dom;
 pub mod form;
 pub mod format;
 pub mod handlers;
@@ -131,29 +132,5 @@ pub use crate::converter::utility::serialization::{serialize_node, serialize_nod
 // Helper functions migrated to utility modules
 pub use crate::converter::utility::siblings::append_inline_suffix;
 
-// Caching functions migrated to utility/caching
-
-// Content functions migrated to utility/content
-
 // Heading functions migrated to block/heading
 pub use crate::converter::block::heading::find_single_heading_child;
-
-// Link functions migrated to inline/link
-
-// Re-export dispatch functions for routing elements to handlers
-// Media module doesn't have a dispatcher - it exports utility functions
-
-// Re-export utility submodules for public access to their types
-// NOTE: utility::preprocessing is deliberately not re-exported to avoid naming conflict
-// with preprocessing_helpers module. Users should access utility::preprocessing directly.
-
-// Re-export format renderer types
-
-// Block and inline handlers are internal - only dispatchers are exposed
-// Individual handlers are pub(crate) and not meant to be part of the public API
-
-// Re-export media utilities for internal use (crate-private)
-
-// Re-export list utilities for internal use (crate-private)
-
-// Semantic and form handlers are also internal (pub(crate))

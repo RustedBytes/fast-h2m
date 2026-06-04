@@ -84,8 +84,7 @@ const HACKER_NEWS_FIXTURE: &str =
 const WIKIPEDIA_SMALL_FIXTURE: &str =
     include_str!("../../../fixtures/test_documents/html/wikipedia/small_html.html");
 
-const ELON_MUSK_WIKI_FIXTURE: &str =
-    include_str!("../../../fixtures/elon-musk.html");
+const ELON_MUSK_WIKI_FIXTURE: &str = include_str!("../../../fixtures/elon-musk.html");
 
 #[cfg(feature = "testkit")]
 const WIKIPEDIA_MEDIUM_FIXTURE: &str =
@@ -126,6 +125,7 @@ fn bench_convert_cases(c: &mut Criterion) {
     let strategies = [
         ("auto", options_for(TierStrategy::Auto)),
         ("tier2", options_for(TierStrategy::Tier2)),
+        ("fast_dom", options_for(TierStrategy::FastDom)),
     ];
 
     let mut group = c.benchmark_group("convert");

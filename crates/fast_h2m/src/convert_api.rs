@@ -95,6 +95,11 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     let mut precomputed_normalized: Option<Cow<'_, str>> = None;
 
     match options.tier_strategy {
+        crate::options::TierStrategy::FastDom => {
+            let normalized = normalize_input(html)?;
+            let markdown = crate::converter::fast_dom::convert(normalized.as_ref(), &options)?;
+            return Ok(conversion_result_from_content(markdown));
+        }
         crate::options::TierStrategy::Tier2 => {
             // Skip Tier-1 entirely; fall through to the Tier-2 path below.
         }

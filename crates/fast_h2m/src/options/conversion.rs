@@ -39,6 +39,12 @@ pub enum TierStrategy {
     Auto,
     /// Always use the Tier-2 (`tl::parse` + walk) path, skipping Tier-1.
     Tier2,
+    /// Use a lean DOM conversion path for common HTML documents.
+    ///
+    /// This skips the full Tier-2 context, metadata, structure, visitor, selector,
+    /// and repair machinery. It is intended for callers that prefer throughput over
+    /// the richer compatibility behavior of [`TierStrategy::Tier2`].
+    FastDom,
     /// Force the Tier-1 byte scanner; if it bails, fall back to Tier-2.
     /// Testkit-only; not stable API.
     #[cfg(any(test, feature = "testkit"))]
