@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "fast-h2m"
-version = "0.4.1"
+version = "0.4.2"
 description = "Python bindings for fast_h2m, a high-performance HTML to Markdown converter written in Rust."
 authors = [
     { name = "Yehor Smoliakov", email = "egorsmkv@gmail.com" },
