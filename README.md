@@ -12,7 +12,7 @@ High-performance HTML to Markdown converter written in Rust.
 
 ```toml
 [dependencies]
-fast_h2m = "0.3"
+fast_h2m = "0.4"
 ```
 
 ## Basic Usage
