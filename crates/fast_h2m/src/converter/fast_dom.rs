@@ -168,95 +168,56 @@ fn walk_children(
 fn classify_tag(name: &str) -> TagKind {
     let bytes = name.as_bytes();
     match bytes.len() {
-        1 => {
-            if eq_tag(bytes, b"a") {
-                TagKind::Link
-            } else if eq_tag(bytes, b"b") {
-                TagKind::Strong
-            } else if eq_tag(bytes, b"i") {
-                TagKind::Emphasis
-            } else if eq_tag(bytes, b"p") {
-                TagKind::Paragraph
-            } else {
-                TagKind::Passthrough
-            }
-        }
-        2 => {
-            if (bytes[0] == b'h' || bytes[0] == b'H') && matches!(bytes[1], b'1'..=b'6') {
+        1 => match ascii_lower(bytes[0]) {
+            b'a' => TagKind::Link,
+            b'b' => TagKind::Strong,
+            b'i' => TagKind::Emphasis,
+            b'p' => TagKind::Paragraph,
+            _ => TagKind::Passthrough,
+        },
+        2 => match pack2_lower(bytes) {
+            TAG_H1..=TAG_H6 if matches!(bytes[1], b'1'..=b'6') => {
                 TagKind::Heading((bytes[1] - b'0') as usize)
-            } else if eq_tag(bytes, b"br") {
-                TagKind::Break
-            } else if eq_tag(bytes, b"em") {
-                TagKind::Emphasis
-            } else if eq_tag(bytes, b"hr") {
-                TagKind::HorizontalRule
-            } else if eq_tag(bytes, b"li") {
-                TagKind::ListItem
-            } else if eq_tag(bytes, b"ol") {
-                TagKind::OrderedList
-            } else if eq_tag(bytes, b"td") || eq_tag(bytes, b"th") {
-                TagKind::TableCell
-            } else if eq_tag(bytes, b"tr") {
-                TagKind::TableRow
-            } else if eq_tag(bytes, b"ul") {
-                TagKind::UnorderedList
-            } else {
-                TagKind::Passthrough
             }
-        }
-        3 => {
-            if eq_tag(bytes, b"img") {
-                TagKind::Image
-            } else if eq_tag(bytes, b"pre") {
-                TagKind::Pre
-            } else {
-                TagKind::Passthrough
-            }
-        }
-        4 => {
-            if eq_tag(bytes, b"code") {
-                TagKind::Code
-            } else if eq_tag(bytes, b"head") {
-                TagKind::Skip
-            } else {
-                TagKind::Passthrough
-            }
-        }
-        5 => {
-            if eq_tag(bytes, b"style") {
-                TagKind::Skip
-            } else if eq_tag(bytes, b"table") {
-                TagKind::Table
-            } else if eq_tag(bytes, b"tbody") || eq_tag(bytes, b"thead") || eq_tag(bytes, b"tfoot")
-            {
-                TagKind::TableSection
-            } else {
-                TagKind::Passthrough
-            }
-        }
-        6 => {
-            if eq_tag(bytes, b"script") {
-                TagKind::Skip
-            } else if eq_tag(bytes, b"strong") {
-                TagKind::Strong
-            } else {
-                TagKind::Passthrough
-            }
-        }
-        7 => {
-            if eq_tag(bytes, b"caption") {
-                TagKind::TableCell
-            } else {
-                TagKind::Passthrough
-            }
-        }
-        8 => {
-            if eq_tag(bytes, b"template") || eq_tag(bytes, b"noscript") {
-                TagKind::Skip
-            } else {
-                TagKind::Passthrough
-            }
-        }
+            TAG_BR => TagKind::Break,
+            TAG_EM => TagKind::Emphasis,
+            TAG_HR => TagKind::HorizontalRule,
+            TAG_LI => TagKind::ListItem,
+            TAG_OL => TagKind::OrderedList,
+            TAG_TD | TAG_TH => TagKind::TableCell,
+            TAG_TR => TagKind::TableRow,
+            TAG_UL => TagKind::UnorderedList,
+            _ => TagKind::Passthrough,
+        },
+        3 => match pack3_lower(bytes) {
+            TAG_IMG => TagKind::Image,
+            TAG_PRE => TagKind::Pre,
+            _ => TagKind::Passthrough,
+        },
+        4 => match pack4_lower(bytes) {
+            TAG_CODE => TagKind::Code,
+            TAG_HEAD => TagKind::Skip,
+            _ => TagKind::Passthrough,
+        },
+        5 => match pack5_lower(bytes) {
+            TAG_STYLE => TagKind::Skip,
+            TAG_TABLE => TagKind::Table,
+            TAG_TBODY | TAG_THEAD | TAG_TFOOT => TagKind::TableSection,
+            _ => TagKind::Passthrough,
+        },
+        6 => match pack6_lower(bytes) {
+            TAG_SCRIPT => TagKind::Skip,
+            TAG_STRONG => TagKind::Strong,
+            _ => TagKind::Passthrough,
+        },
+        7 => match pack7_lower(bytes) {
+            TAG_CAPTION => TagKind::TableCell,
+            _ => TagKind::Passthrough,
+        },
+        8 => match pack8_lower(bytes) {
+            TAG_TEMPLATE | TAG_NOSCRIPT => TagKind::Skip,
+            _ => TagKind::Passthrough,
+        },
         10 => {
             if eq_tag(bytes, b"blockquote") {
                 TagKind::Blockquote
@@ -266,6 +227,111 @@ fn classify_tag(name: &str) -> TagKind {
         }
         _ => TagKind::Passthrough,
     }
+}
+
+const TAG_BR: u16 = pack2_const(b"br");
+const TAG_EM: u16 = pack2_const(b"em");
+const TAG_H1: u16 = pack2_const(b"h1");
+const TAG_H6: u16 = pack2_const(b"h6");
+const TAG_HR: u16 = pack2_const(b"hr");
+const TAG_LI: u16 = pack2_const(b"li");
+const TAG_OL: u16 = pack2_const(b"ol");
+const TAG_TD: u16 = pack2_const(b"td");
+const TAG_TH: u16 = pack2_const(b"th");
+const TAG_TR: u16 = pack2_const(b"tr");
+const TAG_UL: u16 = pack2_const(b"ul");
+const TAG_IMG: u32 = pack3_const(b"img");
+const TAG_PRE: u32 = pack3_const(b"pre");
+const TAG_CODE: u32 = pack4_const(b"code");
+const TAG_HEAD: u32 = pack4_const(b"head");
+const TAG_STYLE: u64 = pack5_const(b"style");
+const TAG_TABLE: u64 = pack5_const(b"table");
+const TAG_TBODY: u64 = pack5_const(b"tbody");
+const TAG_THEAD: u64 = pack5_const(b"thead");
+const TAG_TFOOT: u64 = pack5_const(b"tfoot");
+const TAG_SCRIPT: u64 = pack6_const(b"script");
+const TAG_STRONG: u64 = pack6_const(b"strong");
+const TAG_CAPTION: u64 = pack7_const(b"caption");
+const TAG_TEMPLATE: u64 = pack8_const(b"template");
+const TAG_NOSCRIPT: u64 = pack8_const(b"noscript");
+
+#[inline]
+fn ascii_lower(byte: u8) -> u8 {
+    byte | (u8::from(byte.is_ascii_uppercase()) * 0x20)
+}
+
+#[inline]
+fn pack2_lower(bytes: &[u8]) -> u16 {
+    u16::from(ascii_lower(bytes[0])) | (u16::from(ascii_lower(bytes[1])) << 8)
+}
+
+#[inline]
+fn pack3_lower(bytes: &[u8]) -> u32 {
+    u32::from(ascii_lower(bytes[0]))
+        | (u32::from(ascii_lower(bytes[1])) << 8)
+        | (u32::from(ascii_lower(bytes[2])) << 16)
+}
+
+#[inline]
+fn pack4_lower(bytes: &[u8]) -> u32 {
+    u32::from(ascii_lower(bytes[0]))
+        | (u32::from(ascii_lower(bytes[1])) << 8)
+        | (u32::from(ascii_lower(bytes[2])) << 16)
+        | (u32::from(ascii_lower(bytes[3])) << 24)
+}
+
+#[inline]
+fn pack5_lower(bytes: &[u8]) -> u64 {
+    u64::from(pack4_lower(bytes)) | (u64::from(ascii_lower(bytes[4])) << 32)
+}
+
+#[inline]
+fn pack6_lower(bytes: &[u8]) -> u64 {
+    pack5_lower(bytes) | (u64::from(ascii_lower(bytes[5])) << 40)
+}
+
+#[inline]
+fn pack7_lower(bytes: &[u8]) -> u64 {
+    pack6_lower(bytes) | (u64::from(ascii_lower(bytes[6])) << 48)
+}
+
+#[inline]
+fn pack8_lower(bytes: &[u8]) -> u64 {
+    pack7_lower(bytes) | (u64::from(ascii_lower(bytes[7])) << 56)
+}
+
+const fn pack2_const(bytes: &[u8; 2]) -> u16 {
+    bytes[0] as u16 | ((bytes[1] as u16) << 8)
+}
+
+const fn pack3_const(bytes: &[u8; 3]) -> u32 {
+    bytes[0] as u32 | ((bytes[1] as u32) << 8) | ((bytes[2] as u32) << 16)
+}
+
+const fn pack4_const(bytes: &[u8; 4]) -> u32 {
+    bytes[0] as u32
+        | ((bytes[1] as u32) << 8)
+        | ((bytes[2] as u32) << 16)
+        | ((bytes[3] as u32) << 24)
+}
+
+const fn pack5_const(bytes: &[u8; 5]) -> u64 {
+    pack4_const(&[bytes[0], bytes[1], bytes[2], bytes[3]]) as u64 | ((bytes[4] as u64) << 32)
+}
+
+const fn pack6_const(bytes: &[u8; 6]) -> u64 {
+    pack5_const(&[bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]]) | ((bytes[5] as u64) << 40)
+}
+
+const fn pack7_const(bytes: &[u8; 7]) -> u64 {
+    pack6_const(&[bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5]])
+        | ((bytes[6] as u64) << 48)
+}
+
+const fn pack8_const(bytes: &[u8; 8]) -> u64 {
+    pack7_const(&[
+        bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6],
+    ]) | ((bytes[7] as u64) << 56)
 }
 
 #[inline]
@@ -702,10 +768,29 @@ fn push_text(raw: &str, output: &mut String, options: &ConversionOptions, state:
 }
 
 fn normalize_text(text: &str) -> Cow<'_, str> {
-    if !may_need_text_normalization(text.as_bytes()) {
+    let bytes = text.as_bytes();
+    if !may_need_text_normalization(bytes) {
         return Cow::Borrowed(text);
     }
 
+    let mut previous_was_space = false;
+    for byte in bytes {
+        if !byte.is_ascii() {
+            return normalize_unicode_text(text);
+        }
+        if is_ascii_markdown_whitespace(*byte) {
+            if previous_was_space || *byte != b' ' {
+                return Cow::Owned(collapse_ascii_whitespace(bytes));
+            }
+            previous_was_space = true;
+        } else {
+            previous_was_space = false;
+        }
+    }
+    Cow::Borrowed(text)
+}
+
+fn normalize_unicode_text(text: &str) -> Cow<'_, str> {
     let mut previous_was_space = false;
     for ch in text.chars() {
         if ch.is_whitespace() {
@@ -718,6 +803,23 @@ fn normalize_text(text: &str) -> Cow<'_, str> {
         }
     }
     Cow::Borrowed(text)
+}
+
+fn collapse_ascii_whitespace(bytes: &[u8]) -> String {
+    let mut output = String::with_capacity(bytes.len());
+    let mut previous_was_space = false;
+    for byte in bytes {
+        if is_ascii_markdown_whitespace(*byte) {
+            if !previous_was_space {
+                output.push(' ');
+                previous_was_space = true;
+            }
+        } else {
+            output.push(char::from(*byte));
+            previous_was_space = false;
+        }
+    }
+    output
 }
 
 fn collapse_whitespace(text: &str) -> String {
@@ -764,7 +866,7 @@ fn push_optional_title(output: &mut String, title: &str) {
         return;
     }
     output.push_str(" \"");
-    if title.as_bytes().contains(&b'"') {
+    if contains_byte(title.as_bytes(), b'"') {
         output.push_str(&title.replace('"', "\\\""));
     } else {
         output.push_str(title);
@@ -773,11 +875,7 @@ fn push_optional_title(output: &mut String, title: &str) {
 }
 
 fn escape_link_label(label: &str) -> String {
-    if !label
-        .as_bytes()
-        .iter()
-        .any(|b| matches!(b, b'[' | b']' | b'\\'))
-    {
+    if !contains_link_label_escape_byte(label.as_bytes()) {
         return label.to_string();
     }
     let mut out = String::with_capacity(label.len() + 2);
@@ -792,7 +890,7 @@ fn escape_link_label(label: &str) -> String {
 
 #[inline]
 fn format_destination(url: &str) -> Cow<'_, str> {
-    if url.as_bytes().iter().any(|b| b.is_ascii_whitespace()) {
+    if contains_ascii_whitespace(url.as_bytes()) {
         Cow::Owned(format!("<{}>", url.replace('\n', "%0A")))
     } else {
         Cow::Borrowed(url)
@@ -831,9 +929,12 @@ fn push_block_end(output: &mut String, state: FastState) {
 
 #[inline]
 fn trim_trailing_spaces(output: &mut String) {
-    while output.ends_with([' ', '\t']) {
-        output.pop();
-    }
+    let len = output
+        .as_bytes()
+        .iter()
+        .rposition(|byte| !matches!(byte, b' ' | b'\t'))
+        .map_or(0, |index| index + 1);
+    output.truncate(len);
 }
 
 #[inline]
@@ -875,6 +976,21 @@ fn may_need_text_normalization(bytes: &[u8]) -> bool {
 #[inline]
 fn may_need_text_normalization(bytes: &[u8]) -> bool {
     bytes.iter().any(|byte| *byte <= b' ' || *byte >= 0x80)
+}
+
+#[inline]
+fn is_ascii_markdown_whitespace(byte: u8) -> bool {
+    matches!(byte, b' ' | b'\t' | b'\n' | 0x0B | 0x0C | b'\r')
+}
+
+#[inline]
+fn contains_ascii_whitespace(bytes: &[u8]) -> bool {
+    bytes.iter().any(|byte| byte.is_ascii_whitespace())
+}
+
+#[inline]
+fn contains_link_label_escape_byte(bytes: &[u8]) -> bool {
+    bytes.iter().any(|byte| matches!(byte, b'[' | b']' | b'\\'))
 }
 
 #[inline]
