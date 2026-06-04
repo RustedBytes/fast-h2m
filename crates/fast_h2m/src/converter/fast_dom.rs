@@ -258,8 +258,6 @@ fn classify_tag(name: &str) -> TagKind {
         10 => {
             if eq_tag(bytes, b"blockquote") {
                 TagKind::Blockquote
-            } else if eq_tag(bytes, b"figcaption") {
-                TagKind::Passthrough
             } else {
                 TagKind::Passthrough
             }
