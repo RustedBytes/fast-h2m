@@ -294,9 +294,7 @@ pub fn scan(html: &str, options: &ConversionOptions) -> Result<String, BailReaso
 
     // Collapse runs of 3+ consecutive newlines to exactly 2, matching Tier-2's
     // `collapse_excess_blank_lines` post-processing step.
-    if contains_triple_newline(state.output.as_bytes()) {
-        collapse_excess_blank_lines(&mut state.output);
-    }
+    collapse_excess_blank_lines(&mut state.output);
 
     // Normalise trailing newlines to match Tier-2's final-output contract:
     //   `format!("{}\n", output.trim_end_matches('\n'))`
@@ -325,18 +323,6 @@ fn find_next_lt(bytes: &[u8], start: usize) -> Option<usize> {
 #[inline]
 fn contains_byte(bytes: &[u8], needle: u8) -> bool {
     bytes.contains(&needle)
-}
-
-#[inline]
-fn contains_triple_newline(bytes: &[u8]) -> bool {
-    let mut start = 0usize;
-    while let Some(pos) = find_newline(bytes, start) {
-        if bytes.get(pos + 1) == Some(&b'\n') && bytes.get(pos + 2) == Some(&b'\n') {
-            return true;
-        }
-        start = pos + 1;
-    }
-    false
 }
 
 #[inline]
@@ -1561,16 +1547,40 @@ fn trim_trailing_inline_whitespace(state: &mut Tier1State) {
 /// Collapse runs of 3+ consecutive newlines down to 2, matching Tier-2's
 /// `collapse_excess_blank_lines` post-processing step.
 fn collapse_excess_blank_lines(output: &mut String) {
-    let mut consecutive = 0usize;
-    output.retain(|c| {
-        if c == '\n' {
-            consecutive += 1;
-            consecutive <= 2
-        } else {
-            consecutive = 0;
-            true
+    let Some(first_excess_run) = memchr::memmem::find(output.as_bytes(), b"\n\n\n") else {
+        return;
+    };
+
+    let len = output.len();
+
+    // SAFETY: The loop only removes ASCII newline bytes and otherwise copies
+    // bytes from the original valid UTF-8 string in order, so the final byte
+    // vector remains valid UTF-8.
+    unsafe {
+        let bytes = output.as_mut_vec();
+        let mut read = first_excess_run + 2;
+        let mut write = first_excess_run + 2;
+        let mut consecutive_newlines = 2usize;
+
+        while read < len {
+            let byte = bytes[read];
+            read += 1;
+
+            if byte == b'\n' {
+                consecutive_newlines += 1;
+                if consecutive_newlines > 2 {
+                    continue;
+                }
+            } else {
+                consecutive_newlines = 0;
+            }
+
+            bytes[write] = byte;
+            write += 1;
         }
-    });
+
+        bytes.truncate(write);
+    }
 }
 
 // ── HTML entity decoding ──────────────────────────────────────────────────────

@@ -30,23 +30,45 @@ pub fn trim_trailing_whitespace(output: &mut String) {
 /// final emission is normalized here. This intentionally preserves single
 /// blank lines (`\n\n`) — only runs of three or more newlines are collapsed.
 pub fn collapse_excess_blank_lines(output: &mut String) {
-    if !output.contains("\n\n\n") {
+    let Some(first_excess_run) = memchr::memmem::find(output.as_bytes(), b"\n\n\n") else {
         return;
-    }
-    let mut cleaned = String::with_capacity(output.len());
-    let mut consecutive = 0usize;
-    for ch in output.chars() {
-        if ch == '\n' {
-            consecutive += 1;
-            if consecutive <= 2 {
-                cleaned.push(ch);
+    };
+
+    collapse_excess_blank_lines_from(output, first_excess_run);
+}
+
+#[inline]
+fn collapse_excess_blank_lines_from(output: &mut String, first_excess_run: usize) {
+    let len = output.len();
+
+    // SAFETY: The loop only removes ASCII newline bytes and otherwise copies
+    // bytes from the original valid UTF-8 string in order, so the final byte
+    // vector remains valid UTF-8.
+    unsafe {
+        let bytes = output.as_mut_vec();
+        let mut read = first_excess_run + 2;
+        let mut write = first_excess_run + 2;
+        let mut consecutive_newlines = 2usize;
+
+        while read < len {
+            let byte = bytes[read];
+            read += 1;
+
+            if byte == b'\n' {
+                consecutive_newlines += 1;
+                if consecutive_newlines > 2 {
+                    continue;
+                }
+            } else {
+                consecutive_newlines = 0;
             }
-        } else {
-            consecutive = 0;
-            cleaned.push(ch);
+
+            bytes[write] = byte;
+            write += 1;
         }
+
+        bytes.truncate(write);
     }
-    *output = cleaned;
 }
 
 /// Remove trailing spaces/tabs from every line while preserving newlines.
@@ -494,6 +516,27 @@ pub fn is_inline_element(tag_name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_collapse_excess_blank_lines_noop() {
+        let mut s = "one\n\ntwo\n".to_owned();
+        collapse_excess_blank_lines(&mut s);
+        assert_eq!("one\n\ntwo\n", s);
+    }
+
+    #[test]
+    fn test_collapse_excess_blank_lines_collapses_runs() {
+        let mut s = "\n\n\none\n\n\n\ntwo\n\n\n".to_owned();
+        collapse_excess_blank_lines(&mut s);
+        assert_eq!("\n\none\n\ntwo\n\n", s);
+    }
+
+    #[test]
+    fn test_collapse_excess_blank_lines_preserves_utf8() {
+        let mut s = "Привет\n\n\n世界\n\n\né".to_owned();
+        collapse_excess_blank_lines(&mut s);
+        assert_eq!("Привет\n\n世界\n\né", s);
+    }
 
     #[test]
     fn test_trim_line_end_whitespace() {
