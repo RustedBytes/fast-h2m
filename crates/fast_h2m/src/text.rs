@@ -39,10 +39,9 @@ pub fn escape(
         });
     }
 
-    if escape_misc
-        && let Some(escaped) = escape_misc_and_numbered_markers(result.as_ref()) {
-            result = Cow::Owned(escaped);
-        }
+    if escape_misc && let Some(escaped) = escape_misc_and_numbered_markers(result.as_ref()) {
+        result = Cow::Owned(escaped);
+    }
 
     if escape_asterisks && result.contains('*') {
         result = Cow::Owned(result.replace('*', r"\*"));

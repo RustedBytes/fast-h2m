@@ -625,9 +625,9 @@ fn collect_rows_from_children(
         };
         let name = child_tag.name().as_utf8_str();
         match classify_tag(name.as_ref()) {
-            TagKind::TableRow => rows.push(collect_cells(&child_tag, parser, options, state)),
+            TagKind::TableRow => rows.push(collect_cells(child_tag, parser, options, state)),
             TagKind::TableSection => {
-                collect_rows_from_children(&child_tag, parser, options, state, rows);
+                collect_rows_from_children(child_tag, parser, options, state, rows);
             }
             _ => {}
         }
@@ -649,7 +649,7 @@ fn collect_cells(
         if classify_tag(name.as_ref()) == TagKind::TableCell {
             let mut content = String::new();
             walk_children(
-                &cell_tag,
+                cell_tag,
                 parser,
                 &mut content,
                 options,
