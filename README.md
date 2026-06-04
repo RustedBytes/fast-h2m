@@ -338,6 +338,12 @@ cargo test
 cargo clippy --workspace --all-targets
 ```
 
+## Acknowledgements
+
+This project builds on ideas and ecosystem work from
+[kreuzberg-dev/html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown)
+and [harlan-zw/mdream](https://github.com/harlan-zw/mdream).
+
 ## License
 
 MIT
