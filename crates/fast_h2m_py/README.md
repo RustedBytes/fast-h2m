@@ -52,4 +52,12 @@ markdown += stream.process_chunk("<p>World</p>")
 markdown += stream.finish()
 ```
 
-The package targets Python 3.8+ and exposes the Rust converter through PyO3.
+The package targets Python 3.9+ and exposes the Rust converter through PyO3.
+CPython wheels use the stable `abi3` ABI, while version-specific wheels are
+published for PyPy 3.11 and 3.12.
+
+When building locally with PyPy, disable the CPython-only `abi3` feature:
+
+```sh
+maturin build --release --no-default-features --features extension-module,asm-tl
+```

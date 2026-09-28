@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "pypy3.11-v8.0.0", "pypy3.12-v8.0.0"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -41,7 +41,11 @@ jobs:
         working-directory: crates/fast_h2m_py
         run: |
           source ../../.venv/bin/activate
-          maturin develop --release --features extension-module,asm-tl
+          if [[ "${{ matrix.python-version }}" == pypy* ]]; then
+            maturin develop --release --locked --no-default-features --features extension-module,asm-tl
+          else
+            maturin develop --release --locked --features extension-module,asm-tl
+          fi
 
       - name: Run Python tests
         working-directory: crates/fast_h2m_py

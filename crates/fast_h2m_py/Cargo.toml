@@ -17,11 +17,12 @@ name = "fast_h2m"
 crate-type = ["cdylib"]
 
 [features]
-default = []
+default = ["abi3"]
+abi3 = ["pyo3/abi3-py39"]
 extension-module = ["pyo3/extension-module"]
 asm-tl = ["fast_h2m_core/asm-tl"]
 
 [dependencies]
 fast_h2m_core = { package = "fast_h2m", path = "../fast_h2m", version = "0.4.4", features = ["serde", "metadata"] }
-pyo3 = { workspace = true, features = ["abi3-py38"] }
+pyo3.workspace = true
 serde_json.workspace = true
