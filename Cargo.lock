@@ -247,7 +247,7 @@ checksum = "91622ff5e7162018101f2fea40d6ebf4a78bbe5a49736a2020649edf9693679e"
 
 [[package]]
 name = "fast_h2m"
-version = "0.4.4"
+version = "0.4.5"
 dependencies = [
  "asm_tl",
  "base64",
@@ -267,7 +267,7 @@ dependencies = [
 
 [[package]]
 name = "fast_h2m_py"
-version = "0.4.4"
+version = "0.4.5"
 dependencies = [
  "fast_h2m",
  "pyo3",

@@ -7,6 +7,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-09-28
+
 ### Added
 
 - Added version-specific PyPy 3.11 and PyPy 3.12 wheels for Linux x86-64,
@@ -24,4 +26,5 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Updated `mdream` from 1.7.0 to 1.7.3.
 - Updated package metadata and build documentation to advertise PyPy support.
 
-[Unreleased]: https://github.com/RustedBytes/fast-h2m/compare/v0.4.4...HEAD
+[Unreleased]: https://github.com/RustedBytes/fast-h2m/compare/v0.4.5...HEAD
+[0.4.5]: https://github.com/RustedBytes/fast-h2m/compare/v0.4.4...v0.4.5

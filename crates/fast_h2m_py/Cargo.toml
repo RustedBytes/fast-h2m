@@ -23,6 +23,6 @@ extension-module = ["pyo3/extension-module"]
 asm-tl = ["fast_h2m_core/asm-tl"]
 
 [dependencies]
-fast_h2m_core = { package = "fast_h2m", path = "../fast_h2m", version = "0.4.4", features = ["serde", "metadata"] }
+fast_h2m_core = { package = "fast_h2m", path = "../fast_h2m", version = "0.4.5", features = ["serde", "metadata"] }
 pyo3.workspace = true
 serde_json.workspace = true

@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.4.4"
+version = "0.4.5"
 edition = "2024"
 authors = ["Na'aman Hirschfeld <naaman@kreuzberg.dev>", "Yehor Smoliakov <egorsmkv@gmail.com>"]
 description = "High-performance HTML to Markdown converter"
@@ -38,7 +38,7 @@ strip = true
 debug = 1
 
 [patch.crates-io]
-fast_h2m = { path = "crates/fast_h2m", version = "0.4.4" }
+fast_h2m = { path = "crates/fast_h2m", version = "0.4.5" }
 # PyPy 3.12 changed its C-extension symbol mapping. Pin PyO3's upstream
 # compatibility patch until it is included in a crates.io release.
 # https://github.com/PyO3/pyo3/pull/6448

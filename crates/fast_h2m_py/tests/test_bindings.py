@@ -17,7 +17,7 @@ ASM_TL_TARGET_SUPPORTED = (
 
 
 def test_package_version():
-    assert fast_h2m.__version__ == "0.4.4"
+    assert fast_h2m.__version__ == "0.4.5"
 
 
 def test_convert_returns_result_dict():
